@@ -4,8 +4,8 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/UNAPEC-ISO--505-003B70?style=for-the-badge" alt="UNAPEC ISO-505">
-  <img src="https://img.shields.io/badge/Versión-0.1.0-2563EB?style=for-the-badge" alt="Versión 0.1.0">
-  <img src="https://img.shields.io/badge/Estado-Foundation-14B8A6?style=for-the-badge" alt="Estado Foundation">
+  <img src="https://img.shields.io/badge/Versión-0.2.0-2563EB?style=for-the-badge" alt="Versión 0.2.0">
+  <img src="https://img.shields.io/badge/Estado-Identity%20%26%20Users-14B8A6?style=for-the-badge" alt="Estado Identity and Users">
 </p>
 
 <p align="center">
@@ -132,7 +132,7 @@ La trazabilidad detallada se mantiene en [`docs/ux/requirements.md`](docs/ux/req
 
 ## 🧱 Stack tecnológico
 
-El stack se documenta separando lo que ya está **implementado en `v0.1.0`** de las tecnologías previstas para las siguientes fases. Esto evita presentar dependencias planificadas como si ya estuvieran integradas.
+El stack se documenta separando lo que ya está **implementado en `v0.2.0`** de las tecnologías previstas para las siguientes fases. Esto evita presentar dependencias planificadas como si ya estuvieran integradas.
 
 ### 🎨 Frontend — implementado
 
@@ -144,11 +144,12 @@ El stack se documenta separando lo que ya está **implementado en `v0.1.0`** de 
 | Área | Tecnología |
 |---|---|
 | Framework | **Angular 22.1** |
-| Lenguaje | **TypeScript 5.9** |
+| Lenguaje | **TypeScript 6** |
 | Programación reactiva | **RxJS 7.8** |
 | Arquitectura UI | Angular standalone |
 | Estilos | **SCSS** |
-| Accesibilidad base | `:focus-visible`, `prefers-reduced-motion`, HTML semántico |
+| Sesión | JWT en memoria + refresh cookie `HttpOnly` |
+| Accesibilidad | HTML semántico, foco visible, contraste forzado, reducción de movimiento, Playwright + axe-core |
 
 ### ⚙️ Backend — implementado
 
@@ -166,6 +167,9 @@ El stack se documenta separando lo que ya está **implementado en `v0.1.0`** de 
 | Contrato HTTP | OpenAPI |
 | Observabilidad base | ASP.NET Core Health Checks |
 | Política frontend | CORS configurable |
+| Identidad | ASP.NET Core Identity + roles |
+| Validación | FluentValidation + Problem Details |
+| Seguridad | JWT, refresh rotation, lockout y rate limiting |
 
 ### 🗄️ Datos e infraestructura — implementado
 
@@ -180,20 +184,17 @@ El stack se documenta separando lo que ya está **implementado en `v0.1.0`** de 
 | Contenedores | **Docker / Docker Compose** |
 | Control de versiones | **Git / GitHub** |
 | CI | **GitHub Actions** |
+| Persistencia | **Entity Framework Core 10** + migraciones |
+| Pruebas | **xUnit** + Testcontainers para SQL Server |
 
 ### 🧩 Tecnologías previstas para las siguientes fases
 
-Estas tecnologías forman parte del diseño objetivo, pero todavía no están integradas en la base `v0.1.0`:
+Estas tecnologías forman parte del diseño objetivo, pero todavía no están integradas en la base `v0.2.0`:
 
-- Entity Framework Core;
-- ASP.NET Core Identity;
-- JWT + refresh tokens;
-- FluentValidation;
 - Angular CDK;
-- Playwright;
-- axe-core;
-- xUnit;
-- pruebas de integración contra SQL Server.
+- telemetría OpenTelemetry;
+- búsqueda especializada para catálogo;
+- caché distribuida para escenarios de escala.
 
 ---
 
@@ -221,11 +222,15 @@ Estructura principal:
 AccessiUX-Market/
 ├── backend/
 │   ├── AccessiUXMarket.sln
-│   └── src/
-│       ├── AccessiUXMarket.Api/
-│       ├── AccessiUXMarket.Application/
-│       ├── AccessiUXMarket.Domain/
-│       └── AccessiUXMarket.Infrastructure/
+│   ├── src/
+│   │   ├── AccessiUXMarket.Api/
+│   │   ├── AccessiUXMarket.Application/
+│   │   ├── AccessiUXMarket.Domain/
+│   │   └── AccessiUXMarket.Infrastructure/
+│   └── tests/
+│       ├── AccessiUXMarket.UnitTests/
+│       ├── AccessiUXMarket.IntegrationTests/
+│       └── AccessiUXMarket.ArchitectureTests/
 ├── frontend/
 │   └── accessible-market-web/
 ├── docs/
@@ -246,7 +251,7 @@ Las dependencias de infraestructura, persistencia y presentación no deben conta
 | Fase | Alcance | Estado |
 |---:|---|:---:|
 | 0 | Foundation, arquitectura, Docker, CI y documentación | ✅ |
-| 1 | Identity y usuarios | ⏳ |
+| 1 | Identity y usuarios | ✅ |
 | 2 | Catálogo, categorías y vendedores | ⏳ |
 | 3 | Búsqueda y filtros dinámicos | ⏳ |
 | 4 | Carrito | ⏳ |
@@ -257,9 +262,9 @@ Las dependencias de infraestructura, persistencia y presentación no deben conta
 
 ### Estado actual
 
-**v0.1.0 — Foundation**
+**v0.2.0 — Identity & Users**
 
-La base incluye solución .NET, proyectos de arquitectura, aplicación Angular inicial, SQL Server mediante Docker Compose, health checks, CORS, documentación y workflow inicial de CI.
+La fase incluye persistencia SQL Server con EF Core, Identity, roles, JWT de corta duración, rotación segura de refresh tokens, recuperación de contraseña, formularios Angular accesibles y pruebas automatizadas de backend, integración y accesibilidad. La rama de fase no se integra en `main` hasta que todas las verificaciones de CI finalicen correctamente.
 
 ---
 
@@ -274,6 +279,12 @@ La base incluye solución .NET, proyectos de arquitectura, aplicación Angular i
 
 ### SQL Server
 
+Copia el archivo de ejemplo y reemplaza todos los valores. No reutilices estas credenciales fuera del entorno local:
+
+```bash
+cp .env.example .env
+```
+
 ```bash
 docker compose up -d sqlserver
 ```
@@ -281,8 +292,13 @@ docker compose up -d sqlserver
 ### Backend
 
 ```bash
+set -a
+source .env
+set +a
 dotnet run --project backend/src/AccessiUXMarket.Api
 ```
+
+Con `Database__ApplyMigrations=true`, la API aplica las migraciones al iniciar. `Database__SeedRoles=true` crea de forma idempotente los roles base; en producción, las migraciones pueden ejecutarse como un paso controlado del despliegue.
 
 Endpoint de salud:
 
@@ -294,20 +310,36 @@ GET /health
 
 ```bash
 cd frontend/accessible-market-web
-npm install
+npm ci
 npm start
 ```
 
 Por defecto, Angular sirve la aplicación en `http://localhost:4200`.
+
+### Verificación
+
+```bash
+dotnet test backend/AccessiUXMarket.sln --configuration Release
+
+cd frontend/accessible-market-web
+npm run build
+npx playwright install chromium
+npm test
+```
 
 ---
 
 ## 📚 Documentación
 
 - [ADR 0001 — Arquitectura](docs/adr/0001-architecture.md)
+- [ADR 0002 — Seguridad de identidad y sesiones](docs/adr/0002-identity-session-security.md)
+- [API de autenticación](docs/api/authentication.md)
+- [Pruebas de identidad](docs/testing/identity.md)
 - [Requisitos UX](docs/ux/requirements.md)
+- [Política de seguridad](SECURITY.md)
+- [Historial de cambios](CHANGELOG.md)
 
-La documentación de accesibilidad, arquitectura ampliada, seguridad, API y pruebas crecerá junto con las fases correspondientes.
+La documentación crecerá junto con las fases correspondientes y solo reportará resultados de pruebas realmente ejecutadas.
 
 ---
 

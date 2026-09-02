@@ -4,7 +4,7 @@ services:
     container_name: accessiuxmarket-sqlserver
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:-ChangeMe_OnlyForLocalDevelopment_123!}"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?Define MSSQL_SA_PASSWORD in .env}"
     ports:
       - "1433:1433"
     volumes:
