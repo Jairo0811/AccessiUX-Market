@@ -47,7 +47,7 @@ AccessiUX Market no pretende ser un clon de Amazon. Su objetivo es demostrar có
 | Información | Detalle |
 |---|---|
 | 📖 Asignatura | **Ingeniería de la Usabilidad (ISO-505)** |
-| 👨‍🏫 Profesor | **Ing. Freddy E. Jiménez S.** |
+| 👨‍🏫 Profesor | **Ing. Freddy E. Jiménez Sone** |
 | 🏫 Institución | **Universidad APEC (UNAPEC)** |
 | 📅 Período académico | **Septiembre - Diciembre 2025** |
 | 📁 Tipo de entrega | **Proyecto Final** |
