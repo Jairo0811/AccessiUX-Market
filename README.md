@@ -58,8 +58,8 @@ AccessiUX Market no pretende ser un clon de Amazon. Su objetivo es demostrar có
 | Ángel Brazoban | A00110074 |
 | Jorge Almanzar | A00110435 |
 | Francis Jairo Matías Rosario | A00115261 |
-| Pieranyela Carrasco | A00116415 |
-| Jenrry Monegro | A00116621 |
+| Pieranyela José Carrasco Rodríguez | A00116415 |
+| Jenrry Monegro Rosario | A00116621 |
 
 > La aplicación actual es una evolución técnica posterior del concepto y de los hallazgos del proyecto académico original.
 
@@ -136,6 +136,11 @@ El stack se documenta separando lo que ya está **implementado en `v0.1.0`** de 
 
 ### 🎨 Frontend — implementado
 
+<p>
+  <img src="https://skillicons.dev/icons?i=angular,ts,sass" alt="Angular, TypeScript y SCSS" />
+  <img src="https://img.shields.io/badge/RxJS-7.8-B7178C?style=flat-square&logo=reactivex&logoColor=white" alt="RxJS 7.8" />
+</p>
+
 | Área | Tecnología |
 |---|---|
 | Framework | **Angular 22.1** |
@@ -147,6 +152,12 @@ El stack se documenta separando lo que ya está **implementado en `v0.1.0`** de 
 
 ### ⚙️ Backend — implementado
 
+<p>
+  <img src="https://skillicons.dev/icons?i=dotnet,cs" alt=".NET y C#" />
+  <img src="https://img.shields.io/badge/ASP.NET%20Core-Web%20API-512BD4?style=flat-square&logo=dotnet&logoColor=white" alt="ASP.NET Core Web API" />
+  <img src="https://img.shields.io/badge/OpenAPI-Contrato%20HTTP-85EA2D?style=flat-square&logo=swagger&logoColor=black" alt="OpenAPI" />
+</p>
+
 | Área | Tecnología |
 |---|---|
 | Plataforma | **.NET 10** |
@@ -157,6 +168,11 @@ El stack se documenta separando lo que ya está **implementado en `v0.1.0`** de 
 | Política frontend | CORS configurable |
 
 ### 🗄️ Datos e infraestructura — implementado
+
+<p>
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/microsoftsqlserver/microsoftsqlserver-plain.svg" alt="Microsoft SQL Server" width="48" height="48" />
+  <img src="https://skillicons.dev/icons?i=docker,git,github,githubactions" alt="Docker, Git, GitHub y GitHub Actions" />
+</p>
 
 | Área | Tecnología |
 |---|---|
