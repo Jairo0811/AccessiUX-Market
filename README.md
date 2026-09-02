@@ -55,8 +55,8 @@ AccessiUX Market no pretende ser un clon de Amazon. Su objetivo es demostrar có
 
 | Integrante | Matrícula |
 |---|---|
-| 👨🏻‍💻 Ángel Brazoban | A00110074 |
-| 👨🏻‍💻 Jorge Almanzar | A00110435 |
+| 👨🏻‍💻 Ángel Guillermo Brazoban Sosa | A00110074 |
+| 👨🏻‍💻 Jorge Thomas Almanzar Soriano | A00110435 |
 | 👨🏻‍💻 Francis Jairo Matías Rosario | A00115261 |
 | 👩🏻‍💻 Pieranyela José Carrasco Rodríguez | A00116415 |
 | 👨🏻‍💻 Jenrry Monegro Rosario | A00116621 |
