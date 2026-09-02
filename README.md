@@ -4,6 +4,10 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/UNAPEC-ISO--505-003B70?style=for-the-badge" alt="UNAPEC ISO-505">
+  <img src="https://img.shields.io/badge/Grupo-%234-128C7E?style=for-the-badge" alt="Grupo 4">
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/Versión-0.2.0-2563EB?style=for-the-badge" alt="Versión 0.2.0">
   <img src="https://img.shields.io/badge/Estado-Identity%20%26%20Users-14B8A6?style=for-the-badge" alt="Estado Identity and Users">
 </p>
