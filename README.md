@@ -1,126 +1,305 @@
-# AccessiUX Market
+<p align="center">
+  <strong>AccessiUX Market</strong>
+</p>
 
-**Accessible & Usable E-Commerce Platform**
+<p align="center">
+  <img src="https://img.shields.io/badge/UNAPEC-ISO--505-003B70?style=for-the-badge" alt="UNAPEC ISO-505">
+  <img src="https://img.shields.io/badge/Versión-0.1.0-2563EB?style=for-the-badge" alt="Versión 0.1.0">
+  <img src="https://img.shields.io/badge/Estado-Foundation-14B8A6?style=for-the-badge" alt="Estado Foundation">
+</p>
 
-AccessiUX Market is an e-commerce platform designed around accessibility, usability, error prevention, and user control.
+<p align="center">
+  <strong>Accessible & Usable E-Commerce Platform</strong>
+</p>
 
-The project evolves from an academic usability, accessibility, and security audit of Amazon.com. Instead of reproducing Amazon, AccessiUX Market turns the audit findings into a new implementation where UX and accessibility are architectural requirements from the beginning.
+<p align="center">
+  Angular · TypeScript · .NET 10 · ASP.NET Core · SQL Server · Docker · GitHub Actions
+</p>
 
-## Project goals
+> 🎓 **Origen académico:** AccessiUX Market evoluciona a partir del proyecto final de **Ingeniería de la Usabilidad (ISO-505)** de la **Universidad APEC (UNAPEC)**, realizado durante el período **Septiembre - Diciembre 2025**. La entrega original consistió en una auditoría de usabilidad, accesibilidad y seguridad sobre Amazon.com. La implementación actual transforma aquellos hallazgos y propuestas en una plataforma e-commerce propia, sin reproducir ni depender de Amazon.
 
-- Build an accessible marketplace aligned with WCAG principles.
-- Apply Jakob Nielsen's usability heuristics to real product flows.
-- Reduce cognitive load in catalog, navigation, and checkout experiences.
-- Give users explicit control over orders and reversibility.
-- Standardize seller information and marketplace policies.
-- Measure UX improvements with automated and user-based evidence.
+---
 
-## Initial requirements derived from the UX audit
+## 📖 Descripción
 
-| ID | Requirement |
-| --- | --- |
-| AM-UX-001 | Visible and time-bounded order cancellation |
-| AM-UX-002 | Standardized seller policy presentation |
-| AM-UX-003 | Simple Reading Mode / accessibility preferences |
-| AM-UX-004 | Dynamic faceted filtering with result counts |
-| AM-UX-005 | Full keyboard navigation and focus management |
-| AM-UX-006 | Checkout designed for visibility and error prevention |
+**AccessiUX Market** es una plataforma de comercio electrónico diseñada alrededor de tres ejes principales: **accesibilidad, usabilidad y experiencia de usuario**.
 
-## Technology stack
+El proyecto parte de una auditoría académica de Amazon.com en la que se analizaron las heurísticas de Jakob Nielsen, métricas UX, accesibilidad basada en WCAG y aspectos de seguridad. La evolución actual convierte las recomendaciones del informe en requisitos funcionales y técnicos de una aplicación nueva.
 
-### Frontend
-- Angular
-- TypeScript
-- Angular CDK
-- SCSS
-- Playwright
-- axe-core
+AccessiUX Market no pretende ser un clon de Amazon. Su objetivo es demostrar cómo un marketplace puede diseñarse desde el inicio con:
 
-### Backend
-- .NET 10
-- ASP.NET Core Web API
-- C#
-- Entity Framework Core
-- FluentValidation
-- SQL Server
+- navegación accesible mediante teclado;
+- menor carga cognitiva;
+- flujos de compra con prevención de errores;
+- control y reversibilidad para el usuario;
+- componentes consistentes para vendedores;
+- búsqueda y filtrado eficientes;
+- pruebas automatizadas de accesibilidad y experiencia de usuario.
 
-### Platform
-- Docker / Docker Compose
-- GitHub Actions
-- OpenAPI
-- Health checks
+---
 
-## Architecture
+## 🎓 Información académica
 
-The backend follows a pragmatic Clean Architecture:
+| Información | Detalle |
+|---|---|
+| 📖 Asignatura | **Ingeniería de la Usabilidad (ISO-505)** |
+| 👨‍🏫 Profesor | **Ing. Freddy E. Jiménez S.** |
+| 🏫 Institución | **Universidad APEC (UNAPEC)** |
+| 📅 Período académico | **Septiembre - Diciembre 2025** |
+| 📁 Tipo de entrega | **Proyecto Final** |
+| 🔎 Caso de estudio original | **Amazon.com** |
+| 📄 Entrega original | **Auditoría de usabilidad, accesibilidad y seguridad** |
+| 💻 Evolución actual | **Marketplace full-stack desarrollado desde cero** |
+
+### 👥 Equipo académico original
+
+| Integrante | Matrícula |
+|---|---|
+| Ángel Brazoban | A00110074 |
+| Jorge Almanzar | A00110435 |
+| Francis Jairo Matías Rosario | A00115261 |
+| Pieranyela Carrasco | A00116415 |
+| Jenrry Monegro | A00116621 |
+
+> La aplicación actual es una evolución técnica posterior del concepto y de los hallazgos del proyecto académico original.
+
+---
+
+## 🧭 Continuidad académica
+
+La continuidad se documenta únicamente cuando existe una coincidencia verificable por **estudiante** o **profesor** dentro de los proyectos académicos conservados en el portafolio.
+
+### 👥 Continuidad por estudiantes
+
+**Pieranyela José Carrasco Rodríguez (A00116415)** y **Jenrry Monegro Rosario (A00116621)** aparecen junto a Francis Jairo Matías Rosario en una secuencia verificable de proyectos de UNAPEC:
+
+| Orden | Asignatura | Proyecto | Período |
+|---:|---|---|---|
+| 1 | Fundamentos de Seguridad de Software (ISO-915) | [**CertiChain**](https://github.com/Jairo0811/CertiChain) | Septiembre - Diciembre 2025 |
+| 2 | Ingeniería de la Usabilidad (ISO-505) | **AccessiUX Market** | Septiembre - Diciembre 2025 |
+| 3 | Desarrollo de Software con Tecnología Open Source I (ISO-610) | [**CineGest**](https://github.com/Jairo0811/CineGest) | Enero - Abril 2026 |
+
+Durante **Septiembre - Diciembre 2025**, CertiChain y el proyecto académico que da origen a AccessiUX Market fueron desarrollados en asignaturas distintas del mismo período. Posteriormente, Pieranyela y Jenrry volvieron a coincidir con Francis Jairo Matías Rosario en CineGest.
+
+Esta relación representa **continuidad por compañeros de equipo**, no dependencia técnica entre las aplicaciones.
+
+### 👨‍🏫 Continuidad por profesor
+
+En los repositorios revisados actualmente no se ha verificado otra asignatura del portafolio impartida por **Ing. Freddy E. Jiménez S.**. Por tanto, no se documenta una continuidad docente adicional para AccessiUX Market.
+
+---
+
+## 🧪 Hallazgos académicos convertidos en requisitos
+
+| ID | Requisito de AccessiUX Market | Origen UX |
+|---|---|---|
+| `AM-UX-001` | Cancelación visible y limitada por tiempo | Control y libertad del usuario |
+| `AM-UX-002` | Presentación estandarizada de políticas del vendedor | Consistencia y estándares |
+| `AM-UX-003` | Modo de Lectura Simple y preferencias de accesibilidad | Estética, carga cognitiva y accesibilidad |
+| `AM-UX-004` | Filtros dinámicos con conteo de resultados | Flexibilidad y eficiencia |
+| `AM-UX-005` | Navegación completa por teclado y gestión de foco | Accesibilidad motriz |
+| `AM-UX-006` | Checkout orientado a visibilidad y prevención de errores | Visibilidad del estado y prevención de errores |
+
+La trazabilidad detallada se mantiene en [`docs/ux/requirements.md`](docs/ux/requirements.md).
+
+---
+
+## 🎯 Objetivos del producto
+
+- Construir un marketplace accesible alineado con principios WCAG.
+- Aplicar las heurísticas de Jakob Nielsen a flujos reales de producto.
+- Reducir carga cognitiva en catálogo, navegación y checkout.
+- Dar al usuario control explícito sobre pedidos y reversibilidad.
+- Estandarizar la información de vendedores y políticas comerciales.
+- Medir las mejoras UX mediante evidencia automatizada y pruebas con usuarios.
+- Mantener una arquitectura modular preparada para crecimiento posterior.
+
+---
+
+## 🧱 Stack tecnológico
+
+El stack se documenta separando lo que ya está **implementado en `v0.1.0`** de las tecnologías previstas para las siguientes fases. Esto evita presentar dependencias planificadas como si ya estuvieran integradas.
+
+### 🎨 Frontend — implementado
+
+| Área | Tecnología |
+|---|---|
+| Framework | **Angular 22.1** |
+| Lenguaje | **TypeScript 5.9** |
+| Programación reactiva | **RxJS 7.8** |
+| Arquitectura UI | Angular standalone |
+| Estilos | **SCSS** |
+| Accesibilidad base | `:focus-visible`, `prefers-reduced-motion`, HTML semántico |
+
+### ⚙️ Backend — implementado
+
+| Área | Tecnología |
+|---|---|
+| Plataforma | **.NET 10** |
+| API | **ASP.NET Core Web API** |
+| Lenguaje | **C#** |
+| Contrato HTTP | OpenAPI |
+| Observabilidad base | ASP.NET Core Health Checks |
+| Política frontend | CORS configurable |
+
+### 🗄️ Datos e infraestructura — implementado
+
+| Área | Tecnología |
+|---|---|
+| Base de datos | **Microsoft SQL Server 2022** |
+| Contenedores | **Docker / Docker Compose** |
+| Control de versiones | **Git / GitHub** |
+| CI | **GitHub Actions** |
+
+### 🧩 Tecnologías previstas para las siguientes fases
+
+Estas tecnologías forman parte del diseño objetivo, pero todavía no están integradas en la base `v0.1.0`:
+
+- Entity Framework Core;
+- ASP.NET Core Identity;
+- JWT + refresh tokens;
+- FluentValidation;
+- Angular CDK;
+- Playwright;
+- axe-core;
+- xUnit;
+- pruebas de integración contra SQL Server.
+
+---
+
+## 🏗️ Arquitectura
+
+El backend sigue una **Clean Architecture pragmática**:
 
 ```text
-Api
- ├── Application
- └── Infrastructure
-       └── Application
-             └── Domain
+AccessiUXMarket.Api
+        │
+        ├──────────────► AccessiUXMarket.Application
+        │
+        └──────────────► AccessiUXMarket.Infrastructure
+                               │
+                               ▼
+                    AccessiUXMarket.Application
+                               │
+                               ▼
+                       AccessiUXMarket.Domain
 ```
+
+Estructura principal:
 
 ```text
-backend/
-├── src/
-│   ├── AccessiUXMarket.Api/
-│   ├── AccessiUXMarket.Application/
-│   ├── AccessiUXMarket.Domain/
-│   └── AccessiUXMarket.Infrastructure/
-└── tests/
-    ├── AccessiUXMarket.UnitTests/
-    └── AccessiUXMarket.IntegrationTests/
-
-frontend/
-└── accessible-market-web/
-
-docs/
-├── accessibility/
-├── architecture/
-├── ux/
-└── adr/
+AccessiUX-Market/
+├── backend/
+│   ├── AccessiUXMarket.sln
+│   └── src/
+│       ├── AccessiUXMarket.Api/
+│       ├── AccessiUXMarket.Application/
+│       ├── AccessiUXMarket.Domain/
+│       └── AccessiUXMarket.Infrastructure/
+├── frontend/
+│   └── accessible-market-web/
+├── docs/
+│   ├── accessibility/
+│   ├── architecture/
+│   ├── ux/
+│   └── adr/
+├── docker-compose.yml
+└── README.md
 ```
 
-## Development roadmap
+Las dependencias de infraestructura, persistencia y presentación no deben contaminar el dominio.
 
-| Phase | Scope |
-| --- | --- |
-| 0 | Foundation, architecture, Docker, CI and documentation |
-| 1 | Identity and users |
-| 2 | Catalog, categories and sellers |
-| 3 | Search and dynamic facets |
-| 4 | Cart |
-| 5 | Checkout |
-| 6 | Orders and cancellations |
-| 7 | Advanced accessibility |
-| 8 | UX Lab, testing and production readiness |
+---
 
-## Local infrastructure
+## 🗺️ Roadmap
 
-Start SQL Server:
+| Fase | Alcance | Estado |
+|---:|---|:---:|
+| 0 | Foundation, arquitectura, Docker, CI y documentación | ✅ |
+| 1 | Identity y usuarios | ⏳ |
+| 2 | Catálogo, categorías y vendedores | ⏳ |
+| 3 | Búsqueda y filtros dinámicos | ⏳ |
+| 4 | Carrito | ⏳ |
+| 5 | Checkout | ⏳ |
+| 6 | Pedidos y cancelaciones | ⏳ |
+| 7 | Accesibilidad avanzada | ⏳ |
+| 8 | UX Lab, testing y preparación para producción | ⏳ |
+
+### Estado actual
+
+**v0.1.0 — Foundation**
+
+La base incluye solución .NET, proyectos de arquitectura, aplicación Angular inicial, SQL Server mediante Docker Compose, health checks, CORS, documentación y workflow inicial de CI.
+
+---
+
+## 🐳 Ejecución local
+
+### Requisitos actuales
+
+- .NET SDK 10;
+- Node.js compatible con Angular 22;
+- npm;
+- Docker Desktop o Docker Engine con Docker Compose.
+
+### SQL Server
 
 ```bash
 docker compose up -d sqlserver
 ```
 
-Run the API:
+### Backend
 
 ```bash
 dotnet run --project backend/src/AccessiUXMarket.Api
 ```
 
-Health endpoint:
+Endpoint de salud:
 
 ```text
 GET /health
 ```
 
-## Status
+### Frontend
 
-Current milestone: **v0.1.0 — Foundation**.
+```bash
+cd frontend/accessible-market-web
+npm install
+npm start
+```
 
-## License
+Por defecto, Angular sirve la aplicación en `http://localhost:4200`.
 
-License to be defined before the first public release.
+---
+
+## 📚 Documentación
+
+- [ADR 0001 — Arquitectura](docs/adr/0001-architecture.md)
+- [Requisitos UX](docs/ux/requirements.md)
+
+La documentación de accesibilidad, arquitectura ampliada, seguridad, API y pruebas crecerá junto con las fases correspondientes.
+
+---
+
+## 📏 Métricas UX
+
+Las métricas del proyecto evolucionado no se inventarán ni se heredarán automáticamente de la auditoría académica. Valores como SUS, tasa de éxito, tiempo de tarea, errores y puntuaciones de accesibilidad deberán proceder de:
+
+- pruebas reales con usuarios;
+- Playwright;
+- axe-core;
+- Lighthouse;
+- métricas reproducibles documentadas.
+
+---
+
+## 📜 Licencia
+
+La licencia se definirá antes de la primera versión pública estable.
+
+---
+
+<p align="center">
+  <strong>AccessiUX Market · Accessibility + Usability + Market</strong><br>
+  Universidad APEC (UNAPEC) · Ingeniería de la Usabilidad (ISO-505)
+</p>
