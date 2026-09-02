@@ -38,7 +38,7 @@ public sealed class CatalogEndpointsTests(IdentityApiFixture fixture) : IClassFi
         Assert.Equal(HttpStatusCode.Created, sellerResponse.StatusCode);
 
         var categories = await client.GetFromJsonAsync<List<CategoryDto>>($"{CatalogRoot}/categories");
-        var category = Assert.Single(categories!.Where(item => item.Slug == "tecnologia"));
+        var category = Assert.Single(categories!, item => item.Slug == "tecnologia");
 
         var productSlug = $"teclado-{Guid.NewGuid():N}";
         var productResponse = await client.PostAsJsonAsync(
