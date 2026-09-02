@@ -13,7 +13,9 @@ import { AuthService } from './core/auth/auth.service';
           <span aria-hidden="true">A</span> AccessiUX Market
         </a>
         <div class="nav__actions">
+          <a routerLink="/catalog">Catálogo</a>
           @if (auth.isAuthenticated()) {
+            <a routerLink="/seller">Vender</a>
             <a routerLink="/account">Mi cuenta</a>
             <button class="link-button" type="button" (click)="logout()">Cerrar sesión</button>
           } @else {
@@ -36,10 +38,9 @@ export class AppComponent {
   private readonly router = inject(Router);
 
   logout(): void {
-    this.auth.logout()
-      .subscribe({
-        next: () => void this.router.navigate(['/']),
-        error: () => void this.router.navigate(['/']),
-      });
+    this.auth.logout().subscribe({
+      next: () => void this.router.navigate(['/']),
+      error: () => void this.router.navigate(['/']),
+    });
   }
 }
