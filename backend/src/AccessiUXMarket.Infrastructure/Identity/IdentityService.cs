@@ -26,32 +26,36 @@ internal sealed class IdentityService(
         ClientContext client,
         CancellationToken cancellationToken)
     {
-        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
-        var user = new ApplicationUser
+        var executionStrategy = dbContext.Database.CreateExecutionStrategy();
+        return await executionStrategy.ExecuteAsync(async () =>
         {
-            Id = Guid.NewGuid(),
-            Email = request.Email.Trim(),
-            UserName = request.Email.Trim(),
-            FullName = request.FullName.Trim(),
-            CreatedAtUtc = timeProvider.GetUtcNow(),
-            IsActive = true
-        };
+            await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+            var user = new ApplicationUser
+            {
+                Id = Guid.NewGuid(),
+                Email = request.Email.Trim(),
+                UserName = request.Email.Trim(),
+                FullName = request.FullName.Trim(),
+                CreatedAtUtc = timeProvider.GetUtcNow(),
+                IsActive = true
+            };
 
-        var creationResult = await userManager.CreateAsync(user, request.Password);
-        if (!creationResult.Succeeded)
-        {
-            return IdentityOperationResult<AuthSession>.Failure(MapIdentityErrors(creationResult.Errors));
-        }
+            var creationResult = await userManager.CreateAsync(user, request.Password);
+            if (!creationResult.Succeeded)
+            {
+                return IdentityOperationResult<AuthSession>.Failure(MapIdentityErrors(creationResult.Errors));
+            }
 
-        var roleResult = await userManager.AddToRoleAsync(user, RoleNames.Customer);
-        if (!roleResult.Succeeded)
-        {
-            return IdentityOperationResult<AuthSession>.Failure(MapIdentityErrors(roleResult.Errors));
-        }
+            var roleResult = await userManager.AddToRoleAsync(user, RoleNames.Customer);
+            if (!roleResult.Succeeded)
+            {
+                return IdentityOperationResult<AuthSession>.Failure(MapIdentityErrors(roleResult.Errors));
+            }
 
-        var session = await CreateSessionAsync(user, Guid.NewGuid(), client, cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-        return IdentityOperationResult<AuthSession>.Success(session);
+            var session = await CreateSessionAsync(user, Guid.NewGuid(), client, cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            return IdentityOperationResult<AuthSession>.Success(session);
+        });
     }
 
     public async Task<IdentityOperationResult<AuthSession>> LoginAsync(
@@ -87,77 +91,81 @@ internal sealed class IdentityService(
         ClientContext client,
         CancellationToken cancellationToken)
     {
-        var tokenHash = SecureTokenGenerator.Hash(refreshToken);
-        await using var transaction = await dbContext.Database.BeginTransactionAsync(
-            IsolationLevel.Serializable,
-            cancellationToken);
-
-        var storedToken = await dbContext.RefreshTokens
-            .SingleOrDefaultAsync(token => token.TokenHash == tokenHash, cancellationToken);
-
-        if (storedToken is null)
+        var executionStrategy = dbContext.Database.CreateExecutionStrategy();
+        return await executionStrategy.ExecuteAsync(async () =>
         {
-            return InvalidRefreshToken();
-        }
+            var tokenHash = SecureTokenGenerator.Hash(refreshToken);
+            await using var transaction = await dbContext.Database.BeginTransactionAsync(
+                IsolationLevel.Serializable,
+                cancellationToken);
 
-        var now = timeProvider.GetUtcNow();
-        if (!storedToken.IsActive(now))
-        {
-            if (storedToken.RevokedAtUtc is not null && storedToken.ReplacedByTokenHash is not null)
+            var storedToken = await dbContext.RefreshTokens
+                .SingleOrDefaultAsync(token => token.TokenHash == tokenHash, cancellationToken);
+
+            if (storedToken is null)
             {
-                await RevokeFamilyAsync(
-                    storedToken.FamilyId,
-                    now,
-                    client.IpAddress,
-                    "Refresh token reuse detected",
-                    cancellationToken);
-                await dbContext.SaveChangesAsync(cancellationToken);
-                await transaction.CommitAsync(cancellationToken);
+                return InvalidRefreshToken();
             }
 
-            return InvalidRefreshToken();
-        }
+            var now = timeProvider.GetUtcNow();
+            if (!storedToken.IsActive(now))
+            {
+                if (storedToken.RevokedAtUtc is not null && storedToken.ReplacedByTokenHash is not null)
+                {
+                    await RevokeFamilyAsync(
+                        storedToken.FamilyId,
+                        now,
+                        client.IpAddress,
+                        "Refresh token reuse detected",
+                        cancellationToken);
+                    await dbContext.SaveChangesAsync(cancellationToken);
+                    await transaction.CommitAsync(cancellationToken);
+                }
 
-        var user = await userManager.FindByIdAsync(storedToken.UserId.ToString());
-        if (user is null || !user.IsActive)
-        {
-            storedToken.Revoke(now, client.IpAddress, "User unavailable");
-            await dbContext.SaveChangesAsync(cancellationToken);
+                return InvalidRefreshToken();
+            }
+
+            var user = await userManager.FindByIdAsync(storedToken.UserId.ToString());
+            if (user is null || !user.IsActive)
+            {
+                storedToken.Revoke(now, client.IpAddress, "User unavailable");
+                await dbContext.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+                return InvalidRefreshToken();
+            }
+
+            var replacementRawToken = SecureTokenGenerator.CreateRefreshToken();
+            var replacementHash = SecureTokenGenerator.Hash(replacementRawToken);
+            var refreshExpiresAtUtc = now.AddDays(_jwtOptions.RefreshTokenDays);
+            var replacement = RefreshToken.Create(
+                user.Id,
+                replacementHash,
+                storedToken.FamilyId,
+                now,
+                refreshExpiresAtUtc,
+                client.IpAddress,
+                client.UserAgent);
+
+            storedToken.Rotate(now, client.IpAddress, replacementHash);
+            dbContext.RefreshTokens.Add(replacement);
+
+            try
+            {
+                await dbContext.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return InvalidRefreshToken();
+            }
+
+            var session = await BuildSessionAsync(
+                user,
+                replacementRawToken,
+                refreshExpiresAtUtc,
+                cancellationToken);
             await transaction.CommitAsync(cancellationToken);
-            return InvalidRefreshToken();
-        }
-
-        var replacementRawToken = SecureTokenGenerator.CreateRefreshToken();
-        var replacementHash = SecureTokenGenerator.Hash(replacementRawToken);
-        var refreshExpiresAtUtc = now.AddDays(_jwtOptions.RefreshTokenDays);
-        var replacement = RefreshToken.Create(
-            user.Id,
-            replacementHash,
-            storedToken.FamilyId,
-            now,
-            refreshExpiresAtUtc,
-            client.IpAddress,
-            client.UserAgent);
-
-        storedToken.Rotate(now, client.IpAddress, replacementHash);
-        dbContext.RefreshTokens.Add(replacement);
-
-        try
-        {
-            await dbContext.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            return InvalidRefreshToken();
-        }
-
-        var session = await BuildSessionAsync(
-            user,
-            replacementRawToken,
-            refreshExpiresAtUtc,
-            cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-        return IdentityOperationResult<AuthSession>.Success(session);
+            return IdentityOperationResult<AuthSession>.Success(session);
+        });
     }
 
     public async Task LogoutAsync(

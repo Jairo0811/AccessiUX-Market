@@ -122,7 +122,10 @@ if (!app.Environment.IsDevelopment())
 
 app.UseExceptionHandler();
 app.UseSecurityHeaders();
-app.UseHttpsRedirection();
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    app.UseHttpsRedirection();
+}
 app.UseCors("Frontend");
 app.UseStatusCodePages(async statusCodeContext =>
 {
