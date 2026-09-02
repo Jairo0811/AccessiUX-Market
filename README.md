@@ -4,6 +4,10 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/UNAPEC-ISO--505-003B70?style=for-the-badge" alt="UNAPEC ISO-505">
+  <img src="https://img.shields.io/badge/Grupo-%234-128C7E?style=for-the-badge" alt="Grupo 4">
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/Versión-0.2.0-2563EB?style=for-the-badge" alt="Versión 0.2.0">
   <img src="https://img.shields.io/badge/Estado-Identity%20%26%20Users-14B8A6?style=for-the-badge" alt="Estado Identity and Users">
 </p>
@@ -43,7 +47,7 @@ AccessiUX Market no pretende ser un clon de Amazon. Su objetivo es demostrar có
 | Información | Detalle |
 |---|---|
 | 📖 Asignatura | **Ingeniería de la Usabilidad (ISO-505)** |
-| 👨‍🏫 Profesor | **Ing. Freddy E. Jiménez S.** |
+| 👨‍🏫 Profesor | **Ing. Freddy E. Jiménez Sone** |
 | 🏫 Institución | **Universidad APEC (UNAPEC)** |
 | 📅 Período académico | **Septiembre - Diciembre 2025** |
 | 📁 Tipo de entrega | **Proyecto Final** |
@@ -55,8 +59,8 @@ AccessiUX Market no pretende ser un clon de Amazon. Su objetivo es demostrar có
 
 | Integrante | Matrícula |
 |---|---|
-| 👨🏻‍💻 Ángel Brazoban | A00110074 |
-| 👨🏻‍💻 Jorge Almanzar | A00110435 |
+| 👨🏻‍💻 Ángel Guillermo Brazoban Sosa | A00110074 |
+| 👨🏻‍💻 Jorge Thomas Almanzar Soriano | A00110435 |
 | 👨🏻‍💻 Francis Jairo Matías Rosario | A00115261 |
 | 👩🏻‍💻 Pieranyela José Carrasco Rodríguez | A00116415 |
 | 👨🏻‍💻 Jenrry Monegro Rosario | A00116621 |
