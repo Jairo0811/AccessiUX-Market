@@ -67,7 +67,7 @@ AccessiUX Market no pretende ser un clon de Amazon. Su objetivo es demostrar có
 
 ## 🧭 Continuidad académica
 
-La continuidad se documenta únicamente cuando existe una coincidencia verificable por **estudiante** o **profesor** dentro de los proyectos académicos conservados en el portafolio.
+La continuidad se documenta únicamente cuando existe una coincidencia verificable por **estudiante**, **profesor** o **trayectoria institucional documentada** dentro de los proyectos académicos conservados en el portafolio.
 
 ### 👥 Continuidad por estudiantes
 
@@ -82,6 +82,20 @@ La continuidad se documenta únicamente cuando existe una coincidencia verificab
 Durante **Septiembre - Diciembre 2025**, CertiChain y el proyecto académico que da origen a AccessiUX Market fueron desarrollados en asignaturas distintas del mismo período. Posteriormente, Pieranyela y Jenrry volvieron a coincidir con Francis Jairo Matías Rosario en CineGest.
 
 Esta relación representa **continuidad por compañeros de equipo**, no dependencia técnica entre las aplicaciones.
+
+### 🏫 Cruce institucional ITLA → UNAPEC
+
+Dentro del equipo original de AccessiUX Market existe también una trayectoria previa compartida desde el **Instituto Tecnológico de Las Américas (ITLA)** hacia la **Universidad APEC (UNAPEC)** para tres integrantes:
+
+| Integrante | Matrícula UNAPEC | Matrícula ITLA | Relación documentada |
+|---|---|---|---|
+| **Francis Jairo Matías Rosario** | A00115261 | **2015-2984** | ITLA → UNAPEC |
+| **Pieranyela José Carrasco Rodríguez** | A00116415 | **2019-8767** | ITLA → UNAPEC; coincidencia posterior en CertiChain, AccessiUX Market y CineGest |
+| **Jenrry Monegro Rosario** | A00116621 | **2019-8690** | ITLA → UNAPEC; coincidencia posterior en CertiChain, AccessiUX Market y CineGest |
+
+El cruce institucional documenta que los tres cursaron previamente estudios en ITLA y posteriormente coincidieron en proyectos académicos de UNAPEC. **No implica que hayan cursado juntos una misma asignatura en ITLA**.
+
+Esta misma trayectoria ITLA → UNAPEC también aparece documentada en [**CertiChain**](https://github.com/Jairo0811/CertiChain) y [**CineGest**](https://github.com/Jairo0811/CineGest), reforzando la continuidad académica del grupo sin confundirla con una dependencia técnica entre los proyectos.
 
 ### 👨‍🏫 Continuidad por profesor
 
