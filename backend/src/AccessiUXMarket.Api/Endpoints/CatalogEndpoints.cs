@@ -2,7 +2,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using AccessiUXMarket.Api.Infrastructure;
 using AccessiUXMarket.Application.Catalog;
-using AccessiUXMarket.Domain.Identity;
 
 namespace AccessiUXMarket.Api.Endpoints;
 
@@ -22,13 +21,14 @@ public static class CatalogEndpoints
             await service.GetSellerByUserIdAsync(GetUserId(context.User), ct) is { } seller ? Results.Ok(seller) : Results.NotFound())
             .RequireAuthorization();
         group.MapGet("/seller/products", async (HttpContext context, ICatalogService service, CancellationToken ct) =>
-            Results.Ok(await service.GetSellerProductsAsync(GetUserId(context.User), ct)))
-            .RequireAuthorization(policy => policy.RequireRole(RoleNames.Seller));
-        group.MapPost("/seller", CreateSellerAsync).AddEndpointFilter<ValidationFilter<CreateSellerRequest>>().RequireAuthorization();
-        group.MapPost("/seller/products", CreateProductAsync).AddEndpointFilter<ValidationFilter<CreateProductRequest>>()
-            .RequireAuthorization(policy => policy.RequireRole(RoleNames.Seller));
-        group.MapPost("/seller/products/{productId:guid}/publish", PublishAsync)
-            .RequireAuthorization(policy => policy.RequireRole(RoleNames.Seller));
+            Results.Ok(await service.GetSellerProductsAsync(GetUserId(context.User), ct))).RequireAuthorization();
+        group.MapPost("/seller", CreateSellerAsync)
+            .AddEndpointFilter<ValidationFilter<CreateSellerRequest>>()
+            .RequireAuthorization();
+        group.MapPost("/seller/products", CreateProductAsync)
+            .AddEndpointFilter<ValidationFilter<CreateProductRequest>>()
+            .RequireAuthorization();
+        group.MapPost("/seller/products/{productId:guid}/publish", PublishAsync).RequireAuthorization();
         return endpoints;
     }
 
@@ -40,7 +40,11 @@ public static class CatalogEndpoints
 
     private static async Task<IResult> CreateProductAsync(CreateProductRequest request, HttpContext context, ICatalogService service, CancellationToken ct)
     {
-        try { var product = await service.CreateProductAsync(GetUserId(context.User), request, ct); return Results.Created($"/api/v1/catalog/products/{product.Slug}", product); }
+        try
+        {
+            var product = await service.CreateProductAsync(GetUserId(context.User), request, ct);
+            return Results.Created($"/api/v1/catalog/products/{product.Slug}", product);
+        }
         catch (InvalidOperationException ex) { return Results.Conflict(new { message = ex.Message }); }
     }
 
