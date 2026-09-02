@@ -1,5 +1,7 @@
 using System.Text;
+using AccessiUXMarket.Application.Catalog;
 using AccessiUXMarket.Application.Identity;
+using AccessiUXMarket.Infrastructure.Catalog;
 using AccessiUXMarket.Infrastructure.Identity;
 using AccessiUXMarket.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
@@ -79,6 +81,7 @@ public static class DependencyInjection
         services.AddScoped<IJwtTokenFactory, JwtTokenFactory>();
         services.AddScoped<IPasswordResetNotifier, SmtpPasswordResetNotifier>();
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<ICatalogService, CatalogService>();
         services.AddScoped<IdentityDataSeeder>();
 
         return services;
