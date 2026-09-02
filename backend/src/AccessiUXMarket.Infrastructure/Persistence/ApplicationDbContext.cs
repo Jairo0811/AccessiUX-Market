@@ -1,3 +1,4 @@
+using AccessiUXMarket.Domain.Catalog;
 using AccessiUXMarket.Domain.Identity;
 using AccessiUXMarket.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
@@ -10,6 +11,9 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>(options)
 {
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<Category> Categories => Set<Category>();
+    public DbSet<SellerProfile> SellerProfiles => Set<SellerProfile>();
+    public DbSet<Product> Products => Set<Product>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -51,6 +55,54 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
                 .WithMany(user => user.RefreshTokens)
                 .HasForeignKey(token => token.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<Category>(entity =>
+        {
+            entity.ToTable("Categories");
+            entity.HasKey(category => category.Id);
+            entity.Property(category => category.Name).HasMaxLength(120).IsRequired();
+            entity.Property(category => category.Slug).HasMaxLength(140).IsRequired();
+            entity.Property(category => category.Description).HasMaxLength(1000);
+            entity.HasIndex(category => category.Slug).IsUnique();
+        });
+
+        builder.Entity<SellerProfile>(entity =>
+        {
+            entity.ToTable("SellerProfiles");
+            entity.HasKey(seller => seller.Id);
+            entity.Property(seller => seller.DisplayName).HasMaxLength(120).IsRequired();
+            entity.Property(seller => seller.Slug).HasMaxLength(140).IsRequired();
+            entity.Property(seller => seller.Description).HasMaxLength(1000);
+            entity.HasIndex(seller => seller.UserId).IsUnique();
+            entity.HasIndex(seller => seller.Slug).IsUnique();
+            entity.HasOne<ApplicationUser>()
+                .WithOne()
+                .HasForeignKey<SellerProfile>(seller => seller.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<Product>(entity =>
+        {
+            entity.ToTable("Products");
+            entity.HasKey(product => product.Id);
+            entity.Property(product => product.Name).HasMaxLength(180).IsRequired();
+            entity.Property(product => product.Slug).HasMaxLength(200).IsRequired();
+            entity.Property(product => product.Description).HasMaxLength(5000).IsRequired();
+            entity.Property(product => product.Price).HasPrecision(18, 2).IsRequired();
+            entity.Property(product => product.Currency).HasMaxLength(3).IsFixedLength().IsRequired();
+            entity.Property(product => product.Status).HasConversion<string>().HasMaxLength(20).IsRequired();
+            entity.HasIndex(product => product.Slug).IsUnique();
+            entity.HasIndex(product => new { product.CategoryId, product.Status });
+            entity.HasIndex(product => new { product.SellerId, product.Status });
+            entity.HasOne<SellerProfile>()
+                .WithMany()
+                .HasForeignKey(product => product.SellerId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<Category>()
+                .WithMany()
+                .HasForeignKey(product => product.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }
