@@ -79,7 +79,14 @@ public sealed class CatalogEndpointsTests(IdentityApiFixture fixture) : IClassFi
         var category = categories!.First();
         var productResponse = await ownerClient.PostAsJsonAsync(
             $"{CatalogRoot}/seller/products",
-            new CreateProductRequest(category.Id, "Producto privado", $"private-{Guid.NewGuid():N}", "Producto para prueba de ownership.", 100m, "DOP", 1));
+            new CreateProductRequest(
+                category.Id,
+                "Producto privado",
+                $"private-{Guid.NewGuid():N}",
+                "Producto para prueba de ownership.",
+                100m,
+                "DOP",
+                1));
         var product = await productResponse.Content.ReadFromJsonAsync<ProductDto>();
         Assert.NotNull(product);
 
@@ -102,7 +109,7 @@ public sealed class CatalogEndpointsTests(IdentityApiFixture fixture) : IClassFi
         var email = $"catalog-{Guid.NewGuid():N}@example.com";
         var response = await client.PostAsJsonAsync(
             $"{AuthRoot}/register",
-            new RegisterRequest("Catalog Test User", email, "AccessiUX_2026!", "AccessiUX_2026!"));
+            new RegisterRequest(email, "AccessiUX_2026!", "Catalog Test User"));
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var session = await response.Content.ReadFromJsonAsync<AuthResponse>();
         Assert.NotNull(session);
