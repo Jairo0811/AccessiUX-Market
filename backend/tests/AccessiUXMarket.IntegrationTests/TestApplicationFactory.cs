@@ -1,41 +1,40 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
 
 namespace AccessiUXMarket.IntegrationTests;
 
 public sealed class TestApplicationFactory : WebApplicationFactory<Program>
 {
+    private readonly IReadOnlyDictionary<string, string?> _settings;
+
     public TestApplicationFactory(string connectionString)
     {
-        SetEnvironmentConfiguration(new Dictionary<string, string>
+        _settings = new Dictionary<string, string?>
         {
-            ["ASPNETCORE_ENVIRONMENT"] = "Testing",
-            ["ConnectionStrings__DefaultConnection"] = connectionString,
-            ["Database__ApplyMigrations"] = "true",
-            ["Database__SeedRoles"] = "true",
-            ["Jwt__Issuer"] = "AccessiUXMarket.IntegrationTests",
-            ["Jwt__Audience"] = "AccessiUXMarket.IntegrationTests",
-            ["Jwt__SigningKey"] = "AccessiUXMarket_IntegrationTests_SigningKey_2026_Only",
-            ["Jwt__AccessTokenMinutes"] = "15",
-            ["Jwt__RefreshTokenDays"] = "7",
-            ["Cors__AllowedOrigins__0"] = "http://localhost:4200",
-            ["PasswordReset__FrontendUrl"] = "http://localhost:4200/reset-password",
-            ["Smtp__Enabled"] = "false",
-            ["RateLimiting__AuthPermitLimit"] = "1000",
-            ["RateLimiting__PasswordResetPermitLimit"] = "1000"
-        });
+            ["ConnectionStrings:DefaultConnection"] = connectionString,
+            ["Database:ApplyMigrations"] = "true",
+            ["Database:SeedRoles"] = "true",
+            ["Database:SeedCatalog"] = "true",
+            ["Jwt:Issuer"] = "AccessiUXMarket.IntegrationTests",
+            ["Jwt:Audience"] = "AccessiUXMarket.IntegrationTests",
+            ["Jwt:SigningKey"] = "AccessiUXMarket_IntegrationTests_SigningKey_2026_Only",
+            ["Jwt:AccessTokenMinutes"] = "15",
+            ["Jwt:RefreshTokenDays"] = "7",
+            ["Cors:AllowedOrigins:0"] = "http://localhost:4200",
+            ["PasswordReset:FrontendUrl"] = "http://localhost:4200/reset-password",
+            ["Smtp:Enabled"] = "false",
+            ["RateLimiting:AuthPermitLimit"] = "1000",
+            ["RateLimiting:PasswordResetPermitLimit"] = "1000"
+        };
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
-    }
-
-    private static void SetEnvironmentConfiguration(IReadOnlyDictionary<string, string> settings)
-    {
-        foreach (var (key, value) in settings)
+        builder.ConfigureAppConfiguration((_, configuration) =>
         {
-            Environment.SetEnvironmentVariable(key, value);
-        }
+            configuration.AddInMemoryCollection(_settings);
+        });
     }
 }
