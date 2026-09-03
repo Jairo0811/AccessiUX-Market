@@ -71,9 +71,23 @@ public sealed class CatalogService(ApplicationDbContext dbContext, TimeProvider 
             facetBase = facetBase.Where(product => EF.Functions.Like(product.Name, $"%{queryText}%") || EF.Functions.Like(product.Description, $"%{queryText}%"));
         }
 
-        var categoryFacets = await dbContext.Categories.AsNoTracking().Where(category => category.IsActive)
-            .Select(category => new CategoryFacetDto(category.Id, category.Name, category.Slug, facetBase.Count(product => product.CategoryId == category.Id)))
-            .Where(facet => facet.Count > 0).OrderBy(facet => facet.Name).ToListAsync(cancellationToken);
+        var categoryCounts = await facetBase
+            .GroupBy(product => product.CategoryId)
+            .Select(group => new { CategoryId = group.Key, Count = group.Count() })
+            .ToDictionaryAsync(item => item.CategoryId, item => item.Count, cancellationToken);
+
+        var activeCategories = await dbContext.Categories
+            .AsNoTracking()
+            .Where(category => category.IsActive)
+            .OrderBy(category => category.Name)
+            .Select(category => new { category.Id, category.Name, category.Slug })
+            .ToListAsync(cancellationToken);
+
+        var categoryFacets = activeCategories
+            .Where(category => categoryCounts.ContainsKey(category.Id))
+            .Select(category => new CategoryFacetDto(category.Id, category.Name, category.Slug, categoryCounts[category.Id]))
+            .ToList();
+
         var facetMinPrice = await facetBase.Select(product => (decimal?)product.Price).MinAsync(cancellationToken);
         var facetMaxPrice = await facetBase.Select(product => (decimal?)product.Price).MaxAsync(cancellationToken);
 
