@@ -12,6 +12,7 @@ public static class CatalogEndpoints
         var group = endpoints.MapGroup("/api/v1/catalog").WithTags("Catalog");
         group.MapGet("/categories", async (ICatalogService service, CancellationToken ct) => Results.Ok(await service.GetCategoriesAsync(ct)));
         group.MapGet("/products", async (ICatalogService service, CancellationToken ct) => Results.Ok(await service.GetPublishedProductsAsync(ct)));
+        group.MapGet("/search", SearchAsync);
         group.MapGet("/products/{slug}", async (string slug, ICatalogService service, CancellationToken ct) =>
             await service.GetPublishedProductBySlugAsync(slug, ct) is { } product ? Results.Ok(product) : Results.NotFound());
         group.MapGet("/sellers/{slug}", async (string slug, ICatalogService service, CancellationToken ct) =>
@@ -30,6 +31,36 @@ public static class CatalogEndpoints
             .RequireAuthorization();
         group.MapPost("/seller/products/{productId:guid}/publish", PublishAsync).RequireAuthorization();
         return endpoints;
+    }
+
+    private static async Task<IResult> SearchAsync(
+        string? q,
+        Guid? categoryId,
+        decimal? minPrice,
+        decimal? maxPrice,
+        bool? inStock,
+        string? sort,
+        int? page,
+        int? pageSize,
+        ICatalogService service,
+        CancellationToken ct)
+    {
+        if (minPrice is < 0 || maxPrice is < 0 || (minPrice.HasValue && maxPrice.HasValue && minPrice > maxPrice))
+        {
+            return Results.BadRequest(new { message = "Price filters are invalid." });
+        }
+
+        var request = new CatalogSearchRequest(
+            q,
+            categoryId,
+            minPrice,
+            maxPrice,
+            inStock,
+            sort ?? "relevance",
+            page ?? 1,
+            pageSize ?? 12);
+
+        return Results.Ok(await service.SearchPublishedProductsAsync(request, ct));
     }
 
     private static async Task<IResult> CreateSellerAsync(CreateSellerRequest request, HttpContext context, ICatalogService service, CancellationToken ct)
