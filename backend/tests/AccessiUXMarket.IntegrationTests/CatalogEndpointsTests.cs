@@ -78,7 +78,7 @@ public sealed class CatalogEndpointsTests(IdentityApiFixture fixture) : IClassFi
         Assert.NotNull(result);
         var item = Assert.Single(result.Items);
         Assert.Equal("Mouse ergonómico accesible", item.Name);
-        Assert.True(result.Facets.Categories.Any(facet => facet.Id == technology.Id));
+        Assert.Contains(result.Facets.Categories, facet => facet.Id == technology.Id);
     }
 
     [Fact]
