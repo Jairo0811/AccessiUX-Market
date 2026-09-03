@@ -21,7 +21,11 @@ public sealed class CatalogService(ApplicationDbContext dbContext, TimeProvider 
         product.Price,
         product.Currency,
         product.StockQuantity,
-        product.Status.ToString());
+        product.Status == ProductStatus.Draft
+            ? "Draft"
+            : product.Status == ProductStatus.Published
+                ? "Published"
+                : "Archived");
 
     public async Task<IReadOnlyList<CategoryDto>> GetCategoriesAsync(CancellationToken cancellationToken = default) =>
         await dbContext.Categories.AsNoTracking().Where(category => category.IsActive).OrderBy(category => category.Name)
