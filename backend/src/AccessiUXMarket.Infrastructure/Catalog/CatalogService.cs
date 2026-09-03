@@ -23,18 +23,102 @@ public sealed class CatalogService(ApplicationDbContext dbContext, TimeProvider 
             .AsNoTracking()
             .Where(product => product.Status == ProductStatus.Published)
             .OrderBy(product => product.Name)
-            .Select(product => new ProductDto(
-                product.Id,
-                product.SellerId,
-                product.CategoryId,
-                product.Name,
-                product.Slug,
-                product.Description,
-                product.Price,
-                product.Currency,
-                product.StockQuantity,
-                product.Status.ToString()))
+            .Select(product => ToDtoProjection(product))
             .ToListAsync(cancellationToken);
+
+    public async Task<CatalogSearchResultDto> SearchPublishedProductsAsync(CatalogSearchRequest request, CancellationToken cancellationToken = default)
+    {
+        var page = Math.Max(1, request.Page);
+        var pageSize = Math.Clamp(request.PageSize, 1, 48);
+        var queryText = request.Query?.Trim();
+
+        var published = dbContext.Products
+            .AsNoTracking()
+            .Where(product => product.Status == ProductStatus.Published);
+
+        if (!string.IsNullOrWhiteSpace(queryText))
+        {
+            published = published.Where(product =>
+                EF.Functions.Like(product.Name, $"%{queryText}%") ||
+                EF.Functions.Like(product.Description, $"%{queryText}%"));
+        }
+
+        if (request.CategoryId is { } categoryId)
+        {
+            published = published.Where(product => product.CategoryId == categoryId);
+        }
+
+        if (request.MinPrice is { } minPrice)
+        {
+            published = published.Where(product => product.Price >= minPrice);
+        }
+
+        if (request.MaxPrice is { } maxPrice)
+        {
+            published = published.Where(product => product.Price <= maxPrice);
+        }
+
+        if (request.InStock is true)
+        {
+            published = published.Where(product => product.StockQuantity > 0);
+        }
+        else if (request.InStock is false)
+        {
+            published = published.Where(product => product.StockQuantity == 0);
+        }
+
+        var totalCount = await published.CountAsync(cancellationToken);
+        var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        var ordered = request.Sort.Trim().ToLowerInvariant() switch
+        {
+            "price-asc" => published.OrderBy(product => product.Price).ThenBy(product => product.Name),
+            "price-desc" => published.OrderByDescending(product => product.Price).ThenBy(product => product.Name),
+            "name" => published.OrderBy(product => product.Name),
+            "newest" => published.OrderByDescending(product => product.CreatedAtUtc).ThenBy(product => product.Name),
+            _ => published.OrderBy(product => product.Name)
+        };
+
+        var items = await ordered
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(product => ToDtoProjection(product))
+            .ToListAsync(cancellationToken);
+
+        var facetBase = dbContext.Products
+            .AsNoTracking()
+            .Where(product => product.Status == ProductStatus.Published);
+
+        if (!string.IsNullOrWhiteSpace(queryText))
+        {
+            facetBase = facetBase.Where(product =>
+                EF.Functions.Like(product.Name, $"%{queryText}%") ||
+                EF.Functions.Like(product.Description, $"%{queryText}%"));
+        }
+
+        var categoryFacets = await dbContext.Categories
+            .AsNoTracking()
+            .Where(category => category.IsActive)
+            .Select(category => new CategoryFacetDto(
+                category.Id,
+                category.Name,
+                category.Slug,
+                facetBase.Count(product => product.CategoryId == category.Id)))
+            .Where(facet => facet.Count > 0)
+            .OrderBy(facet => facet.Name)
+            .ToListAsync(cancellationToken);
+
+        decimal? facetMinPrice = await facetBase.Select(product => (decimal?)product.Price).MinAsync(cancellationToken);
+        decimal? facetMaxPrice = await facetBase.Select(product => (decimal?)product.Price).MaxAsync(cancellationToken);
+
+        return new CatalogSearchResultDto(
+            items,
+            totalCount,
+            page,
+            pageSize,
+            totalPages,
+            new CatalogFacetsDto(categoryFacets, facetMinPrice, facetMaxPrice));
+    }
 
     public async Task<ProductDto?> GetPublishedProductBySlugAsync(string slug, CancellationToken cancellationToken = default)
     {
@@ -42,17 +126,7 @@ public sealed class CatalogService(ApplicationDbContext dbContext, TimeProvider 
         return await dbContext.Products
             .AsNoTracking()
             .Where(product => product.Status == ProductStatus.Published && product.Slug == normalizedSlug)
-            .Select(product => new ProductDto(
-                product.Id,
-                product.SellerId,
-                product.CategoryId,
-                product.Name,
-                product.Slug,
-                product.Description,
-                product.Price,
-                product.Currency,
-                product.StockQuantity,
-                product.Status.ToString()))
+            .Select(product => ToDtoProjection(product))
             .SingleOrDefaultAsync(cancellationToken);
     }
 
@@ -89,17 +163,7 @@ public sealed class CatalogService(ApplicationDbContext dbContext, TimeProvider 
             .AsNoTracking()
             .Where(product => product.SellerId == sellerId.Value)
             .OrderByDescending(product => product.CreatedAtUtc)
-            .Select(product => new ProductDto(
-                product.Id,
-                product.SellerId,
-                product.CategoryId,
-                product.Name,
-                product.Slug,
-                product.Description,
-                product.Price,
-                product.Currency,
-                product.StockQuantity,
-                product.Status.ToString()))
+            .Select(product => ToDtoProjection(product))
             .ToListAsync(cancellationToken);
     }
 
@@ -202,6 +266,19 @@ public sealed class CatalogService(ApplicationDbContext dbContext, TimeProvider 
     }
 
     private static ProductDto ToDto(Product product) =>
+        new(
+            product.Id,
+            product.SellerId,
+            product.CategoryId,
+            product.Name,
+            product.Slug,
+            product.Description,
+            product.Price,
+            product.Currency,
+            product.StockQuantity,
+            product.Status.ToString());
+
+    private static ProductDto ToDtoProjection(Product product) =>
         new(
             product.Id,
             product.SellerId,
