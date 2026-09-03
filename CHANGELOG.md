@@ -6,6 +6,25 @@ All notable changes to AccessiUX Market are documented in this file.
 
 ### Added
 
+- Public catalog search endpoint with free-text search over product names and descriptions.
+- Dynamic filtering by category, minimum/maximum price, and stock availability.
+- Deterministic sorting by relevance/default name, newest, name, and ascending/descending price.
+- Server-side pagination with bounded page sizes and total-page metadata.
+- Dynamic category facets with result counts plus catalog minimum/maximum price metadata.
+- Angular accessible search/filter form with URL-synchronized state for shareable and navigable searches.
+- Accessible catalog pagination, result announcements, empty-state guidance, and filter reset flow.
+- SQL Server integration tests for combined filters, pagination, sorting, and invalid price ranges.
+- Playwright/axe coverage for search controls, empty results, and URL filter synchronization.
+
+### Changed
+
+- API product version advanced from `0.3.0` Catalog, Categories and Sellers to `0.4.0` Search and Dynamic Filters.
+- Public catalog browsing now consumes the paged search contract instead of loading every published product at once.
+
+## [0.3.0] - 2026-09-03
+
+### Added
+
 - Marketplace catalog domain with categories, seller profiles, products, stock, prices, currencies, and product lifecycle states.
 - Public catalog API for active categories, published products, product detail, and public seller profiles.
 - Protected seller API for profile creation, product drafts, seller inventory, and publication.
