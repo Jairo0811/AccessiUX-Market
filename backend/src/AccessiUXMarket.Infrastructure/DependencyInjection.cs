@@ -1,6 +1,8 @@
 using System.Text;
+using AccessiUXMarket.Application.Cart;
 using AccessiUXMarket.Application.Catalog;
 using AccessiUXMarket.Application.Identity;
+using AccessiUXMarket.Infrastructure.Cart;
 using AccessiUXMarket.Infrastructure.Catalog;
 using AccessiUXMarket.Infrastructure.Identity;
 using AccessiUXMarket.Infrastructure.Persistence;
@@ -68,6 +70,7 @@ public static class DependencyInjection
         services.AddScoped<IPasswordResetNotifier, SmtpPasswordResetNotifier>();
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<ICatalogService, CatalogService>();
+        services.AddScoped<ICartService, CartService>();
         services.AddScoped<IdentityDataSeeder>();
         services.AddScoped<CatalogDataSeeder>();
         return services;

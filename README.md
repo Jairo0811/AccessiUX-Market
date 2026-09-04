@@ -8,8 +8,8 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Versión-0.2.0-2563EB?style=for-the-badge" alt="Versión 0.2.0">
-  <img src="https://img.shields.io/badge/Estado-Identity%20%26%20Users-14B8A6?style=for-the-badge" alt="Estado Identity and Users">
+  <img src="https://img.shields.io/badge/Versión-0.5.0-2563EB?style=for-the-badge" alt="Versión 0.5.0">
+  <img src="https://img.shields.io/badge/Estado-Carrito-14B8A6?style=for-the-badge" alt="Estado Carrito">
 </p>
 
 <p align="center">
@@ -38,6 +38,7 @@ AccessiUX Market no pretende ser un clon de Amazon. Su objetivo es demostrar có
 - control y reversibilidad para el usuario;
 - componentes consistentes para vendedores;
 - búsqueda y filtrado eficientes;
+- carrito persistente y validado desde servidor;
 - pruebas automatizadas de accesibilidad y experiencia de usuario.
 
 ---
@@ -127,7 +128,7 @@ La trazabilidad detallada se mantiene en [`docs/ux/requirements.md`](docs/ux/req
 - Construir un marketplace accesible alineado con principios WCAG.
 - Aplicar las heurísticas de Jakob Nielsen a flujos reales de producto.
 - Reducir carga cognitiva en catálogo, navegación y checkout.
-- Dar al usuario control explícito sobre pedidos y reversibilidad.
+- Dar al usuario control explícito sobre carrito, pedidos y reversibilidad.
 - Estandarizar la información de vendedores y políticas comerciales.
 - Medir las mejoras UX mediante evidencia automatizada y pruebas con usuarios.
 - Mantener una arquitectura modular preparada para crecimiento posterior.
@@ -136,7 +137,7 @@ La trazabilidad detallada se mantiene en [`docs/ux/requirements.md`](docs/ux/req
 
 ## 🧱 Stack tecnológico
 
-El stack se documenta separando lo que ya está **implementado en `v0.2.0`** de las tecnologías previstas para las siguientes fases. Esto evita presentar dependencias planificadas como si ya estuvieran integradas.
+El stack se documenta según las capacidades realmente implementadas en **`v0.5.0`**, evitando presentar dependencias futuras como si ya formaran parte del producto.
 
 ### 🎨 Frontend — implementado
 
@@ -153,7 +154,8 @@ El stack se documenta separando lo que ya está **implementado en `v0.2.0`** de 
 | Arquitectura UI | Angular standalone |
 | Estilos | **SCSS** |
 | Sesión | JWT en memoria + refresh cookie `HttpOnly` |
-| Accesibilidad | HTML semántico, foco visible, contraste forzado, reducción de movimiento, Playwright + axe-core |
+| Marketplace | Catálogo, búsqueda/filtros, vendedor y carrito |
+| Accesibilidad | HTML semántico, foco visible, `aria-live`, contraste forzado, reducción de movimiento, Playwright + axe-core |
 
 ### ⚙️ Backend — implementado
 
@@ -174,6 +176,7 @@ El stack se documenta separando lo que ya está **implementado en `v0.2.0`** de 
 | Identidad | ASP.NET Core Identity + roles |
 | Validación | FluentValidation + Problem Details |
 | Seguridad | JWT, refresh rotation, lockout y rate limiting |
+| Dominio marketplace | Catálogo, vendedores, búsqueda y carrito persistente |
 
 ### 🗄️ Datos e infraestructura — implementado
 
@@ -193,11 +196,11 @@ El stack se documenta separando lo que ya está **implementado en `v0.2.0`** de 
 
 ### 🧩 Tecnologías previstas para las siguientes fases
 
-Estas tecnologías forman parte del diseño objetivo, pero todavía no están integradas en la base `v0.2.0`:
+Estas tecnologías forman parte del diseño objetivo, pero todavía no están integradas:
 
 - Angular CDK;
 - telemetría OpenTelemetry;
-- búsqueda especializada para catálogo;
+- búsqueda especializada para escenarios de catálogo de mayor escala;
 - caché distribuida para escenarios de escala.
 
 ---
@@ -239,6 +242,7 @@ AccessiUX-Market/
 │   └── accessible-market-web/
 ├── docs/
 │   ├── accessibility/
+│   ├── api/
 │   ├── architecture/
 │   ├── ux/
 │   └── adr/
@@ -250,15 +254,31 @@ Las dependencias de infraestructura, persistencia y presentación no deben conta
 
 ---
 
+## 🛒 Estado funcional actual
+
+Con `v0.5.0`, AccessiUX Market dispone de un flujo marketplace navegable previo al checkout:
+
+1. registro e inicio de sesión;
+2. onboarding de vendedor y publicación de productos;
+3. catálogo público;
+4. búsqueda con filtros, facetas, ordenamiento y paginación;
+5. detalle de producto;
+6. carrito persistente por usuario;
+7. actualización y eliminación de líneas con validación server-side de stock.
+
+El carrito **no confía en precios ni propietarios enviados por el cliente**. El backend obtiene precio, moneda, publicación y stock desde SQL Server. La Fase 5 volverá a validar estos datos durante Checkout antes de crear una operación transaccional.
+
+---
+
 ## 🗺️ Roadmap
 
 | Fase | Alcance | Estado |
 |---:|---|:---:|
 | 0 | Foundation, arquitectura, Docker, CI y documentación | ✅ |
 | 1 | Identity y usuarios | ✅ |
-| 2 | Catálogo, categorías y vendedores | ⏳ |
-| 3 | Búsqueda y filtros dinámicos | ⏳ |
-| 4 | Carrito | ⏳ |
+| 2 | Catálogo, categorías y vendedores | ✅ |
+| 3 | Búsqueda y filtros dinámicos | ✅ |
+| 4 | Carrito | ✅ |
 | 5 | Checkout | ⏳ |
 | 6 | Pedidos y cancelaciones | ⏳ |
 | 7 | Accesibilidad avanzada | ⏳ |
@@ -266,9 +286,9 @@ Las dependencias de infraestructura, persistencia y presentación no deben conta
 
 ### Estado actual
 
-**v0.2.0 — Identity & Users**
+**v0.5.0 — Cart**
 
-La fase incluye persistencia SQL Server con EF Core, Identity, roles, JWT de corta duración, rotación segura de refresh tokens, recuperación de contraseña, formularios Angular accesibles y pruebas automatizadas de backend, integración y accesibilidad. La rama de fase no se integra en `main` hasta que todas las verificaciones de CI finalicen correctamente.
+La fase añade carrito SQL Server persistente por usuario autenticado, validación de stock y moneda en backend, operaciones de agregar/actualizar/eliminar/vaciar, integración desde detalle de producto, experiencia Angular accesible y pruebas de integración y accesibilidad. La rama de fase solo se integra en `main` cuando todas las verificaciones de CI finalizan correctamente.
 
 ---
 
@@ -302,7 +322,7 @@ set +a
 dotnet run --project backend/src/AccessiUXMarket.Api
 ```
 
-Con `Database__ApplyMigrations=true`, la API aplica las migraciones al iniciar. `Database__SeedRoles=true` crea de forma idempotente los roles base; en producción, las migraciones pueden ejecutarse como un paso controlado del despliegue.
+Con `Database__ApplyMigrations=true`, la API aplica las migraciones al iniciar. `Database__SeedRoles=true` crea de forma idempotente los roles base y `Database__SeedCatalog=true` crea las categorías iniciales. En producción, las migraciones pueden ejecutarse como un paso controlado del despliegue.
 
 Endpoint de salud:
 
@@ -338,6 +358,7 @@ npm test
 - [ADR 0001 — Arquitectura](docs/adr/0001-architecture.md)
 - [ADR 0002 — Seguridad de identidad y sesiones](docs/adr/0002-identity-session-security.md)
 - [API de autenticación](docs/api/authentication.md)
+- [API de carrito](docs/api/cart.md)
 - [Pruebas de identidad](docs/testing/identity.md)
 - [Requisitos UX](docs/ux/requirements.md)
 - [Política de seguridad](SECURITY.md)
