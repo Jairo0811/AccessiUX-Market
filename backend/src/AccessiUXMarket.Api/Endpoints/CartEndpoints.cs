@@ -13,7 +13,7 @@ public static class CartEndpoints
             .WithTags("Cart")
             .RequireAuthorization();
 
-        group.MapGet("/", async (HttpContext context, ICartService service, CancellationToken ct) =>
+        group.MapGet(string.Empty, async (HttpContext context, ICartService service, CancellationToken ct) =>
             Results.Ok(await service.GetAsync(GetUserId(context.User), ct)));
 
         group.MapPost("/items", AddAsync)
@@ -25,7 +25,7 @@ public static class CartEndpoints
         group.MapDelete("/items/{productId:guid}", async (Guid productId, HttpContext context, ICartService service, CancellationToken ct) =>
             Results.Ok(await service.RemoveAsync(GetUserId(context.User), productId, ct)));
 
-        group.MapDelete("/", async (HttpContext context, ICartService service, CancellationToken ct) =>
+        group.MapDelete(string.Empty, async (HttpContext context, ICartService service, CancellationToken ct) =>
         {
             await service.ClearAsync(GetUserId(context.User), ct);
             return Results.NoContent();
