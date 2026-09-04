@@ -4,6 +4,28 @@ All notable changes to AccessiUX Market are documented in this file.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-04
+
+### Added
+
+- Persistent authenticated cart backed by SQL Server and EF Core.
+- Cart line domain model keyed by user and product, preventing duplicate product rows per user.
+- Authenticated cart API for reading, adding, updating, removing, and clearing cart items.
+- Server-side stock validation and a `1-99` quantity limit per cart line.
+- Protection against combining products with different currencies in the same cart.
+- Accessible Angular cart experience with quantity editing, removal, clear-cart confirmation, subtotal, empty-state guidance, and live announcements.
+- Add-to-cart flow from public product detail for authenticated customers.
+- SQL Server integration coverage for authentication, persistence, stock enforcement, line merging, and user isolation.
+- Playwright/axe coverage for the protected empty-cart experience.
+- Cart API documentation in `docs/api/cart.md`.
+
+### Changed
+
+- API product version advanced from `0.4.0` Search and Dynamic Filters to `0.5.0` Cart.
+- Product prices and stock used by the cart are always sourced server-side rather than trusted from client payloads.
+
+## [0.4.0] - 2026-09-04
+
 ### Added
 
 - Public catalog search endpoint with free-text search over product names and descriptions.
