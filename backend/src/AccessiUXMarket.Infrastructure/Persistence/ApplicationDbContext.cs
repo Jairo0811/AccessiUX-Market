@@ -114,7 +114,6 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
             entity.Property(item => item.Quantity).IsRequired();
             entity.Property(item => item.CreatedAtUtc).IsRequired();
             entity.Property(item => item.UpdatedAtUtc).IsRequired();
-            entity.HasIndex(item => item.UserId);
             entity.HasOne<ApplicationUser>()
                 .WithMany()
                 .HasForeignKey(item => item.UserId)
