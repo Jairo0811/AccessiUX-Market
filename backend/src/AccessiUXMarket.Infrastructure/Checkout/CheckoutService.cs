@@ -41,10 +41,26 @@ public sealed class CheckoutService(ApplicationDbContext dbContext, TimeProvider
         CheckoutRequest request,
         CancellationToken cancellationToken = default)
     {
-        await using var transaction = await dbContext.Database.BeginTransactionAsync(
-            IsolationLevel.Serializable,
-            cancellationToken);
+        var strategy = dbContext.Database.CreateExecutionStrategy();
 
+        return await strategy.ExecuteAsync(async () =>
+        {
+            await using var transaction = await dbContext.Database.BeginTransactionAsync(
+                IsolationLevel.Serializable,
+                cancellationToken);
+
+            var confirmation = await ConfirmWithinTransactionAsync(userId, request, cancellationToken);
+
+            await transaction.CommitAsync(cancellationToken);
+            return confirmation;
+        });
+    }
+
+    private async Task<CheckoutConfirmationDto> ConfirmWithinTransactionAsync(
+        Guid userId,
+        CheckoutRequest request,
+        CancellationToken cancellationToken)
+    {
         var cartItems = await dbContext.CartItems
             .Where(item => item.UserId == userId)
             .OrderBy(item => item.CreatedAtUtc)
@@ -95,9 +111,8 @@ public sealed class CheckoutService(ApplicationDbContext dbContext, TimeProvider
             subtotal += product.Price * cartItem.Quantity;
         }
 
-        var orderId = Guid.NewGuid();
         var order = new Order(
-            orderId,
+            Guid.NewGuid(),
             userId,
             CreateOrderNumber(now),
             currencies[0],
@@ -132,7 +147,6 @@ public sealed class CheckoutService(ApplicationDbContext dbContext, TimeProvider
         dbContext.CartItems.RemoveRange(cartItems);
 
         await dbContext.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
 
         return new CheckoutConfirmationDto(
             order.Id,
