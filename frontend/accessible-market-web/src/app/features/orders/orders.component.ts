@@ -10,10 +10,10 @@ import { OrderService } from '../../core/orders/order.service';
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <main class="orders-shell" id="main-content">
+    <section class="orders-shell" aria-labelledby="orders-title">
       <header class="page-header">
         <p class="eyebrow">Mi cuenta</p>
-        <h1>Mis pedidos</h1>
+        <h1 id="orders-title">Mis pedidos</h1>
         <p>Consulta el estado de tus compras y verifica claramente si todavía pueden cancelarse.</p>
       </header>
 
@@ -62,7 +62,7 @@ import { OrderService } from '../../core/orders/order.service';
           }
         </div>
       }
-    </main>
+    </section>
   `,
   styles: [`
     :host { display: block; }
@@ -141,7 +141,7 @@ export class OrdersComponent implements OnInit {
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <main class="detail-shell" id="main-content">
+    <section class="detail-shell" aria-labelledby="order-title">
       <a routerLink="/orders" class="back-link">← Volver a mis pedidos</a>
       <p class="sr-status" aria-live="polite">{{ liveMessage }}</p>
 
@@ -152,13 +152,17 @@ export class OrdersComponent implements OnInit {
       } @else if (order) {
         <header class="page-header">
           <p class="eyebrow">Pedido</p>
-          <h1>{{ order.orderNumber }}</h1>
+          <h1 id="order-title">{{ order.orderNumber }}</h1>
           <p><strong>Estado:</strong> {{ statusLabel(order.status) }}</p>
         </header>
 
         <section class="policy-card" aria-labelledby="cancellation-title">
           <h2 id="cancellation-title">Control de cancelación</h2>
           <p id="cancellation-policy">{{ friendlyCancellationMessage(order) }}</p>
+
+          @if (actionErrorMessage) {
+            <p class="notice" role="alert">{{ actionErrorMessage }}</p>
+          }
 
           @if (order.canCancel && !confirmingCancellation) {
             <button type="button" class="danger-button" (click)="confirmingCancellation = true" aria-describedby="cancellation-policy">
@@ -227,7 +231,7 @@ export class OrdersComponent implements OnInit {
           </section>
         </div>
       }
-    </main>
+    </section>
   `,
   styles: [`
     :host { display: block; }
@@ -266,6 +270,7 @@ export class OrderDetailComponent implements OnInit {
   cancelling = false;
   confirmingCancellation = false;
   errorMessage = '';
+  actionErrorMessage = '';
   liveMessage = '';
 
   ngOnInit(): void {
@@ -284,7 +289,7 @@ export class OrderDetailComponent implements OnInit {
 
     const id = this.order.id;
     this.cancelling = true;
-    this.errorMessage = '';
+    this.actionErrorMessage = '';
 
     this.ordersService.cancel(id).subscribe({
       next: result => {
@@ -296,8 +301,8 @@ export class OrderDetailComponent implements OnInit {
       error: (error: HttpErrorResponse) => {
         this.cancelling = false;
         this.confirmingCancellation = false;
-        this.errorMessage = this.readError(error, 'No fue posible cancelar el pedido. Actualiza el estado e inténtalo nuevamente.');
-        this.liveMessage = this.errorMessage;
+        this.actionErrorMessage = this.readError(error, 'No fue posible cancelar el pedido. Actualizamos su estado para que puedas revisarlo.');
+        this.liveMessage = this.actionErrorMessage;
         this.loadOrder(id, false);
       }
     });
@@ -330,6 +335,7 @@ export class OrderDetailComponent implements OnInit {
     this.ordersService.getOrder(id).subscribe({
       next: order => {
         this.order = order;
+        this.errorMessage = '';
         this.loading = false;
       },
       error: (error: HttpErrorResponse) => {
