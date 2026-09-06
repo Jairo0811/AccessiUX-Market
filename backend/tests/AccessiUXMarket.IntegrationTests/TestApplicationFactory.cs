@@ -14,6 +14,7 @@ public sealed class TestApplicationFactory : WebApplicationFactory<Program>
             ["Database__ApplyMigrations"] = "true",
             ["Database__SeedRoles"] = "true",
             ["Database__SeedCatalog"] = "true",
+            ["Database__SeedDemoUsers"] = "true",
             ["Jwt__Issuer"] = "AccessiUXMarket.IntegrationTests",
             ["Jwt__Audience"] = "AccessiUXMarket.IntegrationTests",
             ["Jwt__SigningKey"] = "AccessiUXMarket_IntegrationTests_SigningKey_2026_Only",

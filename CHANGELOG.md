@@ -4,6 +4,31 @@ All notable changes to AccessiUX Market are documented in this file.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-09-06
+
+### Added
+
+- Standardized seller warranty, shipping, and return policies persisted independently on seller profiles.
+- Accessible seller policy editing and consistent public policy presentation on product detail.
+- SQL Server migration and regression coverage for seller policies.
+- `/health/live` liveness endpoint and `/health/ready` readiness endpoint backed by the application database check.
+- Phase 8 UX Lab protocol and production release-readiness checklist.
+- CI dependency gates with `npm audit --audit-level=high` and .NET vulnerable-package inspection.
+- Development-only demo accounts for Customer, Seller, and Administrator roles using the documented `@accessiux.local` credentials.
+- Integration coverage proving demo accounts remain unavailable outside the Development environment even when the seed toggle is enabled.
+
+### Changed
+
+- `AM-UX-002` is now completed, closing the current UX requirements baseline.
+- API product metadata advanced to `1.0.0`.
+- Database initialization now separates role, catalog, and development-demo-user seeding.
+- Phase 8 closes the original implementation roadmap and prepares the repository for a stable portfolio release.
+
+### Security
+
+- Demo credentials are guarded by both `ASPNETCORE_ENVIRONMENT=Development` and `Database:SeedDemoUsers=true`; they are not seeded in Testing or Production.
+- Production readiness keeps strict CORS configuration, HSTS outside Development, JWT validation, refresh-token rotation, lockout, rate limiting, and dependency vulnerability checks.
+
 ## [0.8.0] - 2026-09-06
 
 ### Added

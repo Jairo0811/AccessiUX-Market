@@ -8,8 +8,8 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Versión-0.8.0-2563EB?style=for-the-badge" alt="Versión 0.8.0">
-  <img src="https://img.shields.io/badge/Estado-Accesibilidad%20avanzada-14B8A6?style=for-the-badge" alt="Estado Accesibilidad avanzada">
+  <img src="https://img.shields.io/badge/Versión-1.0.0-2563EB?style=for-the-badge" alt="Versión 1.0.0">
+  <img src="https://img.shields.io/badge/Estado-Release%20estable-14B8A6?style=for-the-badge" alt="Estado Release estable">
 </p>
 
 <p align="center">
@@ -39,6 +39,7 @@ AccessiUX Market no pretende ser un clon de Amazon. Su objetivo es demostrar có
 - carrito persistente validado desde servidor;
 - checkout con revisión explícita antes de confirmar;
 - pedidos con estado visible y reversibilidad controlada;
+- políticas comerciales del vendedor presentadas de forma consistente;
 - prevención de errores y feedback accesible;
 - componentes consistentes para compradores y vendedores;
 - pruebas automatizadas de backend, integración y accesibilidad.
@@ -113,7 +114,7 @@ En los repositorios revisados actualmente no se ha verificado otra asignatura de
 | ID | Requisito de AccessiUX Market | Origen UX | Estado |
 |---|---|---|:---:|
 | `AM-UX-001` | Cancelación visible y limitada por tiempo | Control y libertad del usuario | ✅ |
-| `AM-UX-002` | Presentación estandarizada de políticas del vendedor | Consistencia y estándares | ⏳ |
+| `AM-UX-002` | Presentación estandarizada de políticas del vendedor | Consistencia y estándares | ✅ |
 | `AM-UX-003` | Modo de Lectura Simple y preferencias de accesibilidad | Estética, carga cognitiva y accesibilidad | ✅ |
 | `AM-UX-004` | Filtros dinámicos con conteo de resultados | Flexibilidad y eficiencia | ✅ |
 | `AM-UX-005` | Navegación completa por teclado y gestión de foco | Accesibilidad motriz | ✅ |
@@ -137,7 +138,7 @@ La trazabilidad detallada se mantiene en [`docs/ux/requirements.md`](docs/ux/req
 
 ## 🧱 Stack tecnológico
 
-El stack se documenta según las capacidades implementadas en **`v0.8.0`**, evitando presentar dependencias futuras como si ya formaran parte del producto.
+El stack se documenta según las capacidades implementadas en **`v1.0.0`**, evitando presentar dependencias futuras como si ya formaran parte del producto.
 
 ### 🎨 Frontend — implementado
 
@@ -160,12 +161,12 @@ El stack se documenta según las capacidades implementadas en **`v0.8.0`**, evit
 | API | **ASP.NET Core Web API** |
 | Lenguaje | **C#** |
 | Contrato HTTP | OpenAPI |
-| Observabilidad base | ASP.NET Core Health Checks |
+| Observabilidad base | ASP.NET Core Health Checks con liveness/readiness |
 | Política frontend | CORS configurable |
 | Identidad | ASP.NET Core Identity + roles |
 | Validación | FluentValidation + Problem Details |
 | Seguridad | JWT, refresh rotation, lockout y rate limiting |
-| Dominio marketplace | Catálogo, vendedores, búsqueda, carrito, checkout, pedidos y cancelaciones |
+| Dominio marketplace | Catálogo, vendedores, políticas, búsqueda, carrito, checkout, pedidos y cancelaciones |
 | Transacciones | EF Core execution strategy + SQL Server `Serializable` para operaciones críticas |
 
 ### 🗄️ Datos e infraestructura — implementado
@@ -178,8 +179,9 @@ El stack se documenta según las capacidades implementadas en **`v0.8.0`**, evit
 | Control de versiones | **Git / GitHub** |
 | CI | **GitHub Actions** |
 | Pruebas | **xUnit** + Testcontainers para SQL Server + Playwright + axe-core |
+| Dependencias | Auditoría npm y revisión de paquetes .NET vulnerables en CI |
 
-### 🧩 Tecnologías previstas para siguientes fases
+### 🧩 Evoluciones futuras opcionales
 
 - Angular CDK donde aporte valor real;
 - telemetría OpenTelemetry;
@@ -227,8 +229,9 @@ AccessiUX-Market/
 │   ├── accessibility/
 │   ├── api/
 │   ├── architecture/
-│   ├── ux/
-│   └── adr/
+│   ├── production/
+│   ├── testing/
+│   └── ux/
 ├── docker-compose.yml
 └── README.md
 ```
@@ -239,11 +242,11 @@ Las dependencias de infraestructura, persistencia y presentación no deben conta
 
 ## 🛒 Estado funcional actual
 
-Con **`v0.8.0`**, AccessiUX Market cubre el flujo de compra desde autenticación hasta gestión inmediata del pedido y añade preferencias de accesibilidad controladas por el usuario:
+Con **`v1.0.0`**, AccessiUX Market cubre el flujo principal del marketplace y el baseline UX definido por el proyecto:
 
 1. registro, inicio de sesión, refresh y recuperación de contraseña;
-2. onboarding de vendedor y publicación de productos;
-3. catálogo público y detalle de producto;
+2. onboarding de vendedor, políticas comerciales y publicación de productos;
+3. catálogo público y detalle de producto con garantía, envío y devoluciones en orden consistente;
 4. búsqueda con filtros, facetas, ordenamiento y paginación;
 5. carrito persistente por usuario con validación server-side;
 6. checkout con revisión explícita de dirección, método de pago, artículos y total;
@@ -252,7 +255,9 @@ Con **`v0.8.0`**, AccessiUX Market cubre el flujo de compra desde autenticación
 9. cancelación de pedidos `Pending` dentro de una ventana configurable;
 10. restitución atómica del inventario cuando la cancelación es válida;
 11. Modo de Lectura Simple, reducción de movimiento, contraste aumentado y texto ampliado persistentes;
-12. skip link, estado de navegación actual y gestión predecible de foco en cambios de ruta SPA.
+12. skip link, estado de navegación actual y gestión predecible de foco en cambios de ruta SPA;
+13. endpoints de liveness y readiness para operación y despliegue;
+14. gates de dependencias y suite automatizada de backend, integración y accesibilidad.
 
 ### Reversibilidad de pedidos
 
@@ -263,6 +268,10 @@ La ventana predeterminada es de **30 minutos**, configurable mediante `Orders:Ca
 ### Accesibilidad avanzada
 
 La ruta pública `/accessibility` permite activar y restablecer preferencias que se conservan en el navegador. La carga inicial mantiene el orden nativo de teclado para que el skip link sea el primer control; en navegaciones internas posteriores, el foco se mueve al contenido principal. Estas conductas forman parte de la suite de regresión automatizada junto con axe-core.
+
+### Políticas del vendedor
+
+Garantía, envío y devoluciones se almacenan como campos independientes del perfil del vendedor. El backend valida su contenido y el detalle de producto conserva siempre el mismo orden visual: **Garantía → Envío → Devoluciones**. Cuando una política todavía no fue publicada, la interfaz lo indica de forma explícita en vez de eliminar silenciosamente la sección.
 
 ---
 
@@ -278,13 +287,13 @@ La ruta pública `/accessibility` permite activar y restablecer preferencias que
 | 5 | Checkout | ✅ |
 | 6 | Pedidos y cancelaciones | ✅ |
 | 7 | Accesibilidad avanzada | ✅ |
-| 8 | UX Lab, testing y preparación para producción | ⏳ |
+| 8 | UX Lab, testing y preparación para producción | ✅ |
 
 ### Estado actual
 
-**v0.8.0 — Advanced Accessibility**
+**v1.0.0 — Stable Portfolio Release**
 
-Fase 7 implementa `AM-UX-003` y cierra la superficie actual de `AM-UX-005`: preferencias persistentes de accesibilidad, Modo de Lectura Simple, reducción de movimiento, contraste aumentado, texto ampliado, skip link, `aria-current` y gestión de foco después de navegaciones SPA. El cierre se valida mediante build Angular, Playwright/axe y la suite completa del backend en GitHub Actions.
+Fase 8 completa `AM-UX-002`, separa liveness/readiness, endurece CI con revisión de dependencias, documenta un protocolo UX Lab reproducible y un checklist de release, y deja cuentas demo locales protegidas por entorno para facilitar pruebas manuales. Los resultados humanos de SUS/SEQ/tiempos continúan sin inventarse: deben proceder de sesiones reales documentadas.
 
 ---
 
@@ -308,14 +317,25 @@ docker compose up -d sqlserver
 
 ### Backend
 
+Carga las variables de `.env` en tu shell y ejecuta:
+
 ```bash
-set -a
-source .env
-set +a
 dotnet run --project backend/src/AccessiUXMarket.Api
 ```
 
 Con `Database__ApplyMigrations=true`, la API aplica las migraciones al iniciar. `Database__SeedRoles=true` crea los roles base y `Database__SeedCatalog=true` crea las categorías iniciales de forma idempotente.
+
+En **Development**, `appsettings.Development.json` habilita el seeding de cuentas demo. El código exige simultáneamente `Environment == Development` y `Database:SeedDemoUsers=true`, por lo que estas cuentas no se crean en Testing ni Production.
+
+### Credenciales demo — solo Development
+
+| Rol | Usuario | Contraseña |
+|---|---|---|
+| Cliente | `customer@accessiux.local` | `AccessiUX#2026!` |
+| Vendedor | `seller@accessiux.local` | `AccessiUX#2026!` |
+| Administrador | `admin@accessiux.local` | `AccessiUX#2026!` |
+
+La cuenta de vendedor recibe los roles `Customer` y `Seller`; la cuenta administrativa recibe `Customer` y `Administrator`. Estas credenciales son públicas y deliberadamente locales: **nunca deben reutilizarse en un despliegue real**.
 
 Para cambiar la ventana de cancelación:
 
@@ -323,11 +343,15 @@ Para cambiar la ventana de cancelación:
 Orders__CancellationWindowMinutes=30
 ```
 
-Endpoint de salud:
+Endpoints de salud:
 
 ```text
 GET /health
+GET /health/live
+GET /health/ready
 ```
+
+`/health/live` comprueba que el proceso responde; `/health/ready` incluye la disponibilidad de SQL Server.
 
 ### Frontend
 
@@ -345,6 +369,7 @@ Por defecto, Angular sirve la aplicación en `http://localhost:4200`.
 dotnet test backend/AccessiUXMarket.sln --configuration Release
 
 cd frontend/accessible-market-web
+npm audit --audit-level=high
 npm run build
 npx playwright install chromium
 npm test
@@ -362,6 +387,8 @@ npm test
 - [Arquitectura de Fase 6](docs/architecture/phase-6-orders.md)
 - [UX de Fase 6](docs/ux/phase-6-orders.md)
 - [Accesibilidad avanzada — Fase 7](docs/accessibility/phase-7-advanced-accessibility.md)
+- [UX Lab — Fase 8](docs/ux/phase-8-ux-lab.md)
+- [Release readiness](docs/production/release-readiness.md)
 - [Pruebas de identidad](docs/testing/identity.md)
 - [Requisitos UX](docs/ux/requirements.md)
 - [Política de seguridad](SECURITY.md)
@@ -381,11 +408,13 @@ Las métricas del proyecto evolucionado no se inventan ni se heredan automática
 - Lighthouse;
 - métricas reproducibles documentadas.
 
+El protocolo de Fase 8 deja preparadas las tareas y plantillas de recolección sin presentar valores humanos no observados.
+
 ---
 
 ## 📜 Licencia
 
-La licencia se definirá antes de la primera versión pública estable.
+El repositorio todavía no declara una licencia de software explícita. No debe asumirse permiso de reutilización más allá de lo permitido por la plataforma y la legislación aplicable hasta que se añada un archivo de licencia.
 
 ---
 

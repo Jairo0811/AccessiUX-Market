@@ -20,6 +20,16 @@ public sealed class CreateSellerRequestValidator : AbstractValidator<CreateSelle
     }
 }
 
+public sealed class UpdateSellerPoliciesRequestValidator : AbstractValidator<UpdateSellerPoliciesRequest>
+{
+    public UpdateSellerPoliciesRequestValidator()
+    {
+        RuleFor(x => x.WarrantyPolicy).NotEmpty().MaximumLength(2000);
+        RuleFor(x => x.ShippingPolicy).NotEmpty().MaximumLength(2000);
+        RuleFor(x => x.ReturnPolicy).NotEmpty().MaximumLength(2000);
+    }
+}
+
 public sealed class CreateProductRequestValidator : AbstractValidator<CreateProductRequest>
 {
     public CreateProductRequestValidator()

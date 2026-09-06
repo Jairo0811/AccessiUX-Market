@@ -15,6 +15,8 @@ public static class CatalogEndpoints
         group.MapGet("/search", SearchAsync);
         group.MapGet("/products/{slug}", async (string slug, ICatalogService service, CancellationToken ct) =>
             await service.GetPublishedProductBySlugAsync(slug, ct) is { } product ? Results.Ok(product) : Results.NotFound());
+        group.MapGet("/sellers/id/{sellerId:guid}", async (Guid sellerId, ICatalogService service, CancellationToken ct) =>
+            await service.GetSellerByIdAsync(sellerId, ct) is { } seller ? Results.Ok(seller) : Results.NotFound());
         group.MapGet("/sellers/{slug}", async (string slug, ICatalogService service, CancellationToken ct) =>
             await service.GetSellerBySlugAsync(slug, ct) is { } seller ? Results.Ok(seller) : Results.NotFound());
 
@@ -25,6 +27,9 @@ public static class CatalogEndpoints
             Results.Ok(await service.GetSellerProductsAsync(GetUserId(context.User), ct))).RequireAuthorization();
         group.MapPost("/seller", CreateSellerAsync)
             .AddEndpointFilter<ValidationFilter<CreateSellerRequest>>()
+            .RequireAuthorization();
+        group.MapPut("/seller/policies", UpdateSellerPoliciesAsync)
+            .AddEndpointFilter<ValidationFilter<UpdateSellerPoliciesRequest>>()
             .RequireAuthorization();
         group.MapPost("/seller/products", CreateProductAsync)
             .AddEndpointFilter<ValidationFilter<CreateProductRequest>>()
@@ -66,6 +71,12 @@ public static class CatalogEndpoints
     private static async Task<IResult> CreateSellerAsync(CreateSellerRequest request, HttpContext context, ICatalogService service, CancellationToken ct)
     {
         try { return Results.Created("/api/v1/catalog/seller/me", await service.CreateSellerAsync(GetUserId(context.User), request, ct)); }
+        catch (InvalidOperationException ex) { return Results.Conflict(new { message = ex.Message }); }
+    }
+
+    private static async Task<IResult> UpdateSellerPoliciesAsync(UpdateSellerPoliciesRequest request, HttpContext context, ICatalogService service, CancellationToken ct)
+    {
+        try { return Results.Ok(await service.UpdateSellerPoliciesAsync(GetUserId(context.User), request, ct)); }
         catch (InvalidOperationException ex) { return Results.Conflict(new { message = ex.Message }); }
     }
 

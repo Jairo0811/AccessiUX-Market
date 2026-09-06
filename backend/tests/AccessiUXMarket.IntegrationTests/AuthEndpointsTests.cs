@@ -172,6 +172,27 @@ public sealed class AuthEndpointsTests(IdentityApiFixture fixture) : IClassFixtu
         Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
     }
 
+    [Fact]
+    public async Task DemoAccounts_AreNotSeededOutsideDevelopment()
+    {
+        using var client = CreateClient();
+        var demoEmails = new[]
+        {
+            "customer@accessiux.local",
+            "seller@accessiux.local",
+            "admin@accessiux.local"
+        };
+
+        foreach (var email in demoEmails)
+        {
+            var response = await client.PostAsJsonAsync(
+                $"{ApiRoot}/login",
+                new LoginRequest(email, "AccessiUX#2026!"));
+
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+    }
+
     private HttpClient CreateClient() => fixture.Factory.CreateClient(
         new WebApplicationFactoryClientOptions { HandleCookies = true });
 

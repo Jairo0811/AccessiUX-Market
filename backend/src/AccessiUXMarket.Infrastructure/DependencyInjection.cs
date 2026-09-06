@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace AccessiUXMarket.Infrastructure;
 
@@ -30,7 +31,9 @@ public static class DependencyInjection
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString, sqlOptions => sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null)));
 
-        services.AddHealthChecks().AddDbContextCheck<ApplicationDbContext>("database");
+        services.AddHealthChecks()
+            .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["live"])
+            .AddDbContextCheck<ApplicationDbContext>("database", tags: ["ready"]);
 
         services.AddIdentityCore<ApplicationUser>(options =>
             {
