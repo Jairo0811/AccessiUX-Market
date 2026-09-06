@@ -121,7 +121,7 @@ app.UseAuthorization();
 
 if (app.Environment.IsDevelopment()) app.MapOpenApi();
 app.MapHealthChecks("/health");
-app.MapGet("/api", () => Results.Ok(new { name = "AccessiUX Market API", version = "0.6.0" }));
+app.MapGet("/api", () => Results.Ok(new { name = "AccessiUX Market API", version = "0.7.0" }));
 app.MapIdentityEndpoints();
 app.MapCatalogEndpoints();
 app.MapCartEndpoints();
