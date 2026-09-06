@@ -2,7 +2,11 @@ name: Full-stack smoke
 
 on:
   push:
-    branches: [test/full-stack-smoke-v1]
+    branches:
+      - main
+      - 'test/full-stack-smoke-*'
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -14,11 +18,10 @@ concurrency:
 
 jobs:
   smoke:
-    name: v1.0.0 real stack smoke
+    name: Real stack smoke
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
-      MSSQL_SA_PASSWORD: AccessiUX_Smoke_SQL_2026!
       API_BASE: http://127.0.0.1:5080
     steps:
       - name: Checkout
@@ -36,13 +39,16 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/accessible-market-web/package-lock.json
 
-      - name: Resolve demo password from development seeder
+      - name: Resolve runtime test credentials
         shell: bash
         run: |
-          value="$(sed -n 's/.*DemoPassword = "\([^"]*\)".*/\1/p' backend/src/AccessiUXMarket.Infrastructure/Identity/IdentityDataSeeder.cs)"
-          test -n "$value"
-          echo "::add-mask::$value"
-          echo "DEMO_PASSWORD=$value" >> "$GITHUB_ENV"
+          demo_password="$(sed -n 's/.*DemoPassword = "\([^"]*\)".*/\1/p' backend/src/AccessiUXMarket.Infrastructure/Identity/IdentityDataSeeder.cs)"
+          test -n "$demo_password"
+          sql_password="Smoke_${GITHUB_RUN_ID}_$(openssl rand -hex 8)_Aa1!"
+          echo "::add-mask::$demo_password"
+          echo "::add-mask::$sql_password"
+          echo "DEMO_PASSWORD=$demo_password" >> "$GITHUB_ENV"
+          echo "MSSQL_SA_PASSWORD=$sql_password" >> "$GITHUB_ENV"
 
       - name: Start SQL Server
         run: docker compose up -d sqlserver
