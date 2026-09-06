@@ -42,7 +42,7 @@ public sealed class OrderEndpointsTests(IdentityApiFixture fixture) : IClassFixt
 
         var orders = await client.GetFromJsonAsync<List<OrderSummaryDto>>(OrdersRoot);
         Assert.NotNull(orders);
-        var summary = Assert.Single(orders.Where(order => order.Id == confirmation.OrderId));
+        var summary = Assert.Single(orders, order => order.Id == confirmation.OrderId);
         Assert.Equal("Pending", summary.Status);
         Assert.True(summary.CanCancel);
         Assert.True(summary.CancelUntilUtc > summary.CreatedAtUtc);
