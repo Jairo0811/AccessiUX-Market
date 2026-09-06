@@ -123,7 +123,7 @@ test('checkout exposes critical information for review before confirmation', asy
   await page.goto('/checkout');
   await expect(page.getByRole('heading', { name: 'Revisa antes de confirmar' })).toBeVisible();
   await page.getByLabel('Nombre de quien recibe').fill('Cliente Prueba');
-  await page.getByLabel('Dirección', { exact: true }).fill('Av. Winston Churchill 100');
+  await page.getByRole('textbox', { name: 'Dirección', exact: true }).fill('Av. Winston Churchill 100');
   await page.getByLabel('Ciudad').fill('Santo Domingo');
   await page.getByLabel('Provincia / región').fill('Distrito Nacional');
   await page.getByLabel('Código postal').fill('10127');
