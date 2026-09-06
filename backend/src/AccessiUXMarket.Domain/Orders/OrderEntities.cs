@@ -79,6 +79,38 @@ public sealed class Order
     public DateTime UpdatedAtUtc { get; private set; }
     public List<OrderItem> Items { get; private set; } = [];
 
+    public DateTime GetCancellationDeadlineUtc(TimeSpan cancellationWindow)
+    {
+        ValidateCancellationWindow(cancellationWindow);
+        return CreatedAtUtc.Add(cancellationWindow);
+    }
+
+    public bool CanCancel(DateTime utcNow, TimeSpan cancellationWindow)
+    {
+        return Status == OrderStatus.Pending && utcNow <= GetCancellationDeadlineUtc(cancellationWindow);
+    }
+
+    public void Cancel(DateTime utcNow, TimeSpan cancellationWindow)
+    {
+        if (Status == OrderStatus.Cancelled)
+        {
+            throw new InvalidOperationException("The order has already been cancelled.");
+        }
+
+        if (Status != OrderStatus.Pending)
+        {
+            throw new InvalidOperationException("The order can no longer be cancelled because fulfillment has already started.");
+        }
+
+        if (utcNow > GetCancellationDeadlineUtc(cancellationWindow))
+        {
+            throw new InvalidOperationException("The cancellation window for this order has expired.");
+        }
+
+        Status = OrderStatus.Cancelled;
+        UpdatedAtUtc = utcNow;
+    }
+
     public void AddItem(Guid id, Guid productId, string productName, string productSlug, decimal unitPrice, int quantity)
     {
         if (quantity <= 0)
@@ -87,6 +119,14 @@ public sealed class Order
         }
 
         Items.Add(new OrderItem(id, Id, productId, productName, productSlug, unitPrice, quantity));
+    }
+
+    private static void ValidateCancellationWindow(TimeSpan cancellationWindow)
+    {
+        if (cancellationWindow <= TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(cancellationWindow), "Cancellation window must be greater than zero.");
+        }
     }
 }
 
