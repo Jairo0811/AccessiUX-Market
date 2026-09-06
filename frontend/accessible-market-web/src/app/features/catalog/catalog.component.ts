@@ -42,7 +42,7 @@ import { CatalogService } from '../../core/catalog/catalog.service';
               </div>
             </div>
 
-            <div class="catalog-field">
+            <div class="catalog-field catalog-field--category">
               <label for="catalog-category">Categoría</label>
               <select id="catalog-category" formControlName="categoryId">
                 <option value="">Todas las categorías</option>
@@ -68,7 +68,7 @@ import { CatalogService } from '../../core/catalog/catalog.service';
               </div>
             </fieldset>
 
-            <div class="catalog-field">
+            <div class="catalog-field catalog-field--stock">
               <label for="catalog-stock">Disponibilidad</label>
               <select id="catalog-stock" formControlName="inStock">
                 <option value="">Cualquier disponibilidad</option>
@@ -77,7 +77,7 @@ import { CatalogService } from '../../core/catalog/catalog.service';
               </select>
             </div>
 
-            <div class="catalog-field">
+            <div class="catalog-field catalog-field--sort">
               <label for="catalog-sort">Ordenar por</label>
               <select id="catalog-sort" formControlName="sort">
                 <option value="relevance">Relevancia</option>
@@ -162,27 +162,33 @@ import { CatalogService } from '../../core/catalog/catalog.service';
     .catalog-hero p:not(.eyebrow) { max-width: 45rem; margin: 0; color: #52657b; font-size: 1.05rem; }
     .catalog-hero__badge { min-width: 12rem; padding: .9rem 1.1rem; display: flex; align-items: center; gap: .75rem; border: 1px solid rgb(124 58 237 / 18%); border-radius: 1rem; color: #0d2b57; background: rgb(255 255 255 / 82%); box-shadow: 0 .8rem 2rem rgb(11 39 79 / 9%); }
     .catalog-hero__badge span { display: grid; width: 2.2rem; height: 2.2rem; place-items: center; border-radius: .7rem; color: #fff; background: linear-gradient(145deg,#1684ff,#7c3aed); }
-    .catalog-layout { display: grid; grid-template-columns: minmax(16rem, 19rem) minmax(0, 1fr); align-items: start; gap: 1.5rem; }
-    .filter-panel { position: sticky; top: 6.4rem; padding: 1.35rem; border: 1px solid #d8e3f0; border-radius: 1.3rem; background: #fff; box-shadow: 0 .8rem 2.4rem rgb(11 39 79 / 8%); }
+    .catalog-layout { display: grid; grid-template-columns: 1fr; align-items: start; gap: 1.25rem; }
+    .filter-panel { position: static; padding: 1.5rem; border: 1px solid #d8e3f0; border-radius: 1.3rem; background: #fff; box-shadow: 0 .8rem 2.4rem rgb(11 39 79 / 8%); }
     .filter-panel__heading { margin-bottom: 1.2rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
     .filter-panel h2 { margin: .2rem 0 0; color: #081c3d; font-size: 1.55rem; }
     .filter-reset { padding: .2rem 0; border: 0; color: #0b5fad; background: transparent; font-weight: 800; text-decoration: underline; text-underline-offset: .2em; cursor: pointer; }
-    .filter-panel form { display: grid; gap: 1rem; }
+    .filter-panel form { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: end; gap: 1rem; }
     .catalog-field { display: grid; gap: .38rem; }
+    .catalog-field--search { grid-column: span 4; }
+    .catalog-field--category { grid-column: span 3; }
+    .price-fieldset { grid-column: span 5; }
+    .catalog-field--stock { grid-column: span 4; }
+    .catalog-field--sort { grid-column: span 4; }
+    .apply-button { grid-column: span 4; }
     .catalog-field label, .price-fieldset legend { color: #10233f; font-size: .9rem; font-weight: 800; }
-    .catalog-field input, .catalog-field select { width: 100%; min-height: 2.9rem; padding: .65rem .75rem; border: 1.5px solid #b9c9da; border-radius: .7rem; color: #10233f; background: #fff; }
+    .catalog-field input, .catalog-field select { width: 100%; min-height: 3rem; padding: .7rem .8rem; border: 1.5px solid #b9c9da; border-radius: .7rem; color: #10233f; background: #fff; }
     .search-input { position: relative; }
     .search-input span { position: absolute; left: .8rem; top: 50%; transform: translateY(-50%); color: #52657b; }
     .search-input input { padding-left: 2.1rem; }
     .price-fieldset { margin: 0; padding: 0; border: 0; }
     .price-grid { margin-top: .38rem; display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; }
     .apply-button { min-height: 3rem; margin-top: .25rem; padding: .7rem 1rem; display: flex; align-items: center; justify-content: center; gap: .5rem; border: 0; border-radius: .75rem; color: #fff; background: linear-gradient(100deg,#5c21f2 0%,#2563eb 48%,#0eced8 100%); box-shadow: 0 .75rem 1.5rem rgb(37 99 235 / 22%); font-weight: 850; cursor: pointer; }
-    .catalog-results { min-width: 0; }
+    .catalog-results { min-width: 0; width: 100%; }
     .results-toolbar { min-height: 4.8rem; margin-bottom: 1rem; padding: .9rem 1.1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; border: 1px solid #d8e3f0; border-radius: 1rem; background: rgb(255 255 255 / 76%); }
     .results-count, .price-range { margin: .2rem 0 0; color: #52657b; }
     .results-count strong { color: #081c3d; }
     .price-range { font-size: .9rem; }
-    .product-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 1rem; }
+    .product-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 1rem; }
     .product-card { min-width: 0; overflow: hidden; border: 1px solid #d8e3f0; border-radius: 1.2rem; background: #fff; box-shadow: 0 .7rem 2rem rgb(11 39 79 / 7%); transition: transform 160ms ease, box-shadow 160ms ease; }
     .product-card:hover { transform: translateY(-2px); box-shadow: 0 1.2rem 2.6rem rgb(11 39 79 / 12%); }
     .product-card__visual { min-height: 10.5rem; display: grid; place-items: center; background: radial-gradient(circle at 75% 20%,rgb(124 58 237 / 18%),transparent 8rem), linear-gradient(135deg,#e9fbff,#edf2ff 55%,#f3eaff); }
@@ -200,7 +206,7 @@ import { CatalogService } from '../../core/catalog/catalog.service';
     .product-price { color: #081c3d; font-size: 1.2rem; }
     .product-card__cta { margin-top: .9rem; min-height: 2.7rem; display: flex; align-items: center; justify-content: center; gap: .4rem; border: 1.5px solid #0d2b57; border-radius: .7rem; color: #0d2b57; font-weight: 800; text-decoration: none; }
     .product-card__cta:hover { color: #fff; background: #0d2b57; }
-    .empty-state { min-height: 24rem; padding: 3rem 1.2rem; display: grid; place-items: center; align-content: center; text-align: center; border: 1px dashed #b9c9da; border-radius: 1.3rem; background: rgb(255 255 255 / 68%); }
+    .empty-state { min-height: 20rem; width: 100%; padding: 3rem 1.2rem; display: grid; place-items: center; align-content: center; text-align: center; border: 1px dashed #b9c9da; border-radius: 1.3rem; background: radial-gradient(circle at 50% 0%, rgb(18 212 226 / 10%), transparent 17rem), rgb(255 255 255 / 72%); }
     .empty-state__icon { display: grid; width: 4.5rem; height: 4.5rem; place-items: center; border-radius: 1.25rem; color: #fff; background: linear-gradient(145deg,#1684ff,#7c3aed); font-size: 2rem; }
     .empty-state h2 { margin: 1rem 0 .2rem; color: #081c3d; }
     .empty-state p { margin: 0 0 1rem; color: #52657b; }
@@ -209,8 +215,8 @@ import { CatalogService } from '../../core/catalog/catalog.service';
     .pagination button { min-height: 2.5rem; padding: .5rem .8rem; border: 1px solid #b9c9da; border-radius: .65rem; color: #0d2b57; background: #fff; font-weight: 750; cursor: pointer; }
     .pagination button:disabled { opacity: .45; cursor: not-allowed; }
     :is(input, select, button, a):focus-visible { outline: 3px solid #ffb703; outline-offset: 3px; }
-    @media (max-width: 70rem) { .product-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
-    @media (max-width: 52rem) { .catalog-hero { padding: 1.5rem; align-items: flex-start; flex-direction: column; } .catalog-layout { grid-template-columns: 1fr; } .filter-panel { position: static; } }
+    @media (max-width: 70rem) { .filter-panel form { grid-template-columns: repeat(2,minmax(0,1fr)); } .catalog-field--search, .catalog-field--category, .price-fieldset, .catalog-field--stock, .catalog-field--sort, .apply-button { grid-column: auto; } .price-fieldset { grid-column: span 2; } .product-grid { grid-template-columns: repeat(3,minmax(0,1fr)); } }
+    @media (max-width: 52rem) { .catalog-hero { padding: 1.5rem; align-items: flex-start; flex-direction: column; } .filter-panel form { grid-template-columns: 1fr; } .price-fieldset { grid-column: auto; } .product-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
     @media (max-width: 36rem) { .product-grid, .price-grid { grid-template-columns: 1fr; } .results-toolbar, .pagination { align-items: stretch; flex-direction: column; } .pagination { text-align: center; } }
     @media (forced-colors: active) { .product-card, .filter-panel, .catalog-hero, .results-toolbar { border: 2px solid CanvasText; } .apply-button, .empty-state__button { border: 2px solid ButtonText; } }
     @media (prefers-reduced-motion: reduce) { .product-card, .apply-button { transition: none; } .product-card:hover { transform: none; } }
