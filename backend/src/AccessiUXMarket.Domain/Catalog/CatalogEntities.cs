@@ -106,4 +106,20 @@ public sealed class Product
         Status = ProductStatus.Published;
         UpdatedAtUtc = updatedAtUtc;
     }
+
+    public void DecreaseStock(int quantity, DateTime updatedAtUtc)
+    {
+        if (quantity <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(quantity), "Quantity must be greater than zero.");
+        }
+
+        if (quantity > StockQuantity)
+        {
+            throw new InvalidOperationException("There is not enough stock to complete the checkout.");
+        }
+
+        StockQuantity -= quantity;
+        UpdatedAtUtc = updatedAtUtc;
+    }
 }
