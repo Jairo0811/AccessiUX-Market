@@ -122,4 +122,19 @@ public sealed class Product
         StockQuantity -= quantity;
         UpdatedAtUtc = updatedAtUtc;
     }
+
+    public void IncreaseStock(int quantity, DateTime updatedAtUtc)
+    {
+        if (quantity <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(quantity), "Quantity must be greater than zero.");
+        }
+
+        checked
+        {
+            StockQuantity += quantity;
+        }
+
+        UpdatedAtUtc = updatedAtUtc;
+    }
 }
