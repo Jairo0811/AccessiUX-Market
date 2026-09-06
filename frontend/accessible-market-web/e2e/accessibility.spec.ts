@@ -17,6 +17,7 @@ for (const route of publicRoutes) {
     }
 
     await page.goto(route);
+    await expect(page.locator('h1').first()).toBeVisible();
     const results = await new AxeBuilder({ page }).analyze();
     expect(results.violations).toEqual([]);
   });
