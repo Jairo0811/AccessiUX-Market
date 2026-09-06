@@ -4,6 +4,31 @@ All notable changes to AccessiUX Market are documented in this file.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-09-06
+
+### Fixed
+
+- Corrected the Docker Compose SQL Server healthcheck so `MSSQL_SA_PASSWORD` expands inside the container instead of being passed literally to `sqlcmd`; `docker compose up` can now report the database as healthy when it is actually ready.
+
+### Added
+
+- Reproducible full-stack smoke workflow using SQL Server 2022, the real Development API, migrations, demo users, Angular, and Chromium.
+- API smoke coverage for liveness/readiness, `v1.0.1` metadata, Customer/Seller/Administrator authentication, seller policies, product publication, cart, checkout, order history/detail, cancellation, and inventory restoration.
+- Browser smoke coverage for real login/session restoration, role visibility, seller dashboard, and public seller-policy presentation.
+- Permanent release evidence for the complete frontend and backend regression suites after the real-stack smoke.
+
+### Verified
+
+- 22 Playwright/axe tests passed after the browser smoke.
+- 44 backend tests passed: 16 unit, 25 SQL Server integration, and 3 architecture tests.
+- Angular production build passed and `npm ci` reported 0 vulnerabilities during the full-stack validation.
+- Real checkout reduced smoke-product inventory from 5 to 3 and eligible cancellation restored it atomically to 5.
+
+### Changed
+
+- API product metadata advanced from `1.0.0` to `1.0.1`.
+- The full-stack smoke is now a reusable GitHub Actions gate for `main`, pull requests targeting `main`, and dedicated `test/full-stack-smoke-*` branches.
+
 ## [1.0.0] - 2026-09-06
 
 ### Added
