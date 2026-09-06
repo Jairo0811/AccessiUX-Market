@@ -6,6 +6,7 @@ public sealed class IdentityApiFixture : IAsyncLifetime
 {
     private readonly MsSqlContainer _database = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest")
         .WithPassword("AccessiUX_Test_Only_2026!")
+        .WithEnvironment("MSSQL_MEMORY_LIMIT_MB", "2304")
         .Build();
 
     public TestApplicationFactory Factory { get; private set; } = null!;
