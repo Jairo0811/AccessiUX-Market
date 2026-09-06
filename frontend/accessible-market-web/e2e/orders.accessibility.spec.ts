@@ -44,6 +44,11 @@ const baseOrder = {
 };
 
 test('order history exposes status and cancellation availability accessibly', async ({ page }) => {
+  const requests: string[] = [];
+  const failedRequests: string[] = [];
+  page.on('request', request => requests.push(`${request.method()} ${request.url()}`));
+  page.on('requestfailed', request => failedRequests.push(`${request.method()} ${request.url()} :: ${request.failure()?.errorText ?? 'unknown'}`));
+
   await mockAuthenticatedCustomer(page);
 
   await page.route(isOrdersApi, async routeHandler => {
@@ -72,8 +77,14 @@ test('order history exposes status and cancellation availability accessibly', as
   });
 
   await page.goto('/orders');
-
   await expect(page.getByRole('heading', { name: 'Mis pedidos' })).toBeVisible();
+  await page.waitForTimeout(750);
+
+  console.log('ORDERS_DIAGNOSTIC_URL', page.url());
+  console.log('ORDERS_DIAGNOSTIC_REQUESTS', JSON.stringify(requests));
+  console.log('ORDERS_DIAGNOSTIC_FAILED', JSON.stringify(failedRequests));
+  console.log('ORDERS_DIAGNOSTIC_BODY', (await page.locator('body').innerText()).slice(0, 2000));
+
   await expect(page.getByText(baseOrder.orderNumber)).toBeVisible();
   await expect(page.getByText('Pendiente', { exact: true })).toBeVisible();
   await expect(page.getByText('Cancelación disponible.', { exact: true })).toBeVisible();
