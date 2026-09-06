@@ -57,3 +57,39 @@ test('catalog filters are reflected in the URL', async ({ page }) => {
   await expect(page).toHaveURL(/q=teclado/);
   await expect(page).toHaveURL(/minPrice=500/);
 });
+
+test('the authenticated empty cart is accessible and guides the user back to catalog', async ({ page }) => {
+  await page.route('**/api/v1/auth/refresh', async routeHandler => {
+    await routeHandler.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        accessToken: 'test-access-token',
+        accessTokenExpiresAtUtc: '2026-09-04T18:00:00Z',
+        tokenType: 'Bearer',
+        user: {
+          id: '11111111-1111-1111-1111-111111111111',
+          email: 'cart@example.com',
+          fullName: 'Cart Test User',
+          emailConfirmed: false,
+          roles: ['Customer'],
+        },
+      }),
+    });
+  });
+  await page.route('**/api/v1/cart', async routeHandler => {
+    await routeHandler.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ items: [], totalQuantity: 0, subtotal: 0, currency: 'DOP' }),
+    });
+  });
+
+  await page.goto('/cart');
+  await expect(page.getByRole('heading', { name: 'Mi carrito' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Tu carrito está vacío' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Explorar catálogo' })).toBeVisible();
+
+  const results = await new AxeBuilder({ page }).analyze();
+  expect(results.violations).toEqual([]);
+});

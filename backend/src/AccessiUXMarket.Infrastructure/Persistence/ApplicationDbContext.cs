@@ -1,3 +1,4 @@
+using AccessiUXMarket.Domain.Cart;
 using AccessiUXMarket.Domain.Catalog;
 using AccessiUXMarket.Domain.Identity;
 using AccessiUXMarket.Infrastructure.Identity;
@@ -14,6 +15,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<SellerProfile> SellerProfiles => Set<SellerProfile>();
     public DbSet<Product> Products => Set<Product>();
+    public DbSet<CartItem> CartItems => Set<CartItem>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -103,6 +105,23 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
                 .WithMany()
                 .HasForeignKey(product => product.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<CartItem>(entity =>
+        {
+            entity.ToTable("CartItems");
+            entity.HasKey(item => new { item.UserId, item.ProductId });
+            entity.Property(item => item.Quantity).IsRequired();
+            entity.Property(item => item.CreatedAtUtc).IsRequired();
+            entity.Property(item => item.UpdatedAtUtc).IsRequired();
+            entity.HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(item => item.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<Product>()
+                .WithMany()
+                .HasForeignKey(item => item.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

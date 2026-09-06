@@ -121,9 +121,10 @@ app.UseAuthorization();
 
 if (app.Environment.IsDevelopment()) app.MapOpenApi();
 app.MapHealthChecks("/health");
-app.MapGet("/api", () => Results.Ok(new { name = "AccessiUX Market API", version = "0.3.0" }));
+app.MapGet("/api", () => Results.Ok(new { name = "AccessiUX Market API", version = "0.5.0" }));
 app.MapIdentityEndpoints();
 app.MapCatalogEndpoints();
+app.MapCartEndpoints();
 
 await app.Services.InitializeDatabaseAsync(
     app.Configuration.GetValue<bool>("Database:ApplyMigrations"),
