@@ -1,6 +1,7 @@
 using AccessiUXMarket.Domain.Cart;
 using AccessiUXMarket.Domain.Catalog;
 using AccessiUXMarket.Domain.Identity;
+using AccessiUXMarket.Domain.Orders;
 using AccessiUXMarket.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -16,6 +17,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<SellerProfile> SellerProfiles => Set<SellerProfile>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<CartItem> CartItems => Set<CartItem>();
+    public DbSet<Order> Orders => Set<Order>();
+    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -122,6 +125,57 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
                 .WithMany()
                 .HasForeignKey(item => item.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<Order>(entity =>
+        {
+            entity.ToTable("Orders");
+            entity.HasKey(order => order.Id);
+            entity.Property(order => order.OrderNumber).HasMaxLength(32).IsRequired();
+            entity.Property(order => order.Status).HasConversion<string>().HasMaxLength(24).IsRequired();
+            entity.Property(order => order.Currency).HasMaxLength(3).IsFixedLength().IsRequired();
+            entity.Property(order => order.Subtotal).HasPrecision(18, 2).IsRequired();
+            entity.Property(order => order.ShippingAmount).HasPrecision(18, 2).IsRequired();
+            entity.Property(order => order.TaxAmount).HasPrecision(18, 2).IsRequired();
+            entity.Property(order => order.Total).HasPrecision(18, 2).IsRequired();
+            entity.Property(order => order.PaymentMethod).HasMaxLength(30).IsRequired();
+            entity.Property(order => order.RecipientName).HasMaxLength(150).IsRequired();
+            entity.Property(order => order.AddressLine1).HasMaxLength(200).IsRequired();
+            entity.Property(order => order.AddressLine2).HasMaxLength(200);
+            entity.Property(order => order.City).HasMaxLength(120).IsRequired();
+            entity.Property(order => order.Region).HasMaxLength(120).IsRequired();
+            entity.Property(order => order.PostalCode).HasMaxLength(20).IsRequired();
+            entity.Property(order => order.CountryCode).HasMaxLength(2).IsFixedLength().IsRequired();
+            entity.Property(order => order.Phone).HasMaxLength(30).IsRequired();
+            entity.Property(order => order.CreatedAtUtc).IsRequired();
+            entity.Property(order => order.UpdatedAtUtc).IsRequired();
+            entity.HasIndex(order => order.OrderNumber).IsUnique();
+            entity.HasIndex(order => new { order.UserId, order.CreatedAtUtc });
+            entity.HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(order => order.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasMany(order => order.Items)
+                .WithOne()
+                .HasForeignKey(item => item.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<OrderItem>(entity =>
+        {
+            entity.ToTable("OrderItems");
+            entity.HasKey(item => item.Id);
+            entity.Property(item => item.ProductName).HasMaxLength(180).IsRequired();
+            entity.Property(item => item.ProductSlug).HasMaxLength(200).IsRequired();
+            entity.Property(item => item.UnitPrice).HasPrecision(18, 2).IsRequired();
+            entity.Property(item => item.Quantity).IsRequired();
+            entity.Property(item => item.LineTotal).HasPrecision(18, 2).IsRequired();
+            entity.HasIndex(item => item.OrderId);
+            entity.HasIndex(item => item.ProductId);
+            entity.HasOne<Product>()
+                .WithMany()
+                .HasForeignKey(item => item.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }
