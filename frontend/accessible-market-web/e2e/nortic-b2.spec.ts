@@ -1,12 +1,13 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
-test('accessibility statement is public, titled and free of detectable violations', async ({ page }) => {
+test('accessibility statement and preferences are public, titled and free of detectable violations', async ({ page }) => {
   await page.goto('/accessibility');
 
   await expect(page).toHaveTitle('Accesibilidad | AccessiUX Market');
-  await expect(page.getByRole('heading', { level: 1, name: 'Declaración de accesibilidad' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Accesibilidad y preferencias' })).toBeVisible();
   await expect(page.getByText('Objetivo de conformidad: nivel AA.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Preferencias de accesibilidad' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Principios que aplicamos' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Compras con prevención de errores' })).toBeVisible();
 
