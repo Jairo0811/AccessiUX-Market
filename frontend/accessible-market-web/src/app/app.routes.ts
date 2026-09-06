@@ -10,6 +10,7 @@ export const routes: Routes = [
   { path: 'forgot-password', loadComponent: () => import('./features/auth/forgot-password.component').then(m => m.ForgotPasswordComponent), title: 'Restablecer contraseña | AccessiUX Market' },
   { path: 'reset-password', loadComponent: () => import('./features/auth/reset-password.component').then(m => m.ResetPasswordComponent), title: 'Nueva contraseña | AccessiUX Market' },
   { path: 'cart', canActivate: [authGuard], loadComponent: () => import('./features/cart/cart.component').then(m => m.CartComponent), title: 'Mi carrito | AccessiUX Market' },
+  { path: 'checkout', canActivate: [authGuard], loadComponent: () => import('./features/checkout/checkout.component').then(m => m.CheckoutComponent), title: 'Checkout | AccessiUX Market' },
   { path: 'account', canActivate: [authGuard], loadComponent: () => import('./features/account/account.component').then(m => m.AccountComponent), title: 'Mi cuenta | AccessiUX Market' },
   { path: 'seller', canActivate: [authGuard], loadComponent: () => import('./features/seller/seller-dashboard.component').then(m => m.SellerDashboardComponent), title: 'Panel de vendedor | AccessiUX Market' },
   { path: '**', redirectTo: '' },
