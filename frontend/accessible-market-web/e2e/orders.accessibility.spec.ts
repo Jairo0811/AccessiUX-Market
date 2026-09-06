@@ -44,24 +44,32 @@ const baseOrder = {
 
 test('order history exposes status and cancellation availability accessibly', async ({ page }) => {
   await mockAuthenticatedCustomer(page);
-  await page.route('**/api/v1/orders', async routeHandler => {
-    await routeHandler.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify([{
-        id: orderId,
-        orderNumber: baseOrder.orderNumber,
-        status: 'Pending',
-        total: 3000,
-        currency: 'DOP',
-        itemCount: 2,
-        createdAtUtc,
-        updatedAtUtc: createdAtUtc,
-        canCancel: true,
-        cancelUntilUtc,
-        cancellationMessage: baseOrder.cancellationMessage,
-      }]),
-    });
+  await page.route('**/api/v1/orders**', async routeHandler => {
+    const request = routeHandler.request();
+    const url = new URL(request.url());
+
+    if (request.method() === 'GET' && /^\/api\/v1\/orders\/?$/.test(url.pathname)) {
+      await routeHandler.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([{
+          id: orderId,
+          orderNumber: baseOrder.orderNumber,
+          status: 'Pending',
+          total: 3000,
+          currency: 'DOP',
+          itemCount: 2,
+          createdAtUtc,
+          updatedAtUtc: createdAtUtc,
+          canCancel: true,
+          cancelUntilUtc,
+          cancellationMessage: baseOrder.cancellationMessage,
+        }]),
+      });
+      return;
+    }
+
+    await routeHandler.fallback();
   });
 
   await page.goto('/orders');
@@ -80,11 +88,11 @@ test('order cancellation requires explicit confirmation and announces the new st
   await mockAuthenticatedCustomer(page);
   let cancelled = false;
 
-  await page.route('**/api/v1/orders/**', async routeHandler => {
+  await page.route('**/api/v1/orders**', async routeHandler => {
     const request = routeHandler.request();
     const url = new URL(request.url());
 
-    if (request.method() === 'POST' && url.pathname.endsWith('/cancel')) {
+    if (request.method() === 'POST' && url.pathname.endsWith(`/${orderId}/cancel`)) {
       cancelled = true;
       await routeHandler.fulfill({
         status: 200,
@@ -100,18 +108,23 @@ test('order cancellation requires explicit confirmation and announces the new st
       return;
     }
 
-    await routeHandler.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify(cancelled ? {
-        ...baseOrder,
-        status: 'Cancelled',
-        updatedAtUtc: '2026-09-06T21:10:00Z',
-        cancelledAtUtc: '2026-09-06T21:10:00Z',
-        canCancel: false,
-        cancellationMessage: 'This order has been cancelled.',
-      } : baseOrder),
-    });
+    if (request.method() === 'GET' && url.pathname.endsWith(`/${orderId}`)) {
+      await routeHandler.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(cancelled ? {
+          ...baseOrder,
+          status: 'Cancelled',
+          updatedAtUtc: '2026-09-06T21:10:00Z',
+          cancelledAtUtc: '2026-09-06T21:10:00Z',
+          canCancel: false,
+          cancellationMessage: 'This order has been cancelled.',
+        } : baseOrder),
+      });
+      return;
+    }
+
+    await routeHandler.fallback();
   });
 
   await page.goto(`/orders/${orderId}`);
