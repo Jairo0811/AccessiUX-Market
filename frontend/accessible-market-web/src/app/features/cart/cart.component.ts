@@ -58,8 +58,11 @@ import { CartService } from '../../core/cart/cart.service';
             <h2 id="cart-summary-title">Resumen</h2>
             <p>{{ currentCart.totalQuantity }} artículo(s)</p>
             <p><strong>Subtotal: {{ currentCart.subtotal | currency:currentCart.currency:'symbol':'1.2-2' }}</strong></p>
-            <p>Impuestos, envío y total final se calcularán en el checkout.</p>
-            <button type="button" (click)="clear()">Vaciar carrito</button>
+            <p>Envío, impuestos y total final permanecerán visibles para revisión antes de confirmar la compra.</p>
+            <div class="button-row">
+              <a class="button button--gradient" routerLink="/checkout">Continuar al checkout</a>
+              <button class="button button--secondary" type="button" (click)="clear()">Vaciar carrito</button>
+            </div>
           </section>
         }
       }
