@@ -37,6 +37,10 @@ jobs:
         run: dotnet build backend/AccessiUXMarket.sln --configuration Release --no-restore
 
       - name: Test
+        env:
+          # GitHub-hosted runners are ephemeral; disabling Ryuk avoids a runner-level
+          # resource-reaper termination while the fixture still disposes SQL explicitly.
+          TESTCONTAINERS_RYUK_DISABLED: 'true'
         run: dotnet test backend/AccessiUXMarket.sln --configuration Release --no-restore --no-build --logger "console;verbosity=normal"
 
   frontend:
