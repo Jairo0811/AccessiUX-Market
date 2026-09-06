@@ -5,7 +5,6 @@ const orderId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const productId = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 const createdAtUtc = '2026-09-06T21:00:00Z';
 const cancelUntilUtc = '2026-09-06T21:30:00Z';
-const isOrdersApi = (url: URL): boolean => url.pathname === '/api/v1/orders' || url.pathname.startsWith('/api/v1/orders/');
 
 const baseOrder = {
   id: orderId,
@@ -44,15 +43,13 @@ const baseOrder = {
 };
 
 test('order history exposes status and cancellation availability accessibly', async ({ page }) => {
-  const requests: string[] = [];
-  const failedRequests: string[] = [];
-  page.on('request', request => requests.push(`${request.method()} ${request.url()}`));
-  page.on('requestfailed', request => failedRequests.push(`${request.method()} ${request.url()} :: ${request.failure()?.errorText ?? 'unknown'}`));
-
   await mockAuthenticatedCustomer(page);
 
-  await page.route(isOrdersApi, async routeHandler => {
-    if (routeHandler.request().method() !== 'GET') {
+  await page.route('**/*', async routeHandler => {
+    const request = routeHandler.request();
+    const url = new URL(request.url());
+
+    if (url.pathname !== '/api/v1/orders' || request.method() !== 'GET') {
       await routeHandler.fallback();
       return;
     }
@@ -77,14 +74,8 @@ test('order history exposes status and cancellation availability accessibly', as
   });
 
   await page.goto('/orders');
+
   await expect(page.getByRole('heading', { name: 'Mis pedidos' })).toBeVisible();
-  await page.waitForTimeout(750);
-
-  console.log('ORDERS_DIAGNOSTIC_URL', page.url());
-  console.log('ORDERS_DIAGNOSTIC_REQUESTS', JSON.stringify(requests));
-  console.log('ORDERS_DIAGNOSTIC_FAILED', JSON.stringify(failedRequests));
-  console.log('ORDERS_DIAGNOSTIC_BODY', (await page.locator('body').innerText()).slice(0, 2000));
-
   await expect(page.getByText(baseOrder.orderNumber)).toBeVisible();
   await expect(page.getByText('Pendiente', { exact: true })).toBeVisible();
   await expect(page.getByText('Cancelación disponible.', { exact: true })).toBeVisible();
@@ -98,11 +89,12 @@ test('order cancellation requires explicit confirmation and announces the new st
   await mockAuthenticatedCustomer(page);
   let cancelled = false;
 
-  await page.route(isOrdersApi, async routeHandler => {
+  await page.route('**/*', async routeHandler => {
     const request = routeHandler.request();
     const url = new URL(request.url());
+    const detailPath = `/api/v1/orders/${orderId}`;
 
-    if (request.method() === 'POST' && url.pathname.endsWith('/cancel')) {
+    if (url.pathname === `${detailPath}/cancel` && request.method() === 'POST') {
       cancelled = true;
       await routeHandler.fulfill({
         status: 200,
@@ -118,7 +110,7 @@ test('order cancellation requires explicit confirmation and announces the new st
       return;
     }
 
-    if (request.method() === 'GET') {
+    if (url.pathname === detailPath && request.method() === 'GET') {
       await routeHandler.fulfill({
         status: 200,
         contentType: 'application/json',
