@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Versión-1.0.0-2563EB?style=for-the-badge" alt="Versión 1.0.0">
+  <img src="https://img.shields.io/badge/Versión-1.0.1-2563EB?style=for-the-badge" alt="Versión 1.0.1">
   <img src="https://img.shields.io/badge/Estado-Release%20estable-14B8A6?style=for-the-badge" alt="Estado Release estable">
 </p>
 
@@ -42,7 +42,8 @@ AccessiUX Market no pretende ser un clon de Amazon. Su objetivo es demostrar có
 - políticas comerciales del vendedor presentadas de forma consistente;
 - prevención de errores y feedback accesible;
 - componentes consistentes para compradores y vendedores;
-- pruebas automatizadas de backend, integración y accesibilidad.
+- pruebas automatizadas de backend, integración y accesibilidad;
+- smoke testing full-stack reproducible sobre SQL Server, API, Angular y Chromium reales.
 
 ---
 
@@ -138,7 +139,7 @@ La trazabilidad detallada se mantiene en [`docs/ux/requirements.md`](docs/ux/req
 
 ## 🧱 Stack tecnológico
 
-El stack se documenta según las capacidades implementadas en **`v1.0.0`**, evitando presentar dependencias futuras como si ya formaran parte del producto.
+El stack se documenta según las capacidades implementadas en **`v1.0.1`**, evitando presentar dependencias futuras como si ya formaran parte del producto.
 
 ### 🎨 Frontend — implementado
 
@@ -178,6 +179,7 @@ El stack se documenta según las capacidades implementadas en **`v1.0.0`**, evit
 | Contenedores | **Docker / Docker Compose** |
 | Control de versiones | **Git / GitHub** |
 | CI | **GitHub Actions** |
+| Smoke full-stack | **SQL Server + API Development + Angular + Chromium** |
 | Pruebas | **xUnit** + Testcontainers para SQL Server + Playwright + axe-core |
 | Dependencias | Auditoría npm y revisión de paquetes .NET vulnerables en CI |
 
@@ -225,6 +227,8 @@ AccessiUX-Market/
 │       └── AccessiUXMarket.ArchitectureTests/
 ├── frontend/
 │   └── accessible-market-web/
+├── scripts/
+│   └── full-stack-api-smoke.sh
 ├── docs/
 │   ├── accessibility/
 │   ├── api/
@@ -242,7 +246,7 @@ Las dependencias de infraestructura, persistencia y presentación no deben conta
 
 ## 🛒 Estado funcional actual
 
-Con **`v1.0.0`**, AccessiUX Market cubre el flujo principal del marketplace y el baseline UX definido por el proyecto:
+Con **`v1.0.1`**, AccessiUX Market cubre el flujo principal del marketplace y el baseline UX definido por el proyecto:
 
 1. registro, inicio de sesión, refresh y recuperación de contraseña;
 2. onboarding de vendedor, políticas comerciales y publicación de productos;
@@ -257,7 +261,8 @@ Con **`v1.0.0`**, AccessiUX Market cubre el flujo principal del marketplace y el
 11. Modo de Lectura Simple, reducción de movimiento, contraste aumentado y texto ampliado persistentes;
 12. skip link, estado de navegación actual y gestión predecible de foco en cambios de ruta SPA;
 13. endpoints de liveness y readiness para operación y despliegue;
-14. gates de dependencias y suite automatizada de backend, integración y accesibilidad.
+14. gates de dependencias y suite automatizada de backend, integración y accesibilidad;
+15. smoke test full-stack reproducible con base de datos, API, frontend y navegador reales.
 
 ### Reversibilidad de pedidos
 
@@ -272,6 +277,23 @@ La ruta pública `/accessibility` permite activar y restablecer preferencias que
 ### Políticas del vendedor
 
 Garantía, envío y devoluciones se almacenan como campos independientes del perfil del vendedor. El backend valida su contenido y el detalle de producto conserva siempre el mismo orden visual: **Garantía → Envío → Devoluciones**. Cuando una política todavía no fue publicada, la interfaz lo indica de forma explícita en vez de eliminar silenciosamente la sección.
+
+---
+
+## ✅ Validación full-stack de release
+
+`v1.0.1` incorpora un gate reproducible que ejecuta el producto sobre su stack real, sin sustituir el backend por mocks:
+
+- SQL Server 2022 mediante Docker Compose y healthcheck real;
+- API ASP.NET Core en `Development` con migraciones y seeding controlado;
+- autenticación de las cuentas demo `Customer`, `Seller` y `Administrator`;
+- creación de vendedor, políticas y producto, publicación, carrito, checkout, pedido y cancelación;
+- comprobación de inventario `5 → 3 → 5` tras checkout y cancelación;
+- Angular conectado a la API real y Chromium para restauración de sesión y flujos de rol;
+- suite Playwright/axe completa;
+- suite xUnit completa con integración SQL Server y pruebas de arquitectura.
+
+La validación de release registrada para este patch cerró con **22/22 Playwright/axe**, **44/44 backend tests** —16 unitarios, 25 de integración SQL Server y 3 de arquitectura—, build Angular correcto y `npm ci` sin vulnerabilidades reportadas. El detalle operativo se conserva en [`docs/production/release-readiness.md`](docs/production/release-readiness.md).
 
 ---
 
@@ -291,9 +313,9 @@ Garantía, envío y devoluciones se almacenan como campos independientes del per
 
 ### Estado actual
 
-**v1.0.0 — Stable Portfolio Release**
+**v1.0.1 — Stable Portfolio Release · Runtime Validation Patch**
 
-Fase 8 completa `AM-UX-002`, separa liveness/readiness, endurece CI con revisión de dependencias, documenta un protocolo UX Lab reproducible y un checklist de release, y deja cuentas demo locales protegidas por entorno para facilitar pruebas manuales. Los resultados humanos de SUS/SEQ/tiempos continúan sin inventarse: deben proceder de sesiones reales documentadas.
+Fase 8 cerró el roadmap original en `v1.0.0`. El patch `v1.0.1` corrige el healthcheck de SQL Server en Docker Compose y convierte la validación full-stack en un gate reproducible de GitHub Actions, manteniendo intacto el alcance funcional del producto. Los resultados humanos de SUS/SEQ/tiempos continúan sin inventarse: deben proceder de sesiones reales documentadas.
 
 ---
 
@@ -314,6 +336,8 @@ Copia el archivo de ejemplo y reemplaza todos los valores. No reutilices estas c
 cp .env.example .env
 docker compose up -d sqlserver
 ```
+
+El healthcheck usa la contraseña configurada en `MSSQL_SA_PASSWORD` dentro del contenedor; `v1.0.1` corrige su expansión para que Docker refleje correctamente el estado real de SQL Server.
 
 ### Backend
 
@@ -375,6 +399,8 @@ npx playwright install chromium
 npm test
 ```
 
+El gate full-stack se ejecuta en GitHub Actions mediante `.github/workflows/full-stack-smoke.yml`; además puede dispararse manualmente con `workflow_dispatch`.
+
 ---
 
 ## 📚 Documentación
@@ -388,7 +414,7 @@ npm test
 - [UX de Fase 6](docs/ux/phase-6-orders.md)
 - [Accesibilidad avanzada — Fase 7](docs/accessibility/phase-7-advanced-accessibility.md)
 - [UX Lab — Fase 8](docs/ux/phase-8-ux-lab.md)
-- [Release readiness](docs/production/release-readiness.md)
+- [Release readiness y evidencia full-stack](docs/production/release-readiness.md)
 - [Pruebas de identidad](docs/testing/identity.md)
 - [Requisitos UX](docs/ux/requirements.md)
 - [Política de seguridad](SECURITY.md)
