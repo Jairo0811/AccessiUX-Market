@@ -96,13 +96,6 @@ test('order history exposes status and cancellation availability accessibly', as
 test('order cancellation requires explicit confirmation and announces the new state', async ({ page }) => {
   let cancelled = false;
   const detailPath = `/api/v1/orders/${orderId}`;
-  const requests: string[] = [];
-  const responses: string[] = [];
-  const pageErrors: string[] = [];
-
-  page.on('request', request => requests.push(`${request.method()} ${new URL(request.url()).pathname}`));
-  page.on('response', response => responses.push(`${response.status()} ${response.request().method()} ${new URL(response.url()).pathname}`));
-  page.on('pageerror', error => pageErrors.push(error.message));
 
   await installApiRouter(page, async (route, method, pathname) => {
     if (method === 'POST' && pathname === `${detailPath}/cancel`) {
@@ -141,12 +134,6 @@ test('order cancellation requires explicit confirmation and announces the new st
   });
 
   await page.goto(`/orders/${orderId}`);
-  await page.waitForTimeout(750);
-
-  console.log('ORDER_DETAIL_REQUESTS', JSON.stringify(requests));
-  console.log('ORDER_DETAIL_RESPONSES', JSON.stringify(responses));
-  console.log('ORDER_DETAIL_PAGE_ERRORS', JSON.stringify(pageErrors));
-  console.log('ORDER_DETAIL_BODY', (await page.locator('body').innerText()).slice(0, 2500));
 
   await expect(page.getByRole('heading', { name: baseOrder.orderNumber })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Cancelar pedido' })).toBeVisible();
