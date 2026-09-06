@@ -1,0 +1,48 @@
+name: Sync EF snapshot once
+
+on:
+  push:
+    branches: [feature/ux-lab-production-readiness]
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    if: github.event.head_commit.message == 'chore: prepare EF snapshot sync'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore backend/AccessiUXMarket.sln --locked-mode
+
+      - name: Install EF tool
+        run: dotnet tool install --global dotnet-ef --version 10.0.11
+
+      - name: Regenerate seller-policy migration and snapshot
+        shell: bash
+        run: |
+          rm backend/src/AccessiUXMarket.Infrastructure/Persistence/Migrations/20260906222500_AddSellerPolicies.cs
+          dotnet ef migrations add AddSellerPolicies \
+            --project backend/src/AccessiUXMarket.Infrastructure \
+            --startup-project backend/src/AccessiUXMarket.Api \
+            --context ApplicationDbContext \
+            --output-dir Persistence/Migrations
+
+      - name: Commit generated migration metadata
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add backend/src/AccessiUXMarket.Infrastructure/Persistence/Migrations
+          git commit -m 'chore: synchronize EF Core seller policy migration'
+          git push origin HEAD:feature/ux-lab-production-readiness
