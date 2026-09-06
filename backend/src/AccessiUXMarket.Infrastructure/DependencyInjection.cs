@@ -1,9 +1,11 @@
 using System.Text;
 using AccessiUXMarket.Application.Cart;
 using AccessiUXMarket.Application.Catalog;
+using AccessiUXMarket.Application.Checkout;
 using AccessiUXMarket.Application.Identity;
 using AccessiUXMarket.Infrastructure.Cart;
 using AccessiUXMarket.Infrastructure.Catalog;
+using AccessiUXMarket.Infrastructure.Checkout;
 using AccessiUXMarket.Infrastructure.Identity;
 using AccessiUXMarket.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
@@ -71,6 +73,7 @@ public static class DependencyInjection
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<ICatalogService, CatalogService>();
         services.AddScoped<ICartService, CartService>();
+        services.AddScoped<ICheckoutService, CheckoutService>();
         services.AddScoped<IdentityDataSeeder>();
         services.AddScoped<CatalogDataSeeder>();
         return services;
