@@ -12,6 +12,8 @@ export const routes: Routes = [
   { path: 'accessibility', loadComponent: () => import('./features/accessibility/accessibility.component').then(m => m.AccessibilityComponent), title: 'Accesibilidad | AccessiUX Market' },
   { path: 'cart', canActivate: [authGuard], loadComponent: () => import('./features/cart/cart.component').then(m => m.CartComponent), title: 'Mi carrito | AccessiUX Market' },
   { path: 'checkout', canActivate: [authGuard], loadComponent: () => import('./features/checkout/checkout.component').then(m => m.CheckoutComponent), title: 'Checkout | AccessiUX Market' },
+  { path: 'orders', canActivate: [authGuard], loadComponent: () => import('./features/orders/orders.component').then(m => m.OrdersComponent), title: 'Mis pedidos | AccessiUX Market' },
+  { path: 'orders/:id', canActivate: [authGuard], loadComponent: () => import('./features/orders/orders.component').then(m => m.OrderDetailComponent), title: 'Detalle del pedido | AccessiUX Market' },
   { path: 'account', canActivate: [authGuard], loadComponent: () => import('./features/account/account.component').then(m => m.AccountComponent), title: 'Mi cuenta | AccessiUX Market' },
   { path: 'seller', canActivate: [authGuard], loadComponent: () => import('./features/seller/seller-dashboard.component').then(m => m.SellerDashboardComponent), title: 'Panel de vendedor | AccessiUX Market' },
   { path: '**', redirectTo: '' },

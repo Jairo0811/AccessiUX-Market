@@ -3,10 +3,12 @@ using AccessiUXMarket.Application.Cart;
 using AccessiUXMarket.Application.Catalog;
 using AccessiUXMarket.Application.Checkout;
 using AccessiUXMarket.Application.Identity;
+using AccessiUXMarket.Application.Orders;
 using AccessiUXMarket.Infrastructure.Cart;
 using AccessiUXMarket.Infrastructure.Catalog;
 using AccessiUXMarket.Infrastructure.Checkout;
 using AccessiUXMarket.Infrastructure.Identity;
+using AccessiUXMarket.Infrastructure.Orders;
 using AccessiUXMarket.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -67,6 +69,12 @@ public static class DependencyInjection
                 "Enabled SMTP delivery requires Host, Port and FromAddress.")
             .ValidateOnStart();
 
+        services.AddOptions<OrderPolicyOptions>()
+            .Bind(configuration.GetSection(OrderPolicyOptions.SectionName))
+            .Validate(options => options.CancellationWindowMinutes is >= 1 and <= 1440,
+                "Orders:CancellationWindowMinutes must be between 1 and 1440 minutes.")
+            .ValidateOnStart();
+
         services.AddSingleton(TimeProvider.System);
         services.AddScoped<IJwtTokenFactory, JwtTokenFactory>();
         services.AddScoped<IPasswordResetNotifier, SmtpPasswordResetNotifier>();
@@ -74,6 +82,7 @@ public static class DependencyInjection
         services.AddScoped<ICatalogService, CatalogService>();
         services.AddScoped<ICartService, CartService>();
         services.AddScoped<ICheckoutService, CheckoutService>();
+        services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IdentityDataSeeder>();
         services.AddScoped<CatalogDataSeeder>();
         return services;

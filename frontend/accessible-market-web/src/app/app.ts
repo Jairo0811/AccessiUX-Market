@@ -28,6 +28,7 @@ import { AuthService } from './core/auth/auth.service';
           <a routerLink="/catalog">Catálogo</a>
           @if (auth.isAuthenticated()) {
             <a routerLink="/cart">Carrito</a>
+            <a routerLink="/orders">Mis pedidos</a>
             <a routerLink="/seller">Vender</a>
             <a routerLink="/account">Mi cuenta</a>
             <button class="link-button" type="button" (click)="logout()">Cerrar sesión</button>
@@ -81,6 +82,7 @@ import { AuthService } from './core/auth/auth.service';
             <h2>Tu experiencia</h2>
             @if (auth.isAuthenticated()) {
               <a routerLink="/cart">Carrito</a>
+              <a routerLink="/orders">Mis pedidos</a>
               <a routerLink="/account">Mi cuenta</a>
               <a routerLink="/seller">Vender</a>
             } @else {

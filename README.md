@@ -8,8 +8,8 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Versión-0.5.0-2563EB?style=for-the-badge" alt="Versión 0.5.0">
-  <img src="https://img.shields.io/badge/Estado-Carrito-14B8A6?style=for-the-badge" alt="Estado Carrito">
+  <img src="https://img.shields.io/badge/Versión-0.7.0-2563EB?style=for-the-badge" alt="Versión 0.7.0">
+  <img src="https://img.shields.io/badge/Estado-Pedidos%20y%20cancelaciones-14B8A6?style=for-the-badge" alt="Estado Pedidos y cancelaciones">
 </p>
 
 <p align="center">
@@ -28,18 +28,19 @@
 
 **AccessiUX Market** es una plataforma de comercio electrónico diseñada alrededor de tres ejes principales: **accesibilidad, usabilidad y experiencia de usuario**.
 
-El proyecto parte de una auditoría académica de Amazon.com en la que se analizaron las heurísticas de Jakob Nielsen, métricas UX, accesibilidad basada en WCAG y aspectos de seguridad. La evolución actual convierte las recomendaciones del informe en requisitos funcionales y técnicos de una aplicación nueva.
+El proyecto parte de una auditoría académica de Amazon.com en la que se analizaron heurísticas de Jakob Nielsen, métricas UX, accesibilidad basada en WCAG y aspectos de seguridad. La evolución actual convierte los hallazgos en requisitos funcionales y técnicos de una aplicación nueva.
 
 AccessiUX Market no pretende ser un clon de Amazon. Su objetivo es demostrar cómo un marketplace puede diseñarse desde el inicio con:
 
 - navegación accesible mediante teclado;
 - menor carga cognitiva;
-- flujos de compra con prevención de errores;
-- control y reversibilidad para el usuario;
-- componentes consistentes para vendedores;
-- búsqueda y filtrado eficientes;
-- carrito persistente y validado desde servidor;
-- pruebas automatizadas de accesibilidad y experiencia de usuario.
+- búsqueda y filtros eficientes;
+- carrito persistente validado desde servidor;
+- checkout con revisión explícita antes de confirmar;
+- pedidos con estado visible y reversibilidad controlada;
+- prevención de errores y feedback accesible;
+- componentes consistentes para compradores y vendedores;
+- pruebas automatizadas de backend, integración y accesibilidad.
 
 ---
 
@@ -100,8 +101,6 @@ Dentro del equipo original de AccessiUX Market existe también una trayectoria p
 
 El cruce institucional documenta que los tres cursaron previamente estudios en ITLA y posteriormente coincidieron en proyectos académicos de UNAPEC. **No implica que hayan cursado juntos una misma asignatura en ITLA**.
 
-Esta misma trayectoria ITLA → UNAPEC también aparece documentada en [**CertiChain**](https://github.com/Jairo0811/CertiChain) y [**CineGest**](https://github.com/Jairo0811/CineGest), reforzando la continuidad académica del grupo sin confundirla con una dependencia técnica entre los proyectos.
-
 ### 👨‍🏫 Continuidad por profesor
 
 En los repositorios revisados actualmente no se ha verificado otra asignatura del portafolio impartida por **Ing. Freddy E. Jiménez S.**. Por tanto, no se documenta una continuidad docente adicional para AccessiUX Market.
@@ -110,14 +109,14 @@ En los repositorios revisados actualmente no se ha verificado otra asignatura de
 
 ## 🧪 Hallazgos académicos convertidos en requisitos
 
-| ID | Requisito de AccessiUX Market | Origen UX |
-|---|---|---|
-| `AM-UX-001` | Cancelación visible y limitada por tiempo | Control y libertad del usuario |
-| `AM-UX-002` | Presentación estandarizada de políticas del vendedor | Consistencia y estándares |
-| `AM-UX-003` | Modo de Lectura Simple y preferencias de accesibilidad | Estética, carga cognitiva y accesibilidad |
-| `AM-UX-004` | Filtros dinámicos con conteo de resultados | Flexibilidad y eficiencia |
-| `AM-UX-005` | Navegación completa por teclado y gestión de foco | Accesibilidad motriz |
-| `AM-UX-006` | Checkout orientado a visibilidad y prevención de errores | Visibilidad del estado y prevención de errores |
+| ID | Requisito de AccessiUX Market | Origen UX | Estado |
+|---|---|---|:---:|
+| `AM-UX-001` | Cancelación visible y limitada por tiempo | Control y libertad del usuario | ✅ |
+| `AM-UX-002` | Presentación estandarizada de políticas del vendedor | Consistencia y estándares | ⏳ |
+| `AM-UX-003` | Modo de Lectura Simple y preferencias de accesibilidad | Estética, carga cognitiva y accesibilidad | ⏳ |
+| `AM-UX-004` | Filtros dinámicos con conteo de resultados | Flexibilidad y eficiencia | ✅ |
+| `AM-UX-005` | Navegación completa por teclado y gestión de foco | Accesibilidad motriz | 🧪 |
+| `AM-UX-006` | Checkout orientado a visibilidad y prevención de errores | Visibilidad del estado y prevención de errores | ✅ |
 
 La trazabilidad detallada se mantiene en [`docs/ux/requirements.md`](docs/ux/requirements.md).
 
@@ -129,43 +128,31 @@ La trazabilidad detallada se mantiene en [`docs/ux/requirements.md`](docs/ux/req
 - Aplicar las heurísticas de Jakob Nielsen a flujos reales de producto.
 - Reducir carga cognitiva en catálogo, navegación y checkout.
 - Dar al usuario control explícito sobre carrito, pedidos y reversibilidad.
-- Estandarizar la información de vendedores y políticas comerciales.
-- Medir las mejoras UX mediante evidencia automatizada y pruebas con usuarios.
+- Estandarizar información de vendedores y políticas comerciales.
+- Medir mejoras UX mediante evidencia automatizada y pruebas con usuarios.
 - Mantener una arquitectura modular preparada para crecimiento posterior.
 
 ---
 
 ## 🧱 Stack tecnológico
 
-El stack se documenta según las capacidades realmente implementadas en **`v0.5.0`**, evitando presentar dependencias futuras como si ya formaran parte del producto.
+El stack se documenta según las capacidades implementadas en **`v0.7.0`**, evitando presentar dependencias futuras como si ya formaran parte del producto.
 
 ### 🎨 Frontend — implementado
 
-<p>
-  <img src="https://skillicons.dev/icons?i=angular,ts,sass" alt="Angular, TypeScript y SCSS" />
-  <img src="https://img.shields.io/badge/RxJS-7.8-B7178C?style=flat-square&logo=reactivex&logoColor=white" alt="RxJS 7.8" />
-</p>
-
-| Área | Tecnología |
+| Área | Tecnología / capacidad |
 |---|---|
-| Framework | **Angular 22.1** |
+| Framework | **Angular 22.1** standalone |
 | Lenguaje | **TypeScript 6** |
 | Programación reactiva | **RxJS 7.8** |
-| Arquitectura UI | Angular standalone |
 | Estilos | **SCSS** |
 | Sesión | JWT en memoria + refresh cookie `HttpOnly` |
-| Marketplace | Catálogo, búsqueda/filtros, vendedor y carrito |
+| Marketplace | Catálogo, búsqueda/filtros, vendedor, carrito, checkout y pedidos |
 | Accesibilidad | HTML semántico, foco visible, `aria-live`, contraste forzado, reducción de movimiento, Playwright + axe-core |
 
 ### ⚙️ Backend — implementado
 
-<p>
-  <img src="https://skillicons.dev/icons?i=dotnet,cs" alt=".NET y C#" />
-  <img src="https://img.shields.io/badge/ASP.NET%20Core-Web%20API-512BD4?style=flat-square&logo=dotnet&logoColor=white" alt="ASP.NET Core Web API" />
-  <img src="https://img.shields.io/badge/OpenAPI-Contrato%20HTTP-85EA2D?style=flat-square&logo=swagger&logoColor=black" alt="OpenAPI" />
-</p>
-
-| Área | Tecnología |
+| Área | Tecnología / capacidad |
 |---|---|
 | Plataforma | **.NET 10** |
 | API | **ASP.NET Core Web API** |
@@ -176,31 +163,25 @@ El stack se documenta según las capacidades realmente implementadas en **`v0.5.
 | Identidad | ASP.NET Core Identity + roles |
 | Validación | FluentValidation + Problem Details |
 | Seguridad | JWT, refresh rotation, lockout y rate limiting |
-| Dominio marketplace | Catálogo, vendedores, búsqueda y carrito persistente |
+| Dominio marketplace | Catálogo, vendedores, búsqueda, carrito, checkout, pedidos y cancelaciones |
+| Transacciones | EF Core execution strategy + SQL Server `Serializable` para operaciones críticas |
 
 ### 🗄️ Datos e infraestructura — implementado
-
-<p>
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/microsoftsqlserver/microsoftsqlserver-plain.svg" alt="Microsoft SQL Server" width="48" height="48" />
-  <img src="https://skillicons.dev/icons?i=docker,git,github,githubactions" alt="Docker, Git, GitHub y GitHub Actions" />
-</p>
 
 | Área | Tecnología |
 |---|---|
 | Base de datos | **Microsoft SQL Server 2022** |
+| Persistencia | **Entity Framework Core 10** + migraciones |
 | Contenedores | **Docker / Docker Compose** |
 | Control de versiones | **Git / GitHub** |
 | CI | **GitHub Actions** |
-| Persistencia | **Entity Framework Core 10** + migraciones |
-| Pruebas | **xUnit** + Testcontainers para SQL Server |
+| Pruebas | **xUnit** + Testcontainers para SQL Server + Playwright + axe-core |
 
-### 🧩 Tecnologías previstas para las siguientes fases
+### 🧩 Tecnologías previstas para siguientes fases
 
-Estas tecnologías forman parte del diseño objetivo, pero todavía no están integradas:
-
-- Angular CDK;
+- Angular CDK donde aporte valor real;
 - telemetría OpenTelemetry;
-- búsqueda especializada para escenarios de catálogo de mayor escala;
+- búsqueda especializada para catálogos de mayor escala;
 - caché distribuida para escenarios de escala.
 
 ---
@@ -256,17 +237,24 @@ Las dependencias de infraestructura, persistencia y presentación no deben conta
 
 ## 🛒 Estado funcional actual
 
-Con `v0.5.0`, AccessiUX Market dispone de un flujo marketplace navegable previo al checkout:
+Con **`v0.7.0`**, AccessiUX Market cubre el flujo de compra desde autenticación hasta gestión inmediata del pedido:
 
-1. registro e inicio de sesión;
+1. registro, inicio de sesión, refresh y recuperación de contraseña;
 2. onboarding de vendedor y publicación de productos;
-3. catálogo público;
+3. catálogo público y detalle de producto;
 4. búsqueda con filtros, facetas, ordenamiento y paginación;
-5. detalle de producto;
-6. carrito persistente por usuario;
-7. actualización y eliminación de líneas con validación server-side de stock.
+5. carrito persistente por usuario con validación server-side;
+6. checkout con revisión explícita de dirección, método de pago, artículos y total;
+7. creación transaccional del pedido con revalidación de publicación, moneda y stock;
+8. historial y detalle de pedidos por usuario;
+9. cancelación de pedidos `Pending` dentro de una ventana configurable;
+10. restitución atómica del inventario cuando la cancelación es válida.
 
-El carrito **no confía en precios ni propietarios enviados por el cliente**. El backend obtiene precio, moneda, publicación y stock desde SQL Server. La Fase 5 volverá a validar estos datos durante Checkout antes de crear una operación transaccional.
+### Reversibilidad de pedidos
+
+La elegibilidad para cancelar es **server-authoritative**. El backend devuelve `canCancel`, `cancelUntilUtc` y `cancellationMessage`; el cliente no decide la política según su reloj local.
+
+La ventana predeterminada es de **30 minutos**, configurable mediante `Orders:CancellationWindowMinutes`. La cancelación modifica el estado del pedido y restaura stock dentro de una misma transacción SQL Server `Serializable` ejecutada mediante la estrategia de reintentos de EF Core.
 
 ---
 
@@ -279,16 +267,16 @@ El carrito **no confía en precios ni propietarios enviados por el cliente**. El
 | 2 | Catálogo, categorías y vendedores | ✅ |
 | 3 | Búsqueda y filtros dinámicos | ✅ |
 | 4 | Carrito | ✅ |
-| 5 | Checkout | ⏳ |
-| 6 | Pedidos y cancelaciones | ⏳ |
+| 5 | Checkout | ✅ |
+| 6 | Pedidos y cancelaciones | ✅ |
 | 7 | Accesibilidad avanzada | ⏳ |
 | 8 | UX Lab, testing y preparación para producción | ⏳ |
 
 ### Estado actual
 
-**v0.5.0 — Cart**
+**v0.7.0 — Orders & Cancellations**
 
-La fase añade carrito SQL Server persistente por usuario autenticado, validación de stock y moneda en backend, operaciones de agregar/actualizar/eliminar/vaciar, integración desde detalle de producto, experiencia Angular accesible y pruebas de integración y accesibilidad. La rama de fase solo se integra en `main` cuando todas las verificaciones de CI finalizan correctamente.
+Fase 6 implementa `AM-UX-001`: historial y detalle de pedidos, visibilidad explícita de reversibilidad, ventana configurable, confirmación accesible y cancelación transaccional con restitución de inventario. El cierre se valida mediante pruebas unitarias, integración SQL Server/Testcontainers, build Angular y Playwright/axe. La rama solo se integra en `main` cuando ambos jobs del CI finalizan correctamente.
 
 ---
 
@@ -307,9 +295,6 @@ Copia el archivo de ejemplo y reemplaza todos los valores. No reutilices estas c
 
 ```bash
 cp .env.example .env
-```
-
-```bash
 docker compose up -d sqlserver
 ```
 
@@ -322,7 +307,13 @@ set +a
 dotnet run --project backend/src/AccessiUXMarket.Api
 ```
 
-Con `Database__ApplyMigrations=true`, la API aplica las migraciones al iniciar. `Database__SeedRoles=true` crea de forma idempotente los roles base y `Database__SeedCatalog=true` crea las categorías iniciales. En producción, las migraciones pueden ejecutarse como un paso controlado del despliegue.
+Con `Database__ApplyMigrations=true`, la API aplica las migraciones al iniciar. `Database__SeedRoles=true` crea los roles base y `Database__SeedCatalog=true` crea las categorías iniciales de forma idempotente.
+
+Para cambiar la ventana de cancelación:
+
+```text
+Orders__CancellationWindowMinutes=30
+```
 
 Endpoint de salud:
 
@@ -359,18 +350,21 @@ npm test
 - [ADR 0002 — Seguridad de identidad y sesiones](docs/adr/0002-identity-session-security.md)
 - [API de autenticación](docs/api/authentication.md)
 - [API de carrito](docs/api/cart.md)
+- [API de pedidos y cancelaciones](docs/api/orders.md)
+- [Arquitectura de Fase 6](docs/architecture/phase-6-orders.md)
+- [UX de Fase 6](docs/ux/phase-6-orders.md)
 - [Pruebas de identidad](docs/testing/identity.md)
 - [Requisitos UX](docs/ux/requirements.md)
 - [Política de seguridad](SECURITY.md)
 - [Historial de cambios](CHANGELOG.md)
 
-La documentación crecerá junto con las fases correspondientes y solo reportará resultados de pruebas realmente ejecutadas.
+La documentación crece junto con las fases correspondientes y solo reporta resultados de pruebas realmente ejecutadas.
 
 ---
 
 ## 📏 Métricas UX
 
-Las métricas del proyecto evolucionado no se inventarán ni se heredarán automáticamente de la auditoría académica. Valores como SUS, tasa de éxito, tiempo de tarea, errores y puntuaciones de accesibilidad deberán proceder de:
+Las métricas del proyecto evolucionado no se inventan ni se heredan automáticamente de la auditoría académica. Valores como SUS, tasa de éxito, tiempo de tarea, errores y puntuaciones de accesibilidad deberán proceder de:
 
 - pruebas reales con usuarios;
 - Playwright;

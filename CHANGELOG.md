@@ -4,6 +4,48 @@ All notable changes to AccessiUX Market are documented in this file.
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-09-06
+
+### Added
+
+- Authenticated order history and order-detail API scoped to the current user.
+- Server-authoritative cancellation metadata with `canCancel`, `cancelUntilUtc`, and `cancellationMessage`.
+- Configurable order-cancellation window through `Orders:CancellationWindowMinutes`, defaulting to 30 minutes.
+- Transactional order cancellation with SQL Server `Serializable` isolation and EF Core execution strategy.
+- Atomic restoration of product inventory when an eligible order is cancelled.
+- Protected Angular routes for `/orders` and `/orders/:id`.
+- Accessible order history, detail, cancellation eligibility messaging, explicit cancellation confirmation, and live feedback.
+- Unit and SQL Server integration coverage for cancellation rules, authentication, ownership, status transitions, duplicate cancellation prevention, and stock restoration.
+- Playwright/axe coverage for order history and the cancellation-confirmation flow.
+- Orders API, UX, and architecture documentation.
+
+### Changed
+
+- API product version advanced from `0.6.0` Checkout to `0.7.0` Orders and Cancellations.
+- Authenticated navigation now exposes `Mis pedidos` directly.
+- Cancellation eligibility is decided by the backend rather than inferred from the browser clock.
+
+## [0.6.0] - 2026-09-06
+
+### Added
+
+- Protected checkout route and accessible review-before-confirmation experience.
+- `POST /api/v1/checkout/review` for server-side review of address, payment-method selection, cart lines, stock, currency, and totals.
+- `POST /api/v1/checkout/confirm` for transactional order creation.
+- `Order` and `OrderItem` persistence with immutable product, price, and delivery-address snapshots.
+- Stock revalidation and inventory decrement during confirmation.
+- Atomic cart clearing after successful checkout.
+- SQL Server migration for checkout orders.
+- Unit and integration coverage for order snapshots, stock guards, confirmation, cart clearing, and stock revalidation.
+- Playwright/axe coverage for the accessible checkout review flow.
+- NORTIC B2 accessibility statement and regression coverage.
+
+### Changed
+
+- API product version advanced from `0.5.0` Cart to `0.6.0` Checkout.
+- Explicit checkout transactions execute through EF Core's configured retry strategy.
+- Card selection represents a payment-method choice only; AccessiUX Market does not store card data.
+
 ## [0.5.0] - 2026-09-04
 
 ### Added
