@@ -137,10 +137,14 @@ app.MapCartEndpoints();
 app.MapCheckoutEndpoints();
 app.MapOrderEndpoints();
 
+var seedDemoUsers = app.Environment.IsDevelopment() &&
+    app.Configuration.GetValue<bool>("Database:SeedDemoUsers");
+
 await app.Services.InitializeDatabaseAsync(
     app.Configuration.GetValue<bool>("Database:ApplyMigrations"),
     app.Configuration.GetValue("Database:SeedRoles", true),
-    app.Configuration.GetValue("Database:SeedCatalog", true));
+    app.Configuration.GetValue("Database:SeedCatalog", true),
+    seedDemoUsers);
 
 await app.RunAsync();
 
