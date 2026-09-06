@@ -132,7 +132,7 @@ test('checkout exposes critical information for review before confirmation', asy
 
   await expect(page.getByRole('heading', { name: 'Dirección revisada' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Método de pago' })).toBeVisible();
-  await expect(page.getByText('RD$3,000.00')).toBeVisible();
+  await expect(page.locator('.review-totals__grand')).toContainText('3,000.00');
   const reviewCheckbox = page.getByLabel('He revisado la dirección, el método de pago, los productos y el total.');
   await expect(reviewCheckbox).toBeVisible();
   await expect(page.getByRole('button', { name: 'Confirmar compra' })).toBeDisabled();
