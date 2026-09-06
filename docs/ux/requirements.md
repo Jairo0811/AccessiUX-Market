@@ -12,7 +12,7 @@ Users must be able to identify whether a recently created order is cancellable a
 
 Seller warranty, shipping, and return information must use a consistent structure and visual placement across marketplace product experiences.
 
-**Implementation status:** pending.
+**Implementation status:** completed in Phase 8. Warranty, shipping, and return policies are persisted independently on the seller profile, validated server-side, editable from the seller dashboard, exposed through the public seller contract, and rendered on product detail in the fixed order Warranty → Shipping → Returns. Missing policies remain visibly identified rather than silently removing a section.
 
 ## AM-UX-003 — Simple Reading Mode
 

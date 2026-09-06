@@ -49,8 +49,28 @@ public sealed class SellerProfile
     public string DisplayName { get; private set; } = string.Empty;
     public string Slug { get; private set; } = string.Empty;
     public string? Description { get; private set; }
+    public string? WarrantyPolicy { get; private set; }
+    public string? ShippingPolicy { get; private set; }
+    public string? ReturnPolicy { get; private set; }
     public bool IsActive { get; private set; }
     public DateTime CreatedAtUtc { get; private set; }
+
+    public void UpdatePolicies(string warrantyPolicy, string shippingPolicy, string returnPolicy)
+    {
+        WarrantyPolicy = NormalizePolicy(warrantyPolicy);
+        ShippingPolicy = NormalizePolicy(shippingPolicy);
+        ReturnPolicy = NormalizePolicy(returnPolicy);
+    }
+
+    private static string NormalizePolicy(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new ArgumentException("Seller policies cannot be empty.", nameof(value));
+        }
+
+        return value.Trim();
+    }
 }
 
 public sealed class Product

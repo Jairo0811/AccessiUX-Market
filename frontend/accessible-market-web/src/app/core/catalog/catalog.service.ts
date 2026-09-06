@@ -1,7 +1,16 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { CatalogSearchParams, CatalogSearchResult, Category, CreateProductRequest, CreateSellerRequest, Product, Seller } from './catalog.models';
+import {
+  CatalogSearchParams,
+  CatalogSearchResult,
+  Category,
+  CreateProductRequest,
+  CreateSellerRequest,
+  Product,
+  Seller,
+  UpdateSellerPoliciesRequest,
+} from './catalog.models';
 
 @Injectable({ providedIn: 'root' })
 export class CatalogService {
@@ -23,9 +32,11 @@ export class CatalogService {
     return this.http.get<CatalogSearchResult>(`${this.baseUrl}/search`, { params });
   }
   product(slug: string): Observable<Product> { return this.http.get<Product>(`${this.baseUrl}/products/${encodeURIComponent(slug)}`); }
+  sellerById(sellerId: string): Observable<Seller> { return this.http.get<Seller>(`${this.baseUrl}/sellers/id/${encodeURIComponent(sellerId)}`); }
   mySeller(): Observable<Seller> { return this.http.get<Seller>(`${this.baseUrl}/seller/me`); }
   myProducts(): Observable<Product[]> { return this.http.get<Product[]>(`${this.baseUrl}/seller/products`); }
   createSeller(request: CreateSellerRequest): Observable<Seller> { return this.http.post<Seller>(`${this.baseUrl}/seller`, request); }
+  updateSellerPolicies(request: UpdateSellerPoliciesRequest): Observable<Seller> { return this.http.put<Seller>(`${this.baseUrl}/seller/policies`, request); }
   createProduct(request: CreateProductRequest): Observable<Product> { return this.http.post<Product>(`${this.baseUrl}/seller/products`, request); }
   publish(productId: string): Observable<void> { return this.http.post<void>(`${this.baseUrl}/seller/products/${productId}/publish`, {}); }
 }

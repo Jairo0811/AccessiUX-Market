@@ -79,6 +79,9 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
             entity.Property(seller => seller.DisplayName).HasMaxLength(120).IsRequired();
             entity.Property(seller => seller.Slug).HasMaxLength(140).IsRequired();
             entity.Property(seller => seller.Description).HasMaxLength(1000);
+            entity.Property(seller => seller.WarrantyPolicy).HasMaxLength(2000);
+            entity.Property(seller => seller.ShippingPolicy).HasMaxLength(2000);
+            entity.Property(seller => seller.ReturnPolicy).HasMaxLength(2000);
             entity.HasIndex(seller => seller.UserId).IsUnique();
             entity.HasIndex(seller => seller.Slug).IsUnique();
             entity.HasOne<ApplicationUser>()

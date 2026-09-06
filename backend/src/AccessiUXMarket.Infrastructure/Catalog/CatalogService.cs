@@ -27,6 +27,15 @@ public sealed class CatalogService(ApplicationDbContext dbContext, TimeProvider 
                 ? "Published"
                 : "Archived");
 
+    private static readonly Expression<Func<SellerProfile, SellerDto>> SellerProjection = seller => new SellerDto(
+        seller.Id,
+        seller.DisplayName,
+        seller.Slug,
+        seller.Description,
+        seller.WarrantyPolicy,
+        seller.ShippingPolicy,
+        seller.ReturnPolicy);
+
     public async Task<IReadOnlyList<CategoryDto>> GetCategoriesAsync(CancellationToken cancellationToken = default) =>
         await dbContext.Categories.AsNoTracking().Where(category => category.IsActive).OrderBy(category => category.Name)
             .Select(category => new CategoryDto(category.Id, category.Name, category.Slug, category.Description)).ToListAsync(cancellationToken);
@@ -101,16 +110,20 @@ public sealed class CatalogService(ApplicationDbContext dbContext, TimeProvider 
             .Select(ProductProjection).SingleOrDefaultAsync(cancellationToken);
     }
 
+    public async Task<SellerDto?> GetSellerByIdAsync(Guid sellerId, CancellationToken cancellationToken = default) =>
+        await dbContext.SellerProfiles.AsNoTracking().Where(seller => seller.IsActive && seller.Id == sellerId)
+            .Select(SellerProjection).SingleOrDefaultAsync(cancellationToken);
+
     public async Task<SellerDto?> GetSellerBySlugAsync(string slug, CancellationToken cancellationToken = default)
     {
         var normalizedSlug = slug.Trim().ToLowerInvariant();
         return await dbContext.SellerProfiles.AsNoTracking().Where(seller => seller.IsActive && seller.Slug == normalizedSlug)
-            .Select(seller => new SellerDto(seller.Id, seller.DisplayName, seller.Slug, seller.Description)).SingleOrDefaultAsync(cancellationToken);
+            .Select(SellerProjection).SingleOrDefaultAsync(cancellationToken);
     }
 
     public async Task<SellerDto?> GetSellerByUserIdAsync(Guid userId, CancellationToken cancellationToken = default) =>
         await dbContext.SellerProfiles.AsNoTracking().Where(seller => seller.UserId == userId && seller.IsActive)
-            .Select(seller => new SellerDto(seller.Id, seller.DisplayName, seller.Slug, seller.Description)).SingleOrDefaultAsync(cancellationToken);
+            .Select(SellerProjection).SingleOrDefaultAsync(cancellationToken);
 
     public async Task<IReadOnlyList<ProductDto>> GetSellerProductsAsync(Guid userId, CancellationToken cancellationToken = default)
     {
@@ -135,7 +148,17 @@ public sealed class CatalogService(ApplicationDbContext dbContext, TimeProvider 
             var roleResult = await userManager.AddToRoleAsync(user, RoleNames.Seller);
             if (!roleResult.Succeeded) throw new InvalidOperationException("The Seller role could not be assigned.");
         }
-        return new SellerDto(seller.Id, seller.DisplayName, seller.Slug, seller.Description);
+        return ToDto(seller);
+    }
+
+    public async Task<SellerDto> UpdateSellerPoliciesAsync(Guid userId, UpdateSellerPoliciesRequest request, CancellationToken cancellationToken = default)
+    {
+        var seller = await dbContext.SellerProfiles.SingleOrDefaultAsync(profile => profile.UserId == userId && profile.IsActive, cancellationToken)
+            ?? throw new InvalidOperationException("An active seller profile is required.");
+
+        seller.UpdatePolicies(request.WarrantyPolicy, request.ShippingPolicy, request.ReturnPolicy);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return ToDto(seller);
     }
 
     public async Task<ProductDto> CreateProductAsync(Guid userId, CreateProductRequest request, CancellationToken cancellationToken = default)
@@ -163,4 +186,13 @@ public sealed class CatalogService(ApplicationDbContext dbContext, TimeProvider 
     }
 
     private static ProductDto ToDto(Product product) => new(product.Id, product.SellerId, product.CategoryId, product.Name, product.Slug, product.Description, product.Price, product.Currency, product.StockQuantity, product.Status.ToString());
+
+    private static SellerDto ToDto(SellerProfile seller) => new(
+        seller.Id,
+        seller.DisplayName,
+        seller.Slug,
+        seller.Description,
+        seller.WarrantyPolicy,
+        seller.ShippingPolicy,
+        seller.ReturnPolicy);
 }

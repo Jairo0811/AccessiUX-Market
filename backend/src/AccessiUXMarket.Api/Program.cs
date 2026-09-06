@@ -8,6 +8,7 @@ using AccessiUXMarket.Application.Identity;
 using AccessiUXMarket.Infrastructure;
 using AccessiUXMarket.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -121,7 +122,15 @@ app.UseAuthorization();
 
 if (app.Environment.IsDevelopment()) app.MapOpenApi();
 app.MapHealthChecks("/health");
-app.MapGet("/api", () => Results.Ok(new { name = "AccessiUX Market API", version = "0.7.0" }));
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = registration => registration.Tags.Contains("live")
+});
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = registration => registration.Tags.Contains("ready")
+});
+app.MapGet("/api", () => Results.Ok(new { name = "AccessiUX Market API", version = "1.0.0" }));
 app.MapIdentityEndpoints();
 app.MapCatalogEndpoints();
 app.MapCartEndpoints();
