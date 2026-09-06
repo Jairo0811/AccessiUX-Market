@@ -9,6 +9,7 @@ All notable changes to AccessiUX Market are documented in this file.
 ### Fixed
 
 - Corrected the Docker Compose SQL Server healthcheck so `MSSQL_SA_PASSWORD` expands inside the container instead of being passed literally to `sqlcmd`; `docker compose up` can now report the database as healthy when it is actually ready.
+- Bounded SQL Server memory in the Testcontainers integration fixture to keep CI stable under constrained GitHub-hosted runners instead of allowing SQL Server to consume most visible host memory.
 
 ### Added
 
