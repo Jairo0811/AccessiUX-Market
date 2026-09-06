@@ -31,7 +31,7 @@ done
 curl -fsS "${API_BASE}/health/live" >/dev/null
 curl -fsS "${API_BASE}/health/ready" >/dev/null
 api_metadata="$(curl -fsS "${API_BASE}/api")"
-jq -e '.version == "1.0.0"' <<<"$api_metadata" >/dev/null
+jq -e '.version == "1.0.1"' <<<"$api_metadata" >/dev/null
 
 customer_session="$(login 'customer@accessiux.local')"
 seller_session="$(login 'seller@accessiux.local')"
@@ -94,4 +94,4 @@ curl -fsS "${API_BASE}/api/v1/catalog/products/smoke-product-v1" | jq -e '.stock
 curl -fsS -H "$(auth_header "$customer_token")" "${API_BASE}/api/v1/cart" | jq -e '.totalQuantity == 0 and (.items | length) == 0' >/dev/null
 
 printf 'FULL-STACK API SMOKE: PASS\n'
-printf 'Validated health, v1.0.0 metadata, three demo roles, seller policies, product publication, cart, checkout, orders, cancellation and stock restoration.\n'
+printf 'Validated health, v1.0.1 metadata, three demo roles, seller policies, product publication, cart, checkout, orders, cancellation and stock restoration.\n'
