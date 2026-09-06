@@ -159,6 +159,20 @@ jobs:
         working-directory: frontend/accessible-market-web
         run: npm test
 
+      - name: Stop real stack before Testcontainers regression
+        shell: bash
+        run: |
+          if [[ -f /tmp/accessiux-api.pid ]]; then
+            kill "$(cat /tmp/accessiux-api.pid)" 2>/dev/null || true
+            rm -f /tmp/accessiux-api.pid
+          fi
+          pkill -f '[A]ccessiUXMarket.Api' 2>/dev/null || true
+          docker compose down -v
+          if docker ps -a --format '{{.Names}}' | grep -qx 'accessiuxmarket-sqlserver'; then
+            echo 'Real-stack SQL Server is still present before Testcontainers regression.' >&2
+            exit 1
+          fi
+
       - name: Run backend regression suite
         run: dotnet test backend/AccessiUXMarket.sln --configuration Release --no-restore --no-build --logger "console;verbosity=normal"
 
