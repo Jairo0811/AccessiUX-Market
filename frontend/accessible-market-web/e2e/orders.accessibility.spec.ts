@@ -5,7 +5,7 @@ const orderId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const productId = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 const createdAtUtc = '2026-09-06T21:00:00Z';
 const cancelUntilUtc = '2026-09-06T21:30:00Z';
-const ordersApi = /\/api\/v1\/orders(?:\/[^?]*)?(?:\?.*)?$/;
+const isOrdersApi = (url: URL): boolean => url.pathname === '/api/v1/orders' || url.pathname.startsWith('/api/v1/orders/');
 
 const baseOrder = {
   id: orderId,
@@ -46,7 +46,7 @@ const baseOrder = {
 test('order history exposes status and cancellation availability accessibly', async ({ page }) => {
   await mockAuthenticatedCustomer(page);
 
-  await page.route(ordersApi, async routeHandler => {
+  await page.route(isOrdersApi, async routeHandler => {
     if (routeHandler.request().method() !== 'GET') {
       await routeHandler.fallback();
       return;
@@ -87,7 +87,7 @@ test('order cancellation requires explicit confirmation and announces the new st
   await mockAuthenticatedCustomer(page);
   let cancelled = false;
 
-  await page.route(ordersApi, async routeHandler => {
+  await page.route(isOrdersApi, async routeHandler => {
     const request = routeHandler.request();
     const url = new URL(request.url());
 
