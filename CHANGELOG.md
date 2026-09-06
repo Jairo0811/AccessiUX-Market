@@ -4,6 +4,22 @@ All notable changes to AccessiUX Market are documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Persistent accessibility preferences for Simple Reading Mode, reduced motion, increased contrast, and larger text.
+- Public accessibility controls and reset action on `/accessibility` with polite live announcements.
+- Dedicated preference-driven global accessibility stylesheet.
+- Predictable SPA focus management that preserves native initial tab order and focuses main content after subsequent route changes.
+- `aria-current="page"` semantics for primary navigation destinations.
+- Playwright/axe regression coverage for skip links, keyboard navigation, route focus, preference persistence/reset, active-page semantics, and accessibility modes.
+- Phase 7 advanced accessibility documentation.
+
+### Changed
+
+- The accessibility route now combines the declaration with functional user preferences.
+- Primary navigation exposes direct access to accessibility settings.
+- `AM-UX-003` and the current application surface of `AM-UX-005` are marked implemented.
+
 ## [0.7.0] - 2026-09-06
 
 ### Added
