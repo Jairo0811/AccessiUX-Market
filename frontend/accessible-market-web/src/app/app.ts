@@ -1,8 +1,8 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AccessibilityPreferencesService } from './core/accessibility/accessibility-preferences.service';
 import { AuthService } from './core/auth/auth.service';
 
@@ -256,6 +256,7 @@ export class AppComponent {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly document = inject(DOCUMENT);
+  private hasCompletedInitialNavigation = false;
 
   constructor() {
     this.router.events
@@ -263,7 +264,14 @@ export class AppComponent {
         filter((event): event is NavigationEnd => event instanceof NavigationEnd),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe(() => this.focusMainContent());
+      .subscribe(() => {
+        if (!this.hasCompletedInitialNavigation) {
+          this.hasCompletedInitialNavigation = true;
+          return;
+        }
+
+        this.focusMainContent();
+      });
   }
 
   logout(): void {
