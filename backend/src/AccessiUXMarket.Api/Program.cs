@@ -130,7 +130,7 @@ app.MapHealthChecks("/health/ready", new HealthCheckOptions
 {
     Predicate = registration => registration.Tags.Contains("ready")
 });
-app.MapGet("/api", () => Results.Ok(new { name = "AccessiUX Market API", version = "1.0.0" }));
+app.MapGet("/api", () => Results.Ok(new { name = "AccessiUX Market API", version = "1.0.1" }));
 app.MapIdentityEndpoints();
 app.MapCatalogEndpoints();
 app.MapCartEndpoints();
