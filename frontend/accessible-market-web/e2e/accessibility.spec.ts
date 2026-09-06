@@ -6,7 +6,7 @@ const emptySearchResult = JSON.stringify({
   facets: { categories: [], minPrice: null, maxPrice: null }
 });
 
-const publicRoutes = ['/', '/catalog', '/login', '/register', '/forgot-password'];
+const publicRoutes = ['/', '/catalog', '/login', '/register', '/forgot-password', '/accessibility'];
 
 for (const route of publicRoutes) {
   test(`${route} has no automatically detectable accessibility violations`, async ({ page }) => {
@@ -22,6 +22,83 @@ for (const route of publicRoutes) {
     expect(results.violations).toEqual([]);
   });
 }
+
+test('skip link is the first keyboard target and moves focus to main content', async ({ page }) => {
+  await page.goto('/');
+
+  const skipLink = page.getByRole('link', { name: 'Saltar al contenido principal' });
+  await page.keyboard.press('Tab');
+  await expect(skipLink).toBeFocused();
+
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#main-content')).toBeFocused();
+});
+
+test('client-side navigation moves focus predictably to the main region', async ({ page }) => {
+  await page.route('**/api/v1/catalog/search**', async routeHandler => {
+    await routeHandler.fulfill({ status: 200, contentType: 'application/json', body: emptySearchResult });
+  });
+
+  await page.goto('/');
+  const catalogLink = page.locator('.nav').getByRole('link', { name: 'Catálogo' });
+  await catalogLink.focus();
+  await page.keyboard.press('Enter');
+
+  await expect(page).toHaveURL(/\/catalog$/);
+  await expect(page.getByRole('heading', { name: 'Encuentra productos accesibles' })).toBeVisible();
+  await expect(page.locator('#main-content')).toBeFocused();
+});
+
+test('accessibility preferences apply immediately, persist and can be reset', async ({ page }) => {
+  await page.goto('/accessibility');
+
+  const simpleReading = page.getByLabel('Modo de Lectura Simple');
+  const reducedMotion = page.getByLabel('Reducir movimiento');
+  const highContrast = page.getByLabel('Aumentar contraste');
+  const largeText = page.getByLabel('Texto más grande');
+
+  await simpleReading.check();
+  await reducedMotion.check();
+  await highContrast.check();
+  await largeText.check();
+
+  const root = page.locator('html');
+  await expect(root).toHaveAttribute('data-simple-reading', '');
+  await expect(root).toHaveAttribute('data-reduce-motion', '');
+  await expect(root).toHaveAttribute('data-high-contrast', '');
+  await expect(root).toHaveAttribute('data-large-text', '');
+  await expect(page.getByRole('status')).toContainText('Texto más grande activado.');
+
+  let results = await new AxeBuilder({ page }).analyze();
+  expect(results.violations).toEqual([]);
+
+  await page.reload();
+  await expect(simpleReading).toBeChecked();
+  await expect(reducedMotion).toBeChecked();
+  await expect(highContrast).toBeChecked();
+  await expect(largeText).toBeChecked();
+  await expect(root).toHaveAttribute('data-simple-reading', '');
+  await expect(root).toHaveAttribute('data-high-contrast', '');
+
+  await page.getByRole('button', { name: 'Restablecer preferencias' }).click();
+  await expect(simpleReading).not.toBeChecked();
+  await expect(reducedMotion).not.toBeChecked();
+  await expect(highContrast).not.toBeChecked();
+  await expect(largeText).not.toBeChecked();
+  await expect(root).not.toHaveAttribute('data-simple-reading');
+  await expect(root).not.toHaveAttribute('data-reduce-motion');
+  await expect(root).not.toHaveAttribute('data-high-contrast');
+  await expect(root).not.toHaveAttribute('data-large-text');
+  await expect(page.getByRole('status')).toContainText('Preferencias de accesibilidad restablecidas.');
+
+  results = await new AxeBuilder({ page }).analyze();
+  expect(results.violations).toEqual([]);
+});
+
+test('current navigation destination is exposed programmatically', async ({ page }) => {
+  await page.goto('/accessibility');
+  await expect(page.locator('.nav').getByRole('link', { name: 'Accesibilidad' })).toHaveAttribute('aria-current', 'page');
+});
 
 test('the login form has an accessible name for every control', async ({ page }) => {
   await page.goto('/login');
