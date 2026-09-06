@@ -74,6 +74,7 @@ jobs:
             ASPNETCORE_URLS=http://127.0.0.1:5080 \
             ConnectionStrings__DefaultConnection="Server=127.0.0.1,1433;Database=AccessiUXMarketSmoke;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=True" \
             Jwt__SigningKey="AccessiUXMarket_Smoke_SigningKey_2026_Only_AtLeast32Bytes" \
+            Cors__AllowedOrigins__0=http://127.0.0.1:4200 \
             Database__ApplyMigrations=true \
             Database__SeedRoles=true \
             Database__SeedCatalog=true \
