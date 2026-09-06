@@ -5,6 +5,7 @@ const orderId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const productId = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 const createdAtUtc = '2026-09-06T21:00:00Z';
 const cancelUntilUtc = '2026-09-06T21:30:00Z';
+const ordersApi = /\/api\/v1\/orders(?:\/[^?]*)?(?:\?.*)?$/;
 
 const baseOrder = {
   id: orderId,
@@ -44,9 +45,12 @@ const baseOrder = {
 
 test('order history exposes status and cancellation availability accessibly', async ({ page }) => {
   await mockAuthenticatedCustomer(page);
-  await page.route('**/api/v1/orders**', async routeHandler => {
+  let ordersRequestSeen = false;
+
+  await page.route(ordersApi, async routeHandler => {
     const request = routeHandler.request();
     const url = new URL(request.url());
+    ordersRequestSeen = true;
 
     if (request.method() === 'GET' && /^\/api\/v1\/orders\/?$/.test(url.pathname)) {
       await routeHandler.fulfill({
@@ -75,6 +79,7 @@ test('order history exposes status and cancellation availability accessibly', as
   await page.goto('/orders');
 
   await expect(page.getByRole('heading', { name: 'Mis pedidos' })).toBeVisible();
+  expect(ordersRequestSeen).toBe(true);
   await expect(page.getByText(baseOrder.orderNumber)).toBeVisible();
   await expect(page.getByText('Pendiente', { exact: true })).toBeVisible();
   await expect(page.getByText('Cancelación disponible.', { exact: true })).toBeVisible();
@@ -87,8 +92,9 @@ test('order history exposes status and cancellation availability accessibly', as
 test('order cancellation requires explicit confirmation and announces the new state', async ({ page }) => {
   await mockAuthenticatedCustomer(page);
   let cancelled = false;
+  let detailRequestSeen = false;
 
-  await page.route('**/api/v1/orders**', async routeHandler => {
+  await page.route(ordersApi, async routeHandler => {
     const request = routeHandler.request();
     const url = new URL(request.url());
 
@@ -109,6 +115,7 @@ test('order cancellation requires explicit confirmation and announces the new st
     }
 
     if (request.method() === 'GET' && url.pathname.endsWith(`/${orderId}`)) {
+      detailRequestSeen = true;
       await routeHandler.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -129,6 +136,7 @@ test('order cancellation requires explicit confirmation and announces the new st
 
   await page.goto(`/orders/${orderId}`);
 
+  expect(detailRequestSeen).toBe(true);
   await expect(page.getByRole('heading', { name: baseOrder.orderNumber })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Cancelar pedido' })).toBeVisible();
   await page.getByRole('button', { name: 'Cancelar pedido' }).click();
