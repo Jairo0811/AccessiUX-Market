@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page, type Route } from '@playwright/test';
 
 const orderId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const productId = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
@@ -42,35 +42,43 @@ const baseOrder = {
   cancellationMessage: `This order can be cancelled until ${cancelUntilUtc}.`,
 };
 
+const sessionBody = JSON.stringify({
+  accessToken: 'test-token',
+  accessTokenExpiresAtUtc: '2026-09-07T18:00:00Z',
+  tokenType: 'Bearer',
+  user: {
+    id: '11111111-1111-1111-1111-111111111111',
+    email: 'customer@example.com',
+    fullName: 'Orders Test User',
+    emailConfirmed: false,
+    roles: ['Customer'],
+  },
+});
+
 test('order history exposes status and cancellation availability accessibly', async ({ page }) => {
-  await mockAuthenticatedCustomer(page);
-
-  await page.route('**/*', async routeHandler => {
-    const request = routeHandler.request();
-    const url = new URL(request.url());
-
-    if (url.pathname !== '/api/v1/orders' || request.method() !== 'GET') {
-      await routeHandler.fallback();
-      return;
+  await installApiRouter(page, async (route, method, pathname) => {
+    if (method === 'GET' && pathname === '/api/v1/orders') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([{
+          id: orderId,
+          orderNumber: baseOrder.orderNumber,
+          status: 'Pending',
+          total: 3000,
+          currency: 'DOP',
+          itemCount: 2,
+          createdAtUtc,
+          updatedAtUtc: createdAtUtc,
+          canCancel: true,
+          cancelUntilUtc,
+          cancellationMessage: baseOrder.cancellationMessage,
+        }]),
+      });
+      return true;
     }
 
-    await routeHandler.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify([{
-        id: orderId,
-        orderNumber: baseOrder.orderNumber,
-        status: 'Pending',
-        total: 3000,
-        currency: 'DOP',
-        itemCount: 2,
-        createdAtUtc,
-        updatedAtUtc: createdAtUtc,
-        canCancel: true,
-        cancelUntilUtc,
-        cancellationMessage: baseOrder.cancellationMessage,
-      }]),
-    });
+    return false;
   });
 
   await page.goto('/orders');
@@ -86,17 +94,13 @@ test('order history exposes status and cancellation availability accessibly', as
 });
 
 test('order cancellation requires explicit confirmation and announces the new state', async ({ page }) => {
-  await mockAuthenticatedCustomer(page);
   let cancelled = false;
+  const detailPath = `/api/v1/orders/${orderId}`;
 
-  await page.route('**/*', async routeHandler => {
-    const request = routeHandler.request();
-    const url = new URL(request.url());
-    const detailPath = `/api/v1/orders/${orderId}`;
-
-    if (url.pathname === `${detailPath}/cancel` && request.method() === 'POST') {
+  await installApiRouter(page, async (route, method, pathname) => {
+    if (method === 'POST' && pathname === `${detailPath}/cancel`) {
       cancelled = true;
-      await routeHandler.fulfill({
+      await route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
@@ -107,11 +111,11 @@ test('order cancellation requires explicit confirmation and announces the new st
           message: 'Order cancelled successfully. Reserved stock was restored.',
         }),
       });
-      return;
+      return true;
     }
 
-    if (url.pathname === detailPath && request.method() === 'GET') {
-      await routeHandler.fulfill({
+    if (method === 'GET' && pathname === detailPath) {
+      await route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify(cancelled ? {
@@ -123,10 +127,10 @@ test('order cancellation requires explicit confirmation and announces the new st
           cancellationMessage: 'This order has been cancelled.',
         } : baseOrder),
       });
-      return;
+      return true;
     }
 
-    await routeHandler.fallback();
+    return false;
   });
 
   await page.goto(`/orders/${orderId}`);
@@ -145,30 +149,31 @@ test('order cancellation requires explicit confirmation and announces the new st
   await page.getByRole('button', { name: 'Sí, cancelar pedido' }).click();
 
   await expect(page.getByText(`Pedido ${baseOrder.orderNumber} cancelado correctamente.`)).toBeVisible();
-  await expect(page.getByText('Estado: Cancelado')).toBeVisible();
+  await expect(page.getByText(/Estado:\s*Cancelado/)).toBeVisible();
   await expect(page.getByRole('button', { name: 'Cancelar pedido' })).toHaveCount(0);
 
   results = await new AxeBuilder({ page }).analyze();
   expect(results.violations).toEqual([]);
 });
 
-async function mockAuthenticatedCustomer(page: import('@playwright/test').Page): Promise<void> {
-  await page.route('**/api/v1/auth/refresh', async routeHandler => {
-    await routeHandler.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        accessToken: 'test-token',
-        accessTokenExpiresAtUtc: '2026-09-07T18:00:00Z',
-        tokenType: 'Bearer',
-        user: {
-          id: '11111111-1111-1111-1111-111111111111',
-          email: 'customer@example.com',
-          fullName: 'Orders Test User',
-          emailConfirmed: false,
-          roles: ['Customer'],
-        },
-      }),
-    });
+async function installApiRouter(
+  page: Page,
+  handleOrders: (route: Route, method: string, pathname: string) => Promise<boolean>,
+): Promise<void> {
+  await page.route('**/*', async route => {
+    const request = route.request();
+    const method = request.method();
+    const pathname = new URL(request.url()).pathname;
+
+    if (method === 'POST' && pathname === '/api/v1/auth/refresh') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: sessionBody });
+      return;
+    }
+
+    if (await handleOrders(route, method, pathname)) {
+      return;
+    }
+
+    await route.continue();
   });
 }
