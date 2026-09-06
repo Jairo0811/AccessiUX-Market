@@ -38,12 +38,12 @@ test('the catalog exposes accessible filters and a clear empty state', async ({ 
   await expect(page.getByRole('heading', { name: 'Encuentra productos accesibles' })).toBeVisible();
   await expect(page.getByLabel('Buscar')).toBeVisible();
   await expect(page.getByLabel('Categoría')).toBeVisible();
-  await expect(page.getByLabel('Precio mínimo')).toBeVisible();
-  await expect(page.getByLabel('Precio máximo')).toBeVisible();
+  await expect(page.getByLabel('Mínimo')).toBeVisible();
+  await expect(page.getByLabel('Máximo')).toBeVisible();
   await expect(page.getByLabel('Disponibilidad')).toBeVisible();
   await expect(page.getByLabel('Ordenar por')).toBeVisible();
   await expect(page.getByRole('status')).toContainText('0 producto(s) encontrado(s)');
-  await expect(page.getByText('No encontramos productos con esos filtros')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'No encontramos productos' })).toBeVisible();
 });
 
 test('catalog filters are reflected in the URL', async ({ page }) => {
@@ -52,7 +52,7 @@ test('catalog filters are reflected in the URL', async ({ page }) => {
   });
   await page.goto('/catalog');
   await page.getByLabel('Buscar').fill('teclado');
-  await page.getByLabel('Precio mínimo').fill('500');
+  await page.getByLabel('Mínimo').fill('500');
   await page.getByRole('button', { name: 'Aplicar filtros' }).click();
   await expect(page).toHaveURL(/q=teclado/);
   await expect(page).toHaveURL(/minPrice=500/);
@@ -64,7 +64,7 @@ test('the authenticated empty cart is accessible and guides the user back to cat
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        accessToken: 'test-access-token',
+        accessToken: 'test-token',
         accessTokenExpiresAtUtc: '2026-09-04T18:00:00Z',
         tokenType: 'Bearer',
         user: {
