@@ -1,10 +1,14 @@
 using System;
+using AccessiUXMarket.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace AccessiUXMarket.Infrastructure.Persistence.Migrations
 {
+    [DbContext(typeof(ApplicationDbContext))]
+    [Migration("20260904133000_AddCart")]
     public partial class AddCart : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
