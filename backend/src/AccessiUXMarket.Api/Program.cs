@@ -126,6 +126,7 @@ app.MapIdentityEndpoints();
 app.MapCatalogEndpoints();
 app.MapCartEndpoints();
 app.MapCheckoutEndpoints();
+app.MapOrderEndpoints();
 
 await app.Services.InitializeDatabaseAsync(
     app.Configuration.GetValue<bool>("Database:ApplyMigrations"),
