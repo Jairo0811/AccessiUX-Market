@@ -1,0 +1,162 @@
+/* Phase 7 — user-controlled accessibility preferences. */
+
+:root[data-large-text] {
+  font-size: 118.75%;
+}
+
+:root[data-reduce-motion] *,
+:root[data-reduce-motion] *::before,
+:root[data-reduce-motion] *::after {
+  scroll-behavior: auto !important;
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0ms !important;
+}
+
+:root[data-simple-reading] body {
+  background: var(--surface);
+}
+
+:root[data-simple-reading] .site-header {
+  background: var(--surface);
+  backdrop-filter: none;
+}
+
+:root[data-simple-reading] .hero--market {
+  min-height: auto;
+  grid-template-columns: 1fr;
+  background: var(--surface);
+  box-shadow: none;
+}
+
+:root[data-simple-reading] .hero--market::after,
+:root[data-simple-reading] .hero-visual,
+:root[data-simple-reading] .benefits--showcase,
+:root[data-simple-reading] .site-footer__glow {
+  display: none !important;
+}
+
+:root[data-simple-reading] .card,
+:root[data-simple-reading] .content-card,
+:root[data-simple-reading] .preview-card,
+:root[data-simple-reading] .auth-card,
+:root[data-simple-reading] .order-card,
+:root[data-simple-reading] .policy-card {
+  box-shadow: none !important;
+}
+
+:root[data-simple-reading] .preview-card,
+:root[data-simple-reading] .button--gradient,
+:root[data-simple-reading] .brand__mark,
+:root[data-simple-reading] .footer-brand__mark {
+  background-image: none !important;
+}
+
+:root[data-simple-reading] .hero__accent,
+:root[data-simple-reading] .brand__text strong span,
+:root[data-simple-reading] .footer-brand strong span {
+  color: currentColor;
+  background: none;
+}
+
+:root[data-high-contrast] {
+  --navy-950: #000000;
+  --navy-900: #000000;
+  --navy-800: #111111;
+  --navy-700: #1a1a1a;
+  --ink-900: #000000;
+  --ink-700: #111111;
+  --ink-600: #222222;
+  --surface: #ffffff;
+  --surface-soft: #ffffff;
+  --surface-tint: #ffffff;
+  --border: #000000;
+  --border-strong: #000000;
+  --blue: #003f8c;
+  --violet: #4a148c;
+  --teal: #005a52;
+  --success: #005a32;
+  --danger: #8b0000;
+  --focus: #ffbf00;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+}
+
+:root[data-high-contrast] body,
+:root[data-high-contrast] .site-header,
+:root[data-high-contrast] .hero--market,
+:root[data-high-contrast] .auth-card,
+:root[data-high-contrast] .content-card,
+:root[data-high-contrast] .card,
+:root[data-high-contrast] .feature-card,
+:root[data-high-contrast] .preview-card {
+  background: #ffffff;
+  color: #000000;
+  backdrop-filter: none;
+}
+
+:root[data-high-contrast] .nav,
+:root[data-high-contrast] .site-footer {
+  color: #ffffff;
+  background: #000000;
+  border-color: #ffffff;
+}
+
+:root[data-high-contrast] .nav a,
+:root[data-high-contrast] .nav .link-button,
+:root[data-high-contrast] .site-footer a,
+:root[data-high-contrast] .site-footer span,
+:root[data-high-contrast] .site-footer p,
+:root[data-high-contrast] .site-footer h2 {
+  color: #ffffff;
+}
+
+:root[data-high-contrast] .hero__accent,
+:root[data-high-contrast] .brand__text strong span {
+  color: #000000;
+  background: none;
+}
+
+:root[data-high-contrast] .nav .brand__text strong span,
+:root[data-high-contrast] .footer-brand strong span {
+  color: #ffffff;
+  background: none;
+}
+
+:root[data-high-contrast] a:not(.brand):not(.footer-brand),
+:root[data-high-contrast] .text-link,
+:root[data-high-contrast] .text-link--arrow {
+  text-decoration: underline;
+  text-decoration-thickness: 0.12em;
+}
+
+:root[data-high-contrast] button,
+:root[data-high-contrast] input,
+:root[data-high-contrast] textarea,
+:root[data-high-contrast] select,
+:root[data-high-contrast] .card,
+:root[data-high-contrast] .content-card,
+:root[data-high-contrast] .feature-card,
+:root[data-high-contrast] .preview-card,
+:root[data-high-contrast] .auth-card {
+  border-color: #000000;
+}
+
+[aria-current='page'] {
+  text-decoration: underline;
+  text-decoration-thickness: 0.14em;
+  text-underline-offset: 0.3em;
+}
+
+@media (forced-colors: active) {
+  :root[data-high-contrast] .nav,
+  :root[data-high-contrast] .site-footer,
+  :root[data-high-contrast] button,
+  :root[data-high-contrast] input,
+  :root[data-high-contrast] textarea,
+  :root[data-high-contrast] select {
+    forced-color-adjust: auto;
+  }
+}

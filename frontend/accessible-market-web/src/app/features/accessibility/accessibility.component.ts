@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { AccessibilityPreferencesService } from '../../core/accessibility/accessibility-preferences.service';
 
 @Component({
   selector: 'app-accessibility',
@@ -8,16 +9,91 @@ import { RouterLink } from '@angular/router';
     <article class="accessibility-page" aria-labelledby="accessibility-title">
       <header class="accessibility-page__header">
         <p class="eyebrow">Accesibilidad por diseño</p>
-        <h1 id="accessibility-title">Declaración de accesibilidad</h1>
+        <h1 id="accessibility-title">Accesibilidad y preferencias</h1>
         <p class="accessibility-page__lead">
-          AccessiUX Market adopta voluntariamente NORTIC B2:2017 como referencia dominicana de
-          accesibilidad web y mantiene WCAG como base técnica de sus criterios verificables.
+          Personaliza la presentación sin perder funciones esenciales de compra. Tus preferencias se
+          conservan en este navegador y pueden restablecerse cuando quieras.
         </p>
-        <p class="accessibility-page__status" role="status">
-          Objetivo de conformidad: nivel AA. Esta declaración describe un objetivo técnico del
-          producto y no constituye una certificación oficial NORTIC.
+        <p class="accessibility-page__status">
+          Objetivo de conformidad: nivel AA. AccessiUX Market adopta WCAG como base técnica y utiliza
+          NORTIC B2:2017 como referencia dominicana voluntaria; esto no constituye una certificación oficial.
         </p>
       </header>
+
+      <section class="preferences-panel" aria-labelledby="preferences-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">AM-UX-003</p>
+            <h2 id="preferences-title">Preferencias de accesibilidad</h2>
+          </div>
+          <button class="button button--secondary" type="button" (click)="resetPreferences()">
+            Restablecer preferencias
+          </button>
+        </div>
+
+        <p id="preferences-help">
+          Estas opciones complementan las preferencias del sistema operativo. No sustituyen el zoom del navegador,
+          lectores de pantalla ni otras tecnologías asistivas.
+        </p>
+
+        <fieldset aria-describedby="preferences-help">
+          <legend>Elige cómo quieres ver y recorrer la interfaz</legend>
+
+          <label class="preference-option" for="simple-reading-mode">
+            <input
+              id="simple-reading-mode"
+              type="checkbox"
+              [checked]="preferences.simpleReadingMode()"
+              (change)="setSimpleReadingMode($event)"
+            />
+            <span>
+              <strong>Modo de Lectura Simple</strong>
+              <small>Reduce elementos decorativos, densidad promocional y efectos visuales sin ocultar acciones esenciales.</small>
+            </span>
+          </label>
+
+          <label class="preference-option" for="reduced-motion">
+            <input
+              id="reduced-motion"
+              type="checkbox"
+              [checked]="preferences.reducedMotion()"
+              (change)="setReducedMotion($event)"
+            />
+            <span>
+              <strong>Reducir movimiento</strong>
+              <small>Desactiva transiciones y desplazamiento suave aunque el sistema operativo no lo solicite.</small>
+            </span>
+          </label>
+
+          <label class="preference-option" for="high-contrast">
+            <input
+              id="high-contrast"
+              type="checkbox"
+              [checked]="preferences.highContrast()"
+              (change)="setHighContrast($event)"
+            />
+            <span>
+              <strong>Aumentar contraste</strong>
+              <small>Refuerza bordes, texto y superficies para distinguir mejor controles y contenido.</small>
+            </span>
+          </label>
+
+          <label class="preference-option" for="large-text">
+            <input
+              id="large-text"
+              type="checkbox"
+              [checked]="preferences.largeText()"
+              (change)="setLargeText($event)"
+            />
+            <span>
+              <strong>Texto más grande</strong>
+              <small>Aumenta la escala tipográfica de la aplicación sin desactivar el zoom del navegador.</small>
+            </span>
+          </label>
+        </fieldset>
+
+        <p class="preferences-announcement" role="status" aria-live="polite">{{ announcement() }}</p>
+      </section>
 
       <section aria-labelledby="principles-title">
         <h2 id="principles-title">Principios que aplicamos</h2>
@@ -41,6 +117,15 @@ import { RouterLink } from '@angular/router';
         </div>
       </section>
 
+      <section aria-labelledby="keyboard-title">
+        <h2 id="keyboard-title">Navegación por teclado y gestión de foco</h2>
+        <p>
+          El enlace “Saltar al contenido principal” permite evitar la navegación repetitiva. Después de una
+          navegación interna, el foco se traslada al contenido principal para que el cambio de vista sea predecible
+          para usuarios de teclado y tecnologías asistivas.
+        </p>
+      </section>
+
       <section aria-labelledby="checkout-title">
         <h2 id="checkout-title">Compras con prevención de errores</h2>
         <p>
@@ -53,7 +138,8 @@ import { RouterLink } from '@angular/router';
         <h2 id="verification-title">Cómo verificamos la accesibilidad</h2>
         <ul>
           <li>Pruebas automatizadas con Playwright y axe-core.</li>
-          <li>Comprobaciones de navegación por teclado y foco visible.</li>
+          <li>Comprobaciones de navegación por teclado, skip link y foco después de cambios de ruta.</li>
+          <li>Persistencia y aplicación de preferencias de accesibilidad.</li>
           <li>Controles de formularios con etiquetas o nombres accesibles.</li>
           <li>Revisión del flujo completo, no únicamente de páginas aisladas.</li>
           <li>Pruebas de regresión dentro de integración continua.</li>
@@ -102,18 +188,108 @@ import { RouterLink } from '@angular/router';
       background: var(--surface-tint);
       font-weight: 700;
     }
+    .section-heading {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .section-heading h2 { margin-bottom: .35rem; }
+    .preferences-panel fieldset {
+      margin: 1.25rem 0 0;
+      padding: 0;
+      display: grid;
+      gap: .8rem;
+      border: 0;
+    }
+    .preferences-panel legend {
+      margin-bottom: .75rem;
+      font-weight: 800;
+      color: var(--navy-900);
+    }
+    .preference-option {
+      min-height: 4.5rem;
+      padding: 1rem;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: start;
+      gap: .9rem;
+      border: 2px solid var(--border-strong);
+      border-radius: .85rem;
+      background: var(--surface);
+      cursor: pointer;
+    }
+    .preference-option:has(input:checked) {
+      border-color: var(--blue);
+      background: var(--surface-tint);
+    }
+    .preference-option input {
+      width: 1.25rem;
+      height: 1.25rem;
+      margin-top: .15rem;
+    }
+    .preference-option span { display: grid; gap: .25rem; }
+    .preference-option strong { color: var(--navy-900); }
+    .preference-option small { color: var(--ink-700); font-size: .92rem; }
+    .preferences-announcement {
+      min-height: 1.5rem;
+      margin: 1rem 0 0;
+      font-weight: 700;
+    }
     .principle-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
     .principle-grid article { padding: 1rem; border: 1px solid var(--border); border-radius: .8rem; }
     .principle-grid h3 { margin-top: 0; }
     li + li { margin-top: .55rem; }
-    .accessibility-page a:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
-    @media (max-width: 42rem) { .principle-grid { grid-template-columns: 1fr; } }
+    .accessibility-page a:focus-visible,
+    .accessibility-page button:focus-visible,
+    .accessibility-page input:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+    @media (max-width: 42rem) {
+      .principle-grid { grid-template-columns: 1fr; }
+      .section-heading { flex-direction: column; }
+    }
     @media (forced-colors: active) {
       .accessibility-page__header,
       .accessibility-page section,
       .accessibility-page__note,
-      .principle-grid article { border: 2px solid CanvasText; }
+      .principle-grid article,
+      .preference-option { border: 2px solid CanvasText; }
     }
   `]
 })
-export class AccessibilityComponent {}
+export class AccessibilityComponent {
+  readonly preferences = inject(AccessibilityPreferencesService);
+  readonly announcement = signal('');
+
+  setSimpleReadingMode(event: Event): void {
+    const enabled = this.checked(event);
+    this.preferences.setSimpleReadingMode(enabled);
+    this.announcement.set(`Modo de Lectura Simple ${enabled ? 'activado' : 'desactivado'}.`);
+  }
+
+  setReducedMotion(event: Event): void {
+    const enabled = this.checked(event);
+    this.preferences.setReducedMotion(enabled);
+    this.announcement.set(`Reducción de movimiento ${enabled ? 'activada' : 'desactivada'}.`);
+  }
+
+  setHighContrast(event: Event): void {
+    const enabled = this.checked(event);
+    this.preferences.setHighContrast(enabled);
+    this.announcement.set(`Contraste aumentado ${enabled ? 'activado' : 'desactivado'}.`);
+  }
+
+  setLargeText(event: Event): void {
+    const enabled = this.checked(event);
+    this.preferences.setLargeText(enabled);
+    this.announcement.set(`Texto más grande ${enabled ? 'activado' : 'desactivado'}.`);
+  }
+
+  resetPreferences(): void {
+    this.preferences.reset();
+    this.announcement.set('Preferencias de accesibilidad restablecidas.');
+  }
+
+  private checked(event: Event): boolean {
+    return (event.target as HTMLInputElement).checked;
+  }
+}

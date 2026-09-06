@@ -1,10 +1,14 @@
-import { Component, inject } from '@angular/core';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { DOCUMENT } from '@angular/common';
+import { Component, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
+import { AccessibilityPreferencesService } from './core/accessibility/accessibility-preferences.service';
 import { AuthService } from './core/auth/auth.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterLink, RouterOutlet],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet],
   template: `
     <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
 
@@ -25,16 +29,17 @@ import { AuthService } from './core/auth/auth.service';
         </a>
 
         <div class="nav__actions">
-          <a routerLink="/catalog">Catálogo</a>
+          <a routerLink="/catalog" routerLinkActive="active" ariaCurrentWhenActive="page">Catálogo</a>
+          <a routerLink="/accessibility" routerLinkActive="active" ariaCurrentWhenActive="page">Accesibilidad</a>
           @if (auth.isAuthenticated()) {
-            <a routerLink="/cart">Carrito</a>
-            <a routerLink="/orders">Mis pedidos</a>
-            <a routerLink="/seller">Vender</a>
-            <a routerLink="/account">Mi cuenta</a>
+            <a routerLink="/cart" routerLinkActive="active" ariaCurrentWhenActive="page">Carrito</a>
+            <a routerLink="/orders" routerLinkActive="active" ariaCurrentWhenActive="page">Mis pedidos</a>
+            <a routerLink="/seller" routerLinkActive="active" ariaCurrentWhenActive="page">Vender</a>
+            <a routerLink="/account" routerLinkActive="active" ariaCurrentWhenActive="page">Mi cuenta</a>
             <button class="link-button" type="button" (click)="logout()">Cerrar sesión</button>
           } @else {
-            <a routerLink="/login">Iniciar sesión</a>
-            <a class="button button--small button--gradient" routerLink="/register">Crear cuenta</a>
+            <a routerLink="/login" routerLinkActive="active" ariaCurrentWhenActive="page">Iniciar sesión</a>
+            <a class="button button--small button--gradient" routerLink="/register" routerLinkActive="active" ariaCurrentWhenActive="page">Crear cuenta</a>
           }
         </div>
       </nav>
@@ -93,6 +98,7 @@ import { AuthService } from './core/auth/auth.service';
           </section>
           <section>
             <h2>Accesibilidad</h2>
+            <a routerLink="/accessibility">Preferencias y declaración</a>
             <span>Foco visible</span>
             <span>Alto contraste</span>
             <span>Lectores de pantalla</span>
@@ -246,12 +252,44 @@ import { AuthService } from './core/auth/auth.service';
 })
 export class AppComponent {
   readonly auth = inject(AuthService);
+  readonly accessibilityPreferences = inject(AccessibilityPreferencesService);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly document = inject(DOCUMENT);
+  private hasCompletedInitialNavigation = false;
+
+  constructor() {
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        if (!this.hasCompletedInitialNavigation) {
+          this.hasCompletedInitialNavigation = true;
+          return;
+        }
+
+        this.focusMainContent();
+      });
+  }
 
   logout(): void {
     this.auth.logout().subscribe({
       next: () => void this.router.navigate(['/']),
       error: () => void this.router.navigate(['/']),
     });
+  }
+
+  private focusMainContent(): void {
+    const focus = () => this.document.getElementById('main-content')?.focus({ preventScroll: true });
+    const view = this.document.defaultView;
+
+    if (view) {
+      view.requestAnimationFrame(focus);
+      return;
+    }
+
+    focus();
   }
 }

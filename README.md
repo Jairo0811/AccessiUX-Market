@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/AccesiUX-Market.jpeg" alt="Logo de CertiChain" width="720" />
+  <img src="docs/images/AccesiUX-Market.jpeg" alt="Logo de AccessiUX Market" width="720" />
 </p>
 
 <p align="center">
@@ -8,8 +8,8 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Versión-0.7.0-2563EB?style=for-the-badge" alt="Versión 0.7.0">
-  <img src="https://img.shields.io/badge/Estado-Pedidos%20y%20cancelaciones-14B8A6?style=for-the-badge" alt="Estado Pedidos y cancelaciones">
+  <img src="https://img.shields.io/badge/Versión-0.8.0-2563EB?style=for-the-badge" alt="Versión 0.8.0">
+  <img src="https://img.shields.io/badge/Estado-Accesibilidad%20avanzada-14B8A6?style=for-the-badge" alt="Estado Accesibilidad avanzada">
 </p>
 
 <p align="center">
@@ -32,8 +32,9 @@ El proyecto parte de una auditoría académica de Amazon.com en la que se analiz
 
 AccessiUX Market no pretende ser un clon de Amazon. Su objetivo es demostrar cómo un marketplace puede diseñarse desde el inicio con:
 
-- navegación accesible mediante teclado;
-- menor carga cognitiva;
+- navegación accesible mediante teclado y gestión predecible de foco;
+- preferencias persistentes de accesibilidad controladas por el usuario;
+- menor carga cognitiva mediante Modo de Lectura Simple;
 - búsqueda y filtros eficientes;
 - carrito persistente validado desde servidor;
 - checkout con revisión explícita antes de confirmar;
@@ -113,9 +114,9 @@ En los repositorios revisados actualmente no se ha verificado otra asignatura de
 |---|---|---|:---:|
 | `AM-UX-001` | Cancelación visible y limitada por tiempo | Control y libertad del usuario | ✅ |
 | `AM-UX-002` | Presentación estandarizada de políticas del vendedor | Consistencia y estándares | ⏳ |
-| `AM-UX-003` | Modo de Lectura Simple y preferencias de accesibilidad | Estética, carga cognitiva y accesibilidad | ⏳ |
+| `AM-UX-003` | Modo de Lectura Simple y preferencias de accesibilidad | Estética, carga cognitiva y accesibilidad | ✅ |
 | `AM-UX-004` | Filtros dinámicos con conteo de resultados | Flexibilidad y eficiencia | ✅ |
-| `AM-UX-005` | Navegación completa por teclado y gestión de foco | Accesibilidad motriz | 🧪 |
+| `AM-UX-005` | Navegación completa por teclado y gestión de foco | Accesibilidad motriz | ✅ |
 | `AM-UX-006` | Checkout orientado a visibilidad y prevención de errores | Visibilidad del estado y prevención de errores | ✅ |
 
 La trazabilidad detallada se mantiene en [`docs/ux/requirements.md`](docs/ux/requirements.md).
@@ -127,7 +128,7 @@ La trazabilidad detallada se mantiene en [`docs/ux/requirements.md`](docs/ux/req
 - Construir un marketplace accesible alineado con principios WCAG.
 - Aplicar las heurísticas de Jakob Nielsen a flujos reales de producto.
 - Reducir carga cognitiva en catálogo, navegación y checkout.
-- Dar al usuario control explícito sobre carrito, pedidos y reversibilidad.
+- Dar al usuario control explícito sobre carrito, pedidos, reversibilidad y preferencias de accesibilidad.
 - Estandarizar información de vendedores y políticas comerciales.
 - Medir mejoras UX mediante evidencia automatizada y pruebas con usuarios.
 - Mantener una arquitectura modular preparada para crecimiento posterior.
@@ -136,7 +137,7 @@ La trazabilidad detallada se mantiene en [`docs/ux/requirements.md`](docs/ux/req
 
 ## 🧱 Stack tecnológico
 
-El stack se documenta según las capacidades implementadas en **`v0.7.0`**, evitando presentar dependencias futuras como si ya formaran parte del producto.
+El stack se documenta según las capacidades implementadas en **`v0.8.0`**, evitando presentar dependencias futuras como si ya formaran parte del producto.
 
 ### 🎨 Frontend — implementado
 
@@ -144,11 +145,12 @@ El stack se documenta según las capacidades implementadas en **`v0.7.0`**, evit
 |---|---|
 | Framework | **Angular 22.1** standalone |
 | Lenguaje | **TypeScript 6** |
-| Programación reactiva | **RxJS 7.8** |
+| Programación reactiva | **RxJS 7.8** + Angular Signals |
 | Estilos | **SCSS** |
 | Sesión | JWT en memoria + refresh cookie `HttpOnly` |
 | Marketplace | Catálogo, búsqueda/filtros, vendedor, carrito, checkout y pedidos |
-| Accesibilidad | HTML semántico, foco visible, `aria-live`, contraste forzado, reducción de movimiento, Playwright + axe-core |
+| Accesibilidad | HTML semántico, foco visible, skip link, gestión de foco SPA, `aria-live`, `aria-current`, forced colors, reducción de movimiento y preferencias persistentes |
+| Validación a11y | **Playwright + axe-core** en CI |
 
 ### ⚙️ Backend — implementado
 
@@ -237,7 +239,7 @@ Las dependencias de infraestructura, persistencia y presentación no deben conta
 
 ## 🛒 Estado funcional actual
 
-Con **`v0.7.0`**, AccessiUX Market cubre el flujo de compra desde autenticación hasta gestión inmediata del pedido:
+Con **`v0.8.0`**, AccessiUX Market cubre el flujo de compra desde autenticación hasta gestión inmediata del pedido y añade preferencias de accesibilidad controladas por el usuario:
 
 1. registro, inicio de sesión, refresh y recuperación de contraseña;
 2. onboarding de vendedor y publicación de productos;
@@ -248,13 +250,19 @@ Con **`v0.7.0`**, AccessiUX Market cubre el flujo de compra desde autenticación
 7. creación transaccional del pedido con revalidación de publicación, moneda y stock;
 8. historial y detalle de pedidos por usuario;
 9. cancelación de pedidos `Pending` dentro de una ventana configurable;
-10. restitución atómica del inventario cuando la cancelación es válida.
+10. restitución atómica del inventario cuando la cancelación es válida;
+11. Modo de Lectura Simple, reducción de movimiento, contraste aumentado y texto ampliado persistentes;
+12. skip link, estado de navegación actual y gestión predecible de foco en cambios de ruta SPA.
 
 ### Reversibilidad de pedidos
 
 La elegibilidad para cancelar es **server-authoritative**. El backend devuelve `canCancel`, `cancelUntilUtc` y `cancellationMessage`; el cliente no decide la política según su reloj local.
 
 La ventana predeterminada es de **30 minutos**, configurable mediante `Orders:CancellationWindowMinutes`. La cancelación modifica el estado del pedido y restaura stock dentro de una misma transacción SQL Server `Serializable` ejecutada mediante la estrategia de reintentos de EF Core.
+
+### Accesibilidad avanzada
+
+La ruta pública `/accessibility` permite activar y restablecer preferencias que se conservan en el navegador. La carga inicial mantiene el orden nativo de teclado para que el skip link sea el primer control; en navegaciones internas posteriores, el foco se mueve al contenido principal. Estas conductas forman parte de la suite de regresión automatizada junto con axe-core.
 
 ---
 
@@ -269,14 +277,14 @@ La ventana predeterminada es de **30 minutos**, configurable mediante `Orders:Ca
 | 4 | Carrito | ✅ |
 | 5 | Checkout | ✅ |
 | 6 | Pedidos y cancelaciones | ✅ |
-| 7 | Accesibilidad avanzada | ⏳ |
+| 7 | Accesibilidad avanzada | ✅ |
 | 8 | UX Lab, testing y preparación para producción | ⏳ |
 
 ### Estado actual
 
-**v0.7.0 — Orders & Cancellations**
+**v0.8.0 — Advanced Accessibility**
 
-Fase 6 implementa `AM-UX-001`: historial y detalle de pedidos, visibilidad explícita de reversibilidad, ventana configurable, confirmación accesible y cancelación transaccional con restitución de inventario. El cierre se valida mediante pruebas unitarias, integración SQL Server/Testcontainers, build Angular y Playwright/axe. La rama solo se integra en `main` cuando ambos jobs del CI finalizan correctamente.
+Fase 7 implementa `AM-UX-003` y cierra la superficie actual de `AM-UX-005`: preferencias persistentes de accesibilidad, Modo de Lectura Simple, reducción de movimiento, contraste aumentado, texto ampliado, skip link, `aria-current` y gestión de foco después de navegaciones SPA. El cierre se valida mediante build Angular, Playwright/axe y la suite completa del backend en GitHub Actions.
 
 ---
 
@@ -353,6 +361,7 @@ npm test
 - [API de pedidos y cancelaciones](docs/api/orders.md)
 - [Arquitectura de Fase 6](docs/architecture/phase-6-orders.md)
 - [UX de Fase 6](docs/ux/phase-6-orders.md)
+- [Accesibilidad avanzada — Fase 7](docs/accessibility/phase-7-advanced-accessibility.md)
 - [Pruebas de identidad](docs/testing/identity.md)
 - [Requisitos UX](docs/ux/requirements.md)
 - [Política de seguridad](SECURITY.md)
