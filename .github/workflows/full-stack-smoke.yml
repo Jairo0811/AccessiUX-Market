@@ -132,6 +132,23 @@ jobs:
         working-directory: frontend/accessible-market-web
         run: node e2e/full-stack.smoke.mjs
 
+      - name: Stop smoke Angular before isolated regression
+        shell: bash
+        run: |
+          if [[ -f /tmp/accessiux-web.pid ]]; then
+            kill "$(cat /tmp/accessiux-web.pid)" 2>/dev/null || true
+            rm -f /tmp/accessiux-web.pid
+          fi
+          pkill -f '[n]g serve --host 127.0.0.1 --port 4200' 2>/dev/null || true
+          for attempt in $(seq 1 20); do
+            if ! curl -fsS http://127.0.0.1:4200 >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo 'Smoke Angular server still occupies port 4200.' >&2
+          exit 1
+
       - name: Run existing frontend accessibility regression
         working-directory: frontend/accessible-market-web
         run: npm test
