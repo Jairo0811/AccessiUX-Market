@@ -1,5 +1,5 @@
 <p align="center">
-  <strong>AccessiUX Market</strong>
+  <img src="docs/images/AccesiUX-Market.jpeg" alt="Logo de CertiChain" width="720" />
 </p>
 
 <p align="center">
