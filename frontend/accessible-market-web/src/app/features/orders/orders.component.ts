@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { OrderDetail, OrderSummary } from '../../core/orders/order.models';
 import { OrderService } from '../../core/orders/order.service';
@@ -93,6 +93,7 @@ import { OrderService } from '../../core/orders/order.service';
 })
 export class OrdersComponent implements OnInit {
   private readonly ordersService = inject(OrderService);
+  private readonly changeDetector = inject(ChangeDetectorRef);
 
   orders: OrderSummary[] = [];
   loading = true;
@@ -105,10 +106,12 @@ export class OrdersComponent implements OnInit {
         this.orders = orders;
         this.loading = false;
         this.liveMessage = orders.length === 1 ? 'Se cargó 1 pedido.' : `Se cargaron ${orders.length} pedidos.`;
+        this.changeDetector.markForCheck();
       },
       error: (error: HttpErrorResponse) => {
         this.loading = false;
         this.errorMessage = this.readError(error, 'Intenta nuevamente en unos segundos.');
+        this.changeDetector.markForCheck();
       }
     });
   }
@@ -264,6 +267,7 @@ export class OrdersComponent implements OnInit {
 export class OrderDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly ordersService = inject(OrderService);
+  private readonly changeDetector = inject(ChangeDetectorRef);
 
   order: OrderDetail | null = null;
   loading = true;
@@ -297,6 +301,7 @@ export class OrderDetailComponent implements OnInit {
         this.confirmingCancellation = false;
         this.cancelling = false;
         this.loadOrder(id, false);
+        this.changeDetector.markForCheck();
       },
       error: (error: HttpErrorResponse) => {
         this.cancelling = false;
@@ -304,6 +309,7 @@ export class OrderDetailComponent implements OnInit {
         this.actionErrorMessage = this.readError(error, 'No fue posible cancelar el pedido. Actualizamos su estado para que puedas revisarlo.');
         this.liveMessage = this.actionErrorMessage;
         this.loadOrder(id, false);
+        this.changeDetector.markForCheck();
       }
     });
   }
@@ -337,10 +343,12 @@ export class OrderDetailComponent implements OnInit {
         this.order = order;
         this.errorMessage = '';
         this.loading = false;
+        this.changeDetector.markForCheck();
       },
       error: (error: HttpErrorResponse) => {
         this.loading = false;
         this.errorMessage = this.readError(error, 'Pedido no encontrado o no disponible para esta cuenta.');
+        this.changeDetector.markForCheck();
       }
     });
   }
