@@ -13,6 +13,12 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/Jairo0811/AccessiUX-Market/actions/workflows/ci.yml">
+    <img src="https://github.com/Jairo0811/AccessiUX-Market/actions/workflows/ci.yml/badge.svg" alt="CI">
+  </a>
+</p>
+
+<p align="center">
   <strong>Accessible & Usable E-Commerce Platform</strong>
 </p>
 
