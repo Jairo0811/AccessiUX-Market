@@ -61,7 +61,7 @@ AccessiUX Market no pretende ser un clon de Amazon. Su objetivo es demostrar có
 
 ### 👥 Equipo académico original
 
-| Integrante | Matrícula |
+| 👤 Integrante | 🆔 Matrícula |
 |---|---|
 | 👨🏻‍💻 Ángel Guillermo Brazoban Sosa | A00110074 |
 | 👨🏻‍💻 Jorge Thomas Almanzar Soriano | A00110435 |
@@ -142,6 +142,13 @@ El stack se documenta según las capacidades implementadas en **`v1.0.0`**, evit
 
 ### 🎨 Frontend — implementado
 
+<p>
+  <img src="https://skillicons.dev/icons?i=angular,ts,sass" alt="Angular, TypeScript y SCSS" />
+  <img src="https://img.shields.io/badge/RxJS-7.8-B7178C?style=flat-square&logo=reactivex&logoColor=white" alt="RxJS 7.8" />
+  <img src="https://img.shields.io/badge/Playwright-A11y%20E2E-2EAD33?style=flat-square&logo=playwright&logoColor=white" alt="Playwright" />
+  <img src="https://img.shields.io/badge/axe--core-Accessibility-6A1B9A?style=flat-square" alt="axe-core" />
+</p>
+
 | Área | Tecnología / capacidad |
 |---|---|
 | Framework | **Angular 22.1** standalone |
@@ -154,6 +161,13 @@ El stack se documenta según las capacidades implementadas en **`v1.0.0`**, evit
 | Validación a11y | **Playwright + axe-core** en CI |
 
 ### ⚙️ Backend — implementado
+
+<p>
+  <img src="https://skillicons.dev/icons?i=dotnet,cs" alt=".NET y C#" />
+  <img src="https://img.shields.io/badge/ASP.NET%20Core-Web%20API-512BD4?style=flat-square&logo=dotnet&logoColor=white" alt="ASP.NET Core Web API" />
+  <img src="https://img.shields.io/badge/EF%20Core-10-512BD4?style=flat-square&logo=dotnet&logoColor=white" alt="Entity Framework Core 10" />
+  <img src="https://img.shields.io/badge/OpenAPI-HTTP%20Contract-85EA2D?style=flat-square&logo=swagger&logoColor=black" alt="OpenAPI" />
+</p>
 
 | Área | Tecnología / capacidad |
 |---|---|
@@ -170,6 +184,12 @@ El stack se documenta según las capacidades implementadas en **`v1.0.0`**, evit
 | Transacciones | EF Core execution strategy + SQL Server `Serializable` para operaciones críticas |
 
 ### 🗄️ Datos e infraestructura — implementado
+
+<p>
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/microsoftsqlserver/microsoftsqlserver-plain.svg" alt="Microsoft SQL Server" width="52" height="52" />
+  <img src="https://skillicons.dev/icons?i=docker,git,github,githubactions" alt="Docker, Git, GitHub y GitHub Actions" />
+  <img src="https://img.shields.io/badge/xUnit-Testing-512BD4?style=flat-square&logo=dotnet&logoColor=white" alt="xUnit" />
+</p>
 
 | Área | Tecnología |
 |---|---|
