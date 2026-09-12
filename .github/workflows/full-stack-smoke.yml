@@ -85,7 +85,7 @@ jobs:
             Database__SeedRoles=true \
             Database__SeedCatalog=true \
             Database__SeedDemoUsers=true \
-            dotnet run --project backend/src/AccessiUXMarket.Api --configuration Release --no-build \
+            dotnet run --project backend/src/AccessiUXMarket.Api --configuration Release --no-build --no-launch-profile \
             > /tmp/accessiux-api.log 2>&1 &
           echo $! > /tmp/accessiux-api.pid
 
