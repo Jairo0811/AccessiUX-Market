@@ -46,14 +46,19 @@ jq -e '.user.roles | index("Seller") != null' <<<"$seller_session" >/dev/null
 jq -e '.user.roles | index("Administrator") != null' <<<"$admin_session" >/dev/null
 curl -fsS -H "$(auth_header "$admin_token")" "${API_BASE}/api/v1/auth/me" | jq -e '.roles | index("Administrator") != null' >/dev/null
 
+admin_overview="$(curl -fsS -H "$(auth_header "$admin_token")" "${API_BASE}/api/v1/admin/overview")"
+jq -e '.totalUsers >= 3 and .activeUsers >= 3 and .sellers >= 1' <<<"$admin_overview" >/dev/null
+admin_denied_status="$(curl -sS -o /dev/null -w '%{http_code}' -H "$(auth_header "$customer_token")" "${API_BASE}/api/v1/admin/overview")"
+test "$admin_denied_status" = "403"
+
 categories="$(curl -fsS "${API_BASE}/api/v1/catalog/categories")"
 category_id="$(jq -r '.[0].id' <<<"$categories")"
 test -n "$category_id"
 
-seller_payload='{"displayName":"Smoke Seller","slug":"smoke-seller","description":"Perfil creado por la validación full-stack."}'
-seller_profile="$(curl -fsS -H "$(auth_header "$seller_token")" -H 'Content-Type: application/json' -d "$seller_payload" "${API_BASE}/api/v1/catalog/seller")"
+seller_profile="$(curl -fsS -H "$(auth_header "$seller_token")" "${API_BASE}/api/v1/catalog/seller/me")"
 seller_id="$(jq -r '.id' <<<"$seller_profile")"
 test -n "$seller_id"
+jq -e '.displayName != null and .slug != null' <<<"$seller_profile" >/dev/null
 
 policies_payload='{"warrantyPolicy":"Garantía de 12 meses para la validación smoke.","shippingPolicy":"Envío nacional de prueba con seguimiento.","returnPolicy":"Devoluciones aceptadas dentro de 30 días para la prueba."}'
 updated_seller="$(curl -fsS -X PUT -H "$(auth_header "$seller_token")" -H 'Content-Type: application/json' -d "$policies_payload" "${API_BASE}/api/v1/catalog/seller/policies")"
@@ -94,4 +99,4 @@ curl -fsS "${API_BASE}/api/v1/catalog/products/smoke-product-v1" | jq -e '.stock
 curl -fsS -H "$(auth_header "$customer_token")" "${API_BASE}/api/v1/cart" | jq -e '.totalQuantity == 0 and (.items | length) == 0' >/dev/null
 
 printf 'FULL-STACK API SMOKE: PASS\n'
-printf 'Validated health, v1.0.1 metadata, three demo roles, seller policies, product publication, cart, checkout, orders, cancellation and stock restoration.\n'
+printf 'Validated health, v1.0.1 metadata, role privileges, seeded seller profile, policies, product publication, cart, checkout, orders, cancellation and stock restoration.\n'
