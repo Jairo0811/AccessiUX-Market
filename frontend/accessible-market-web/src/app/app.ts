@@ -14,18 +14,14 @@ import { AuthService } from './core/auth/auth.service';
 
     <header class="site-header">
       <nav class="nav" aria-label="Navegación principal">
-        <a class="brand" routerLink="/" aria-label="AccessiUX Market, inicio">
-          <span class="brand__mark" aria-hidden="true">
-            <svg viewBox="0 0 48 48" focusable="false">
-              <path d="M24 4 7 14v20l17 10 17-10V14L24 4Z" fill="none" stroke="currentColor" stroke-width="3"/>
-              <path d="M16 31 24 15l8 16M18.5 26h11" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-              <circle cx="24" cy="21" r="2.4" fill="currentColor"/>
-            </svg>
-          </span>
-          <span class="brand__text">
-            <strong>Accessi<span>UX</span></strong>
-            <small>Market</small>
-          </span>
+        <a class="brand brand--official" routerLink="/" aria-label="AccessiUX Market, inicio">
+          <img
+            class="brand__logo"
+            src="/branding/accessiux-market-logo.png"
+            alt=""
+            aria-hidden="true"
+          />
+          <span class="brand__fallback">AccessiUX Market</span>
         </a>
 
         <div class="nav__actions">
@@ -62,18 +58,14 @@ import { AuthService } from './core/auth/auth.service';
       <div class="site-footer__glow" aria-hidden="true"></div>
       <div class="site-footer__content">
         <section class="site-footer__brand-block">
-          <a class="footer-brand" routerLink="/" aria-label="AccessiUX Market, inicio">
-            <span class="footer-brand__mark" aria-hidden="true">
-              <svg viewBox="0 0 48 48" focusable="false">
-                <path d="M24 4 7 14v20l17 10 17-10V14L24 4Z" fill="none" stroke="currentColor" stroke-width="3"/>
-                <path d="M16 31 24 15l8 16M18.5 26h11" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="24" cy="21" r="2.4" fill="currentColor"/>
-              </svg>
-            </span>
-            <span>
-              <strong id="footer-brand-title">Accessi<span>UX</span></strong>
-              <small>Market</small>
-            </span>
+          <a class="footer-brand footer-brand--official" routerLink="/" aria-label="AccessiUX Market, inicio">
+            <img
+              class="footer-brand__logo"
+              src="/branding/accessiux-market-logo.png"
+              alt=""
+              aria-hidden="true"
+            />
+            <span id="footer-brand-title" class="footer-brand__fallback">AccessiUX Market</span>
           </a>
           <p>
             Un marketplace pensado para comprar con claridad, confianza y menos barreras.
@@ -134,6 +126,30 @@ import { AuthService } from './core/auth/auth.service';
     </footer>
   `,
   styles: [`
+    .brand--official,
+    .footer-brand--official {
+      position: relative;
+    }
+    .brand__logo {
+      display: block;
+      width: clamp(8.8rem, 13vw, 11.2rem);
+      height: auto;
+      max-height: 3.2rem;
+      object-fit: contain;
+      object-position: left center;
+    }
+    .brand__fallback,
+    .footer-brand__fallback {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
     .site-footer {
       position: relative;
       overflow: hidden;
@@ -174,36 +190,16 @@ import { AuthService } from './core/auth/auth.service';
     .footer-brand {
       display: inline-flex;
       align-items: center;
-      gap: .8rem;
       color: #fff;
       text-decoration: none;
     }
-    .footer-brand__mark {
-      display: grid;
-      width: 3.2rem;
-      height: 3.2rem;
-      place-items: center;
-      border: 1px solid rgb(255 255 255 / 15%);
-      border-radius: 1rem;
-      color: #c7fbff;
-      background: linear-gradient(145deg,rgb(18 212 226 / 22%),rgb(124 58 237 / 32%));
-    }
-    .footer-brand__mark svg { width: 2.25rem; height: 2.25rem; }
-    .footer-brand > span:last-child { display: grid; line-height: 1; }
-    .footer-brand strong { font-size: 1.3rem; }
-    .footer-brand strong span {
-      background: linear-gradient(90deg,#12d4e2,#60a5fa 45%,#b26cff);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    .footer-brand small {
-      margin-top: .32rem;
-      color: #8cecf3;
-      font-size: .68rem;
-      font-weight: 850;
-      letter-spacing: .28em;
-      text-transform: uppercase;
+    .footer-brand__logo {
+      display: block;
+      width: clamp(10rem, 15vw, 12.5rem);
+      height: auto;
+      max-height: 4rem;
+      object-fit: contain;
+      object-position: left center;
     }
     .footer-values {
       margin: 0;
@@ -261,12 +257,29 @@ import { AuthService } from './core/auth/auth.service';
       .site-footer__nav { grid-template-columns: repeat(2,minmax(0,1fr)); }
     }
     @media (max-width: 38rem) {
+      .brand__logo { width: 8.8rem; }
+      .footer-brand__logo { width: 10rem; }
       .site-footer__nav { grid-template-columns: 1fr; }
       .site-footer__bottom { flex-direction: column; }
     }
     @media (forced-colors: active) {
+      .brand__logo,
+      .footer-brand__logo {
+        display: none;
+      }
+      .brand__fallback,
+      .footer-brand__fallback {
+        position: static;
+        width: auto;
+        height: auto;
+        margin: 0;
+        overflow: visible;
+        clip: auto;
+        white-space: normal;
+        color: CanvasText;
+        font-weight: 800;
+      }
       .site-footer,
-      .footer-brand__mark,
       .footer-values li { border: 2px solid CanvasText; }
     }
   `]
