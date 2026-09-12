@@ -15,6 +15,7 @@ public sealed class CheckoutEndpointsTests(IdentityApiFixture fixture) : IClassF
     private const string CatalogRoot = "/api/v1/catalog";
     private const string CartRoot = "/api/v1/cart";
     private const string CheckoutRoot = "/api/v1/checkout";
+    private const decimal DominicanRepublicItbisRate = 0.18m;
 
     [Fact]
     public async Task Checkout_RequiresAuthentication()
@@ -25,7 +26,7 @@ public sealed class CheckoutEndpointsTests(IdentityApiFixture fixture) : IClassF
     }
 
     [Fact]
-    public async Task Review_ExposesItemsAddressPaymentAndTotalsBeforeConfirmation()
+    public async Task Review_ExposesItemsAddressPaymentAndDominicanItbisBeforeConfirmation()
     {
         using var client = CreateClient();
         await AuthenticateNewCustomerAsync(client, "checkout-review");
@@ -44,13 +45,15 @@ public sealed class CheckoutEndpointsTests(IdentityApiFixture fixture) : IClassF
         Assert.Equal(request.Address, review.Address);
         Assert.Equal(request.PaymentMethod, review.PaymentMethod);
         Assert.Equal(product.Price * 2, review.Subtotal);
-        Assert.Equal(review.Subtotal + review.ShippingAmount + review.TaxAmount, review.Total);
+        var expectedTax = Math.Round(review.Subtotal * DominicanRepublicItbisRate, 2, MidpointRounding.AwayFromZero);
+        Assert.Equal(expectedTax, review.TaxAmount);
+        Assert.Equal(review.Subtotal + review.ShippingAmount + expectedTax, review.Total);
         Assert.Equal("DOP", review.Currency);
         Assert.Single(review.Items);
     }
 
     [Fact]
-    public async Task Confirm_CreatesOrderDecrementsStockAndClearsCart()
+    public async Task Confirm_CreatesOrderWithItbisDecrementsStockAndClearsCart()
     {
         using var client = CreateClient();
         await AuthenticateNewCustomerAsync(client, "checkout-confirm");
@@ -64,7 +67,9 @@ public sealed class CheckoutEndpointsTests(IdentityApiFixture fixture) : IClassF
         var confirmation = await response.Content.ReadFromJsonAsync<CheckoutConfirmationDto>();
         Assert.NotNull(confirmation);
         Assert.StartsWith("AUX-", confirmation.OrderNumber);
-        Assert.Equal(product.Price * 2, confirmation.Total);
+        var expectedSubtotal = product.Price * 2;
+        var expectedTax = Math.Round(expectedSubtotal * DominicanRepublicItbisRate, 2, MidpointRounding.AwayFromZero);
+        Assert.Equal(expectedSubtotal + expectedTax, confirmation.Total);
         Assert.Equal("DOP", confirmation.Currency);
         Assert.Equal("Pending", confirmation.Status);
 
@@ -75,6 +80,29 @@ public sealed class CheckoutEndpointsTests(IdentityApiFixture fixture) : IClassF
         var productAfterCheckout = await client.GetFromJsonAsync<ProductDto>($"{CatalogRoot}/products/{product.Slug}");
         Assert.NotNull(productAfterCheckout);
         Assert.Equal(2, productAfterCheckout.StockQuantity);
+    }
+
+    [Fact]
+    public async Task Review_BlocksUnitedStatesUntilStateAndLocalSalesTaxRulesExist()
+    {
+        using var client = CreateClient();
+        await AuthenticateNewCustomerAsync(client, "checkout-us-tax");
+        var product = await CreatePublishedProductAsync(client, stock: 2);
+        var add = await client.PostAsJsonAsync($"{CartRoot}/items", new AddCartItemRequest(product.Id, 1));
+        Assert.Equal(HttpStatusCode.OK, add.StatusCode);
+
+        var request = CreateCheckoutRequest("US");
+        var reviewResponse = await client.PostAsJsonAsync($"{CheckoutRoot}/review", request);
+
+        Assert.Equal(HttpStatusCode.OK, reviewResponse.StatusCode);
+        var review = await reviewResponse.Content.ReadFromJsonAsync<CheckoutReviewDto>();
+        Assert.NotNull(review);
+        Assert.False(review.CanConfirm);
+        Assert.Equal(0m, review.TaxAmount);
+        Assert.Contains(review.Warnings, warning => warning.Contains("sales tax", StringComparison.OrdinalIgnoreCase));
+
+        var confirmResponse = await client.PostAsJsonAsync($"{CheckoutRoot}/confirm", request);
+        Assert.Equal(HttpStatusCode.Conflict, confirmResponse.StatusCode);
     }
 
     [Fact]
@@ -117,7 +145,7 @@ public sealed class CheckoutEndpointsTests(IdentityApiFixture fixture) : IClassF
 
     private HttpClient CreateClient() => fixture.Factory.CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = true });
 
-    private static CheckoutRequest CreateCheckoutRequest() => new(
+    private static CheckoutRequest CreateCheckoutRequest(string countryCode = "DO") => new(
         new CheckoutAddressRequest(
             "Cliente Checkout",
             "Av. Winston Churchill 100",
@@ -125,7 +153,7 @@ public sealed class CheckoutEndpointsTests(IdentityApiFixture fixture) : IClassF
             "Santo Domingo",
             "Distrito Nacional",
             "10127",
-            "DO",
+            countryCode,
             "8095550101"),
         "Card");
 

@@ -81,17 +81,17 @@ jq -e '.totalQuantity == 2 and .items[0].quantity == 2' <<<"$cart" >/dev/null
 
 checkout_payload='{"address":{"recipientName":"Cliente Demo","addressLine1":"Av. Winston Churchill 1","addressLine2":null,"city":"Santo Domingo","region":"Distrito Nacional","postalCode":"10127","countryCode":"DO","phone":"8095550101"},"paymentMethod":"CashOnDelivery"}'
 review="$(curl -fsS -H "$(auth_header "$customer_token")" -H 'Content-Type: application/json' -d "$checkout_payload" "${API_BASE}/api/v1/checkout/review")"
-jq -e '.canConfirm == true and .items[0].quantity == 2 and .total > 0' <<<"$review" >/dev/null
+jq -e '.canConfirm == true and .items[0].quantity == 2 and .subtotal == 3000 and .shippingAmount == 0 and .taxAmount == 540 and .total == 3540' <<<"$review" >/dev/null
 
 confirmation="$(curl -fsS -H "$(auth_header "$customer_token")" -H 'Content-Type: application/json' -d "$checkout_payload" "${API_BASE}/api/v1/checkout/confirm")"
 order_id="$(jq -r '.orderId' <<<"$confirmation")"
-jq -e '.status == "Pending"' <<<"$confirmation" >/dev/null
+jq -e '.status == "Pending" and .total == 3540' <<<"$confirmation" >/dev/null
 
 curl -fsS "${API_BASE}/api/v1/catalog/products/smoke-product-v1" | jq -e '.stockQuantity == 3' >/dev/null
 orders="$(curl -fsS -H "$(auth_header "$customer_token")" "${API_BASE}/api/v1/orders/")"
 jq -e --arg orderId "$order_id" 'map(select(.id == $orderId)) | length == 1' <<<"$orders" >/dev/null
 order_detail="$(curl -fsS -H "$(auth_header "$customer_token")" "${API_BASE}/api/v1/orders/${order_id}")"
-jq -e '.canCancel == true and .status == "Pending"' <<<"$order_detail" >/dev/null
+jq -e '.canCancel == true and .status == "Pending" and .subtotal == 3000 and .taxAmount == 540 and .total == 3540' <<<"$order_detail" >/dev/null
 
 cancelled="$(curl -fsS -X POST -H "$(auth_header "$customer_token")" "${API_BASE}/api/v1/orders/${order_id}/cancel")"
 jq -e '.status == "Cancelled"' <<<"$cancelled" >/dev/null
@@ -99,4 +99,4 @@ curl -fsS "${API_BASE}/api/v1/catalog/products/smoke-product-v1" | jq -e '.stock
 curl -fsS -H "$(auth_header "$customer_token")" "${API_BASE}/api/v1/cart" | jq -e '.totalQuantity == 0 and (.items | length) == 0' >/dev/null
 
 printf 'FULL-STACK API SMOKE: PASS\n'
-printf 'Validated health, v1.0.1 metadata, role privileges, seeded seller profile, policies, product publication, cart, checkout, orders, cancellation and stock restoration.\n'
+printf 'Validated health, v1.0.1 metadata, role privileges, seeded seller profile, policies, product publication, cart, Dominican ITBIS, checkout, orders, cancellation and stock restoration.\n'
