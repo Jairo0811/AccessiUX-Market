@@ -16,12 +16,15 @@ import { AuthService } from './core/auth/auth.service';
       <nav class="nav" aria-label="Navegación principal">
         <a class="brand brand--official" routerLink="/" aria-label="AccessiUX Market, inicio">
           <img
-            class="brand__logo"
-            src="/branding/accessiux-market-logo.png"
+            class="brand__mark"
+            src="/branding/accessiux-mark.svg"
             alt=""
             aria-hidden="true"
           />
-          <span class="brand__fallback">AccessiUX Market</span>
+          <span class="brand__wordmark" aria-hidden="true">
+            <span class="brand__wordmark-accent">AccessiUX</span>
+            <span class="brand__wordmark-market">Market</span>
+          </span>
         </a>
 
         <div class="nav__actions">
@@ -60,12 +63,15 @@ import { AuthService } from './core/auth/auth.service';
         <section class="site-footer__brand-block">
           <a class="footer-brand footer-brand--official" routerLink="/" aria-label="AccessiUX Market, inicio">
             <img
-              class="footer-brand__logo"
-              src="/branding/accessiux-market-logo.png"
+              class="footer-brand__mark"
+              src="/branding/accessiux-mark.svg"
               alt=""
               aria-hidden="true"
             />
-            <span id="footer-brand-title" class="footer-brand__fallback">AccessiUX Market</span>
+            <span id="footer-brand-title" class="footer-brand__wordmark" aria-hidden="true">
+              <span class="footer-brand__wordmark-accent">AccessiUX</span>
+              <span class="footer-brand__wordmark-market">Market</span>
+            </span>
           </a>
           <p>
             Un marketplace pensado para comprar con claridad, confianza y menos barreras.
@@ -128,27 +134,38 @@ import { AuthService } from './core/auth/auth.service';
   styles: [`
     .brand--official,
     .footer-brand--official {
+      display: inline-flex;
+      align-items: center;
+      gap: .7rem;
       position: relative;
+      text-decoration: none;
     }
-    .brand__logo {
+    .brand__mark {
       display: block;
-      width: clamp(8.8rem, 13vw, 11.2rem);
-      height: auto;
-      max-height: 3.2rem;
+      width: 2.75rem;
+      height: 2.75rem;
+      flex: 0 0 auto;
       object-fit: contain;
-      object-position: left center;
     }
-    .brand__fallback,
-    .footer-brand__fallback {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
+    .brand__wordmark,
+    .footer-brand__wordmark {
+      display: inline-flex;
+      align-items: baseline;
+      gap: .3rem;
       white-space: nowrap;
-      border: 0;
+      font-weight: 900;
+      letter-spacing: -.025em;
+    }
+    .brand__wordmark {
+      font-size: clamp(1.05rem, 1.5vw, 1.35rem);
+    }
+    .brand__wordmark-accent,
+    .footer-brand__wordmark-accent {
+      color: #fff;
+    }
+    .brand__wordmark-market,
+    .footer-brand__wordmark-market {
+      color: #8cecf3;
     }
     .site-footer {
       position: relative;
@@ -188,18 +205,17 @@ import { AuthService } from './core/auth/auth.service';
       font-size: 1rem;
     }
     .footer-brand {
-      display: inline-flex;
-      align-items: center;
       color: #fff;
-      text-decoration: none;
     }
-    .footer-brand__logo {
+    .footer-brand__mark {
       display: block;
-      width: clamp(10rem, 15vw, 12.5rem);
-      height: auto;
-      max-height: 4rem;
+      width: 3.2rem;
+      height: 3.2rem;
+      flex: 0 0 auto;
       object-fit: contain;
-      object-position: left center;
+    }
+    .footer-brand__wordmark {
+      font-size: clamp(1.2rem, 1.8vw, 1.55rem);
     }
     .footer-values {
       margin: 0;
@@ -257,27 +273,26 @@ import { AuthService } from './core/auth/auth.service';
       .site-footer__nav { grid-template-columns: repeat(2,minmax(0,1fr)); }
     }
     @media (max-width: 38rem) {
-      .brand__logo { width: 8.8rem; }
-      .footer-brand__logo { width: 10rem; }
+      .brand--official,
+      .footer-brand--official { gap: .5rem; }
+      .brand__mark { width: 2.35rem; height: 2.35rem; }
+      .brand__wordmark { font-size: 1rem; }
+      .footer-brand__mark { width: 2.8rem; height: 2.8rem; }
+      .footer-brand__wordmark { font-size: 1.2rem; }
       .site-footer__nav { grid-template-columns: 1fr; }
       .site-footer__bottom { flex-direction: column; }
     }
     @media (forced-colors: active) {
-      .brand__logo,
-      .footer-brand__logo {
-        display: none;
+      .brand__wordmark-accent,
+      .brand__wordmark-market,
+      .footer-brand__wordmark-accent,
+      .footer-brand__wordmark-market {
+        color: LinkText;
       }
-      .brand__fallback,
-      .footer-brand__fallback {
-        position: static;
-        width: auto;
-        height: auto;
-        margin: 0;
-        overflow: visible;
-        clip: auto;
-        white-space: normal;
-        color: CanvasText;
-        font-weight: 800;
+      .brand__mark,
+      .footer-brand__mark {
+        border: 1px solid LinkText;
+        border-radius: .85rem;
       }
       .site-footer,
       .footer-values li { border: 2px solid CanvasText; }
