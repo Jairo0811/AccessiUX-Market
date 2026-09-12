@@ -26,7 +26,7 @@ try {
     await expect(page.locator('.account-details dd').nth(1)).toHaveText(account.roles);
 
     if (account.email === 'customer@accessiux.local') {
-      await expect(page.getByRole('link', { name: 'Vender', exact: true })).toBeVisible();
+      await expect(page.getByRole('link', { name: 'Vender', exact: true }).first()).toBeVisible();
       await expect(page.getByRole('link', { name: 'Administración', exact: true })).toHaveCount(0);
     }
 
