@@ -15,7 +15,9 @@ public static class OrderEndpoints
 
         group.MapGet("/", GetOrdersAsync);
         group.MapGet("/{orderId:guid}", GetOrderAsync);
+        group.MapGet("/{orderId:guid}/invoice", GetInvoiceAsync);
         group.MapPost("/{orderId:guid}/cancel", CancelOrderAsync);
+        group.MapPost("/{orderId:guid}/complete", CompleteOrderAsync);
 
         return endpoints;
     }
@@ -41,6 +43,25 @@ public static class OrderEndpoints
             : Results.Ok(order);
     }
 
+    private static async Task<IResult> GetInvoiceAsync(
+        Guid orderId,
+        HttpContext context,
+        IOrderService service,
+        CancellationToken ct)
+    {
+        try
+        {
+            var invoice = await service.GetInvoiceAsync(GetUserId(context.User), orderId, ct);
+            return invoice is null
+                ? Results.NotFound(new { message = "Order not found." })
+                : Results.Ok(invoice);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.Conflict(new { message = ex.Message });
+        }
+    }
+
     private static async Task<IResult> CancelOrderAsync(
         Guid orderId,
         HttpContext context,
@@ -50,6 +71,25 @@ public static class OrderEndpoints
         try
         {
             var result = await service.CancelAsync(GetUserId(context.User), orderId, ct);
+            return result is null
+                ? Results.NotFound(new { message = "Order not found." })
+                : Results.Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.Conflict(new { message = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> CompleteOrderAsync(
+        Guid orderId,
+        HttpContext context,
+        IOrderService service,
+        CancellationToken ct)
+    {
+        try
+        {
+            var result = await service.CompleteAsync(GetUserId(context.User), orderId, ct);
             return result is null
                 ? Results.NotFound(new { message = "Order not found." })
                 : Results.Ok(result);
