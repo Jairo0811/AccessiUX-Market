@@ -95,6 +95,61 @@ test('accessibility preferences apply immediately, persist and can be reset', as
   expect(results.violations).toEqual([]);
 });
 
+test('home exposes quick accessibility controls using the global persisted preferences', async ({ page }) => {
+  await page.goto('/');
+
+  const trigger = page.getByRole('button', { name: 'Accesibilidad', exact: true });
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  await trigger.click();
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+  const panel = page.getByRole('region', { name: 'Accesibilidad' });
+  await expect(panel).toBeVisible();
+
+  const largeText = panel.getByRole('button', { name: /^Texto grande/ });
+  const highContrast = panel.getByRole('button', { name: /^Alto contraste/ });
+  const simpleReading = panel.getByRole('button', { name: /^Lectura simple/ });
+  const reducedMotion = panel.getByRole('button', { name: /^Reducir movimiento/ });
+
+  await expect(largeText).toHaveAttribute('aria-pressed', 'false');
+  await expect(highContrast).toHaveAttribute('aria-pressed', 'false');
+  await expect(simpleReading).toHaveAttribute('aria-pressed', 'false');
+  await expect(reducedMotion).toHaveAttribute('aria-pressed', 'false');
+
+  await largeText.click();
+  await highContrast.click();
+  await simpleReading.click();
+  await reducedMotion.click();
+
+  const root = page.locator('html');
+  await expect(root).toHaveAttribute('data-large-text', '');
+  await expect(root).toHaveAttribute('data-high-contrast', '');
+  await expect(root).toHaveAttribute('data-simple-reading', '');
+  await expect(root).toHaveAttribute('data-reduce-motion', '');
+
+  let results = await new AxeBuilder({ page }).analyze();
+  expect(results.violations).toEqual([]);
+
+  await page.reload();
+  await page.getByRole('button', { name: 'Accesibilidad', exact: true }).click();
+  const restoredPanel = page.getByRole('region', { name: 'Accesibilidad' });
+  await expect(restoredPanel.getByRole('button', { name: /^Texto grande/ })).toHaveAttribute('aria-pressed', 'true');
+  await expect(restoredPanel.getByRole('button', { name: /^Alto contraste/ })).toHaveAttribute('aria-pressed', 'true');
+  await expect(restoredPanel.getByRole('button', { name: /^Lectura simple/ })).toHaveAttribute('aria-pressed', 'true');
+  await expect(restoredPanel.getByRole('button', { name: /^Reducir movimiento/ })).toHaveAttribute('aria-pressed', 'true');
+
+  await restoredPanel.getByRole('button', { name: 'Restablecer' }).click();
+  await expect(root).not.toHaveAttribute('data-large-text');
+  await expect(root).not.toHaveAttribute('data-high-contrast');
+  await expect(root).not.toHaveAttribute('data-simple-reading');
+  await expect(root).not.toHaveAttribute('data-reduce-motion');
+
+  await restoredPanel.getByRole('button', { name: 'Cerrar opciones de accesibilidad' }).focus();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('region', { name: 'Accesibilidad' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Accesibilidad', exact: true })).toHaveAttribute('aria-expanded', 'false');
+});
+
 test('current navigation destination is exposed programmatically', async ({ page }) => {
   await page.goto('/accessibility');
   await expect(page.locator('.nav').getByRole('link', { name: 'Accesibilidad' })).toHaveAttribute('aria-current', 'page');
