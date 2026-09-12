@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using AccessiUXMarket.Api.Infrastructure;
 using AccessiUXMarket.Application.Catalog;
+using AccessiUXMarket.Domain.Identity;
 
 namespace AccessiUXMarket.Api.Endpoints;
 
@@ -22,19 +23,21 @@ public static class CatalogEndpoints
 
         group.MapGet("/seller/me", async (HttpContext context, ICatalogService service, CancellationToken ct) =>
             await service.GetSellerByUserIdAsync(GetUserId(context.User), ct) is { } seller ? Results.Ok(seller) : Results.NotFound())
-            .RequireAuthorization();
+            .RequireAuthorization(policy => policy.RequireRole(RoleNames.Seller));
         group.MapGet("/seller/products", async (HttpContext context, ICatalogService service, CancellationToken ct) =>
-            Results.Ok(await service.GetSellerProductsAsync(GetUserId(context.User), ct))).RequireAuthorization();
+            Results.Ok(await service.GetSellerProductsAsync(GetUserId(context.User), ct)))
+            .RequireAuthorization(policy => policy.RequireRole(RoleNames.Seller));
         group.MapPost("/seller", CreateSellerAsync)
             .AddEndpointFilter<ValidationFilter<CreateSellerRequest>>()
-            .RequireAuthorization();
+            .RequireAuthorization(policy => policy.RequireRole(RoleNames.Customer));
         group.MapPut("/seller/policies", UpdateSellerPoliciesAsync)
             .AddEndpointFilter<ValidationFilter<UpdateSellerPoliciesRequest>>()
-            .RequireAuthorization();
+            .RequireAuthorization(policy => policy.RequireRole(RoleNames.Seller));
         group.MapPost("/seller/products", CreateProductAsync)
             .AddEndpointFilter<ValidationFilter<CreateProductRequest>>()
-            .RequireAuthorization();
-        group.MapPost("/seller/products/{productId:guid}/publish", PublishAsync).RequireAuthorization();
+            .RequireAuthorization(policy => policy.RequireRole(RoleNames.Seller));
+        group.MapPost("/seller/products/{productId:guid}/publish", PublishAsync)
+            .RequireAuthorization(policy => policy.RequireRole(RoleNames.Seller));
         return endpoints;
     }
 
