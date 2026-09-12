@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">AccessiUX Market</title>
+  <desc id="desc">Isotipo de AccessiUX Market con símbolo de accesibilidad en forma hexagonal.</desc>
+  <defs>
+    <linearGradient id="bg" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#12d4e2"/>
+      <stop offset="0.5" stop-color="#1684ff"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="18" fill="#0b2147"/>
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#bg)" opacity="0.22"/>
+  <path d="M32 10 13 21v22l19 11 19-11V21L32 10Z" fill="none" stroke="#d9fbff" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M23 42 32 22l9 20M25.5 35h13" fill="none" stroke="#ffffff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="32" cy="29" r="2.7" fill="#ffffff"/>
+</svg>

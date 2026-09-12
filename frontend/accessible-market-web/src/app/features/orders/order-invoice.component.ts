@@ -34,8 +34,8 @@ import { OrderService } from '../../core/orders/order.service';
       } @else if (invoice) {
         <article class="invoice-document" aria-labelledby="invoice-page-title">
           <header class="invoice-header">
-            <div class="invoice-brand" aria-label="AccessiUX Market">
-              <span class="invoice-brand__mark" aria-hidden="true">A</span>
+            <div class="invoice-brand">
+              <img class="invoice-brand__mark" src="branding/accessiux-mark.svg" alt="">
               <div>
                 <strong>AccessiUX Market</strong>
                 <span>Comercio electrónico accesible y usable</span>
@@ -57,7 +57,7 @@ import { OrderService } from '../../core/orders/order.service';
             <h2 id="invoice-meta-title">Información de la compra</h2>
             <dl>
               <div><dt>Número de pedido</dt><dd>{{ invoice.orderNumber }}</dd></div>
-              <div><dt>Fecha de emisión</dt><dd>{{ invoice.issuedAtUtc | date:'long' }} · {{ invoice.issuedAtUtc | date:'shortTime' }}</dd></div>
+              <div><dt>Fecha de emisión</dt><dd>{{ formatIssuedAt(invoice.issuedAtUtc) }}</dd></div>
               <div><dt>Método de pago</dt><dd>{{ paymentLabel(invoice.paymentMethod) }}</dd></div>
               <div><dt>Moneda</dt><dd>{{ invoice.currency }}</dd></div>
             </dl>
@@ -93,8 +93,8 @@ import { OrderService } from '../../core/orders/order.service';
                     <tr>
                       <th scope="row">{{ item.name }}</th>
                       <td>{{ item.quantity }}</td>
-                      <td>{{ item.unitPrice | currency:invoice.currency:'symbol':'1.2-2' }}</td>
-                      <td>{{ item.lineTotal | currency:invoice.currency:'symbol':'1.2-2' }}</td>
+                      <td>{{ formatMoney(item.unitPrice, invoice.currency) }}</td>
+                      <td>{{ formatMoney(item.lineTotal, invoice.currency) }}</td>
                     </tr>
                   }
                 </tbody>
@@ -105,16 +105,16 @@ import { OrderService } from '../../core/orders/order.service';
           <section class="invoice-totals" aria-labelledby="invoice-totals-title">
             <h2 id="invoice-totals-title">Totales</h2>
             <dl>
-              <div><dt>Subtotal</dt><dd>{{ invoice.subtotal | currency:invoice.currency:'symbol':'1.2-2' }}</dd></div>
-              <div><dt>Envío</dt><dd>{{ invoice.shippingAmount | currency:invoice.currency:'symbol':'1.2-2' }}</dd></div>
-              <div><dt>{{ taxLabel(invoice) }}</dt><dd>{{ invoice.taxAmount | currency:invoice.currency:'symbol':'1.2-2' }}</dd></div>
-              <div class="invoice-total"><dt>Total pagado / adeudado</dt><dd>{{ invoice.total | currency:invoice.currency:'symbol':'1.2-2' }}</dd></div>
+              <div><dt>Subtotal</dt><dd>{{ formatMoney(invoice.subtotal, invoice.currency) }}</dd></div>
+              <div><dt>Envío</dt><dd>{{ formatMoney(invoice.shippingAmount, invoice.currency) }}</dd></div>
+              <div><dt>{{ taxLabel(invoice) }}</dt><dd>{{ formatMoney(invoice.taxAmount, invoice.currency) }}</dd></div>
+              <div class="invoice-total"><dt>Total de la compra</dt><dd>{{ formatMoney(invoice.total, invoice.currency) }}</dd></div>
             </dl>
           </section>
 
           <footer class="invoice-footer-note">
             <strong>Gracias por comprar en AccessiUX Market.</strong>
-            <span>Esta factura fue diseñada para conservar una lectura clara con teclado, lector de pantalla, alto contraste e impresión.</span>
+            <span>Documento diseñado para una lectura clara con teclado, lector de pantalla, alto contraste e impresión.</span>
           </footer>
         </article>
       }
@@ -128,10 +128,10 @@ import { OrderService } from '../../core/orders/order.service';
     .invoice-document { padding: clamp(1.4rem,4vw,3rem); display: grid; gap: 1.5rem; border: 1px solid var(--border-strong); border-radius: 1.25rem; background: #fff; box-shadow: var(--shadow-md); }
     .invoice-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 2rem; padding-bottom: 1.4rem; border-bottom: 2px solid var(--navy-900); }
     .invoice-brand { display: flex; align-items: center; gap: .8rem; }
-    .invoice-brand__mark { width: 3rem; height: 3rem; display: grid; place-items: center; border-radius: .8rem; color: #fff; background: linear-gradient(145deg,var(--blue),var(--violet)); font-size: 1.35rem; font-weight: 900; }
+    .invoice-brand__mark { width: 3rem; height: 3rem; flex: 0 0 3rem; display: block; }
     .invoice-brand > div { display: grid; }
     .invoice-brand strong { color: var(--navy-900); font-size: 1.25rem; }
-    .invoice-brand span:last-child { color: var(--ink-600); font-size: .88rem; }
+    .invoice-brand span { color: var(--ink-600); font-size: .88rem; }
     .invoice-heading { text-align: right; }
     .invoice-kicker { margin: 0; color: #2845ba; font-size: .78rem; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
     .invoice-heading h1 { margin: .25rem 0 .55rem; color: var(--navy-900); font-size: clamp(1.7rem,4vw,2.5rem); overflow-wrap: anywhere; }
@@ -166,15 +166,37 @@ import { OrderService } from '../../core/orders/order.service';
       .invoice-meta dl { grid-template-columns: 1fr; }
     }
     @media print {
-      @page { margin: 1.2cm; }
-      body { background: #fff !important; }
-      .site-header, .site-footer, .skip-link, .invoice-actions { display: none !important; }
-      .app-shell { width: 100% !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; }
-      .invoice-page { max-width: none !important; margin: 0 !important; padding: 0 !important; }
-      .invoice-document { padding: 0 !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
-      .invoice-table-wrap { overflow: visible !important; }
-      .invoice-items table { min-width: 0 !important; }
-      .invoice-status { border: 1px solid currentColor; }
+      @page { size: A4 portrait; margin: 8mm 10mm; }
+      html, body { margin: 0 !important; padding: 0 !important; min-height: auto !important; background: #fff !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .site-header, .site-footer, .skip-link, .invoice-actions, .invoice-live { display: none !important; }
+      .app-shell { width: 100% !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; background: #fff !important; }
+      .invoice-page { max-width: none !important; margin: 0 !important; padding: 0 !important; background: #fff !important; }
+      .invoice-document { padding: 0 !important; gap: 6mm !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; font-size: 9.5pt; line-height: 1.32; }
+      .invoice-header { gap: 10mm; padding-bottom: 4mm; break-inside: avoid; }
+      .invoice-brand__mark { width: 10mm; height: 10mm; flex-basis: 10mm; }
+      .invoice-brand strong { font-size: 13pt; }
+      .invoice-brand span { font-size: 8.5pt; }
+      .invoice-kicker { font-size: 7.5pt; }
+      .invoice-heading h1 { margin: 1mm 0 2mm; font-size: 17pt; }
+      .invoice-status { padding: 1.5mm 3mm; border: 1px solid currentColor; font-size: 8.5pt; }
+      .invoice-disclaimer { padding: 3mm 4mm; break-inside: avoid; }
+      .invoice-meta, .invoice-customer, .invoice-totals, .invoice-footer-note { break-inside: avoid; }
+      .invoice-meta h2, .invoice-customer h2, .invoice-items h2, .invoice-totals h2 { margin-bottom: 2.5mm; font-size: 11pt; }
+      .invoice-meta dl { gap: 2mm; }
+      .invoice-meta dl > div { padding: 2.5mm 3mm; border-radius: 2mm; }
+      .invoice-meta dt { font-size: 7.5pt; }
+      .invoice-meta dd { margin-top: .5mm; }
+      .invoice-customer address { line-height: 1.38; }
+      .invoice-table-wrap { overflow: visible !important; border-radius: 2mm; }
+      .invoice-items table { min-width: 0 !important; font-size: 8.5pt; }
+      .invoice-items thead { display: table-header-group; }
+      .invoice-items tr { break-inside: avoid; }
+      .invoice-items th, .invoice-items td { padding: 2.5mm 3mm; }
+      .invoice-totals { width: 48%; min-width: 72mm; }
+      .invoice-totals dl { gap: 0; }
+      .invoice-totals dl > div { padding: 1.4mm 0; }
+      .invoice-totals .invoice-total { margin-top: 1mm; padding-top: 2.2mm; font-size: 10.5pt; }
+      .invoice-footer-note { padding-top: 3mm; gap: 1mm; font-size: 8.5pt; }
     }
   `]
 })
@@ -215,6 +237,24 @@ export class OrderInvoiceComponent implements OnInit {
 
   printInvoice(): void {
     this.document.defaultView?.print();
+  }
+
+  formatIssuedAt(value: string): string {
+    return new Intl.DateTimeFormat('es-DO', {
+      dateStyle: 'long',
+      timeStyle: 'short',
+      timeZone: 'America/Santo_Domingo'
+    }).format(new Date(value));
+  }
+
+  formatMoney(value: number, currency: string): string {
+    return new Intl.NumberFormat('es-DO', {
+      style: 'currency',
+      currency,
+      currencyDisplay: 'code',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value).replace(/\s+/g, ' ');
   }
 
   paymentLabel(paymentMethod: string): string {
