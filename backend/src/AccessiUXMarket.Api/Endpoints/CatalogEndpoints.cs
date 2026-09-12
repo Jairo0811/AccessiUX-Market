@@ -23,7 +23,7 @@ public static class CatalogEndpoints
 
         group.MapGet("/seller/me", async (HttpContext context, ICatalogService service, CancellationToken ct) =>
             await service.GetSellerByUserIdAsync(GetUserId(context.User), ct) is { } seller ? Results.Ok(seller) : Results.NotFound())
-            .RequireAuthorization(policy => policy.RequireRole(RoleNames.Seller));
+            .RequireAuthorization(policy => policy.RequireRole(RoleNames.Customer));
         group.MapGet("/seller/products", async (HttpContext context, ICatalogService service, CancellationToken ct) =>
             Results.Ok(await service.GetSellerProductsAsync(GetUserId(context.User), ct)))
             .RequireAuthorization(policy => policy.RequireRole(RoleNames.Seller));
