@@ -13,9 +13,21 @@ export class AuthService {
 
   readonly currentUser = this.currentUserState.asReadonly();
   readonly isAuthenticated = computed(() => this.currentUserState() !== null);
+  readonly isCustomer = computed(() => this.hasRole('Customer'));
+  readonly isSeller = computed(() => this.hasRole('Seller'));
+  readonly isAdministrator = computed(() => this.hasRole('Administrator'));
 
   get accessToken(): string | null {
     return this.accessTokenState();
+  }
+
+  hasRole(role: string): boolean {
+    return this.currentUserState()?.roles.includes(role) ?? false;
+  }
+
+  hasAnyRole(roles: readonly string[]): boolean {
+    const userRoles = this.currentUserState()?.roles ?? [];
+    return roles.some((role) => userRoles.includes(role));
   }
 
   register(request: RegisterRequest): Observable<CurrentUser> {
