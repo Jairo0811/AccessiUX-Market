@@ -136,6 +136,7 @@ app.MapCatalogEndpoints();
 app.MapCartEndpoints();
 app.MapCheckoutEndpoints();
 app.MapOrderEndpoints();
+app.MapAdminEndpoints();
 
 var seedDemoUsers = app.Environment.IsDevelopment() &&
     app.Configuration.GetValue<bool>("Database:SeedDemoUsers");
