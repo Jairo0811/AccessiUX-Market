@@ -91,12 +91,42 @@ curl -fsS "${API_BASE}/api/v1/catalog/products/smoke-product-v1" | jq -e '.stock
 orders="$(curl -fsS -H "$(auth_header "$customer_token")" "${API_BASE}/api/v1/orders/")"
 jq -e --arg orderId "$order_id" 'map(select(.id == $orderId)) | length == 1' <<<"$orders" >/dev/null
 order_detail="$(curl -fsS -H "$(auth_header "$customer_token")" "${API_BASE}/api/v1/orders/${order_id}")"
-jq -e '.canCancel == true and .status == "Pending" and .subtotal == 3000 and .taxAmount == 540 and .total == 3540' <<<"$order_detail" >/dev/null
+jq -e '.canCancel == true and .canComplete == true and .invoiceAvailable == false and .status == "Pending" and .subtotal == 3000 and .taxAmount == 540 and .total == 3540' <<<"$order_detail" >/dev/null
+
+invoice_before_status="$(curl -sS -o /dev/null -w '%{http_code}' -H "$(auth_header "$customer_token")" "${API_BASE}/api/v1/orders/${order_id}/invoice")"
+test "$invoice_before_status" = "409"
 
 cancelled="$(curl -fsS -X POST -H "$(auth_header "$customer_token")" "${API_BASE}/api/v1/orders/${order_id}/cancel")"
 jq -e '.status == "Cancelled"' <<<"$cancelled" >/dev/null
 curl -fsS "${API_BASE}/api/v1/catalog/products/smoke-product-v1" | jq -e '.stockQuantity == 5' >/dev/null
 curl -fsS -H "$(auth_header "$customer_token")" "${API_BASE}/api/v1/cart" | jq -e '.totalQuantity == 0 and (.items | length) == 0' >/dev/null
 
+# Second purchase: validate irreversible completion and accessible invoice data.
+second_cart_payload="$(jq -nc --arg productId "$product_id" '{productId:$productId,quantity:1}')"
+second_cart="$(curl -fsS -H "$(auth_header "$customer_token")" -H 'Content-Type: application/json' -d "$second_cart_payload" "${API_BASE}/api/v1/cart/items")"
+jq -e '.totalQuantity == 1 and .items[0].quantity == 1' <<<"$second_cart" >/dev/null
+
+second_review="$(curl -fsS -H "$(auth_header "$customer_token")" -H 'Content-Type: application/json' -d "$checkout_payload" "${API_BASE}/api/v1/checkout/review")"
+jq -e '.subtotal == 1500 and .taxAmount == 270 and .total == 1770' <<<"$second_review" >/dev/null
+
+second_confirmation="$(curl -fsS -H "$(auth_header "$customer_token")" -H 'Content-Type: application/json' -d "$checkout_payload" "${API_BASE}/api/v1/checkout/confirm")"
+second_order_id="$(jq -r '.orderId' <<<"$second_confirmation")"
+jq -e '.status == "Pending" and .total == 1770' <<<"$second_confirmation" >/dev/null
+curl -fsS "${API_BASE}/api/v1/catalog/products/smoke-product-v1" | jq -e '.stockQuantity == 4' >/dev/null
+
+completed="$(curl -fsS -X POST -H "$(auth_header "$customer_token")" "${API_BASE}/api/v1/orders/${second_order_id}/complete")"
+jq -e '.status == "Confirmed" and .completedAtUtc != null' <<<"$completed" >/dev/null
+
+completed_detail="$(curl -fsS -H "$(auth_header "$customer_token")" "${API_BASE}/api/v1/orders/${second_order_id}")"
+jq -e '.status == "Confirmed" and .canCancel == false and .canComplete == false and .invoiceAvailable == true and .completedAtUtc != null' <<<"$completed_detail" >/dev/null
+
+invoice="$(curl -fsS -H "$(auth_header "$customer_token")" "${API_BASE}/api/v1/orders/${second_order_id}/invoice")"
+jq -e '.invoiceNumber | startswith("FAC-")' <<<"$invoice" >/dev/null
+jq -e '.status == "Confirmed" and .subtotal == 1500 and .taxAmount == 270 and .total == 1770 and .address.countryCode == "DO" and .items[0].quantity == 1' <<<"$invoice" >/dev/null
+
+cancel_completed_status="$(curl -sS -o /dev/null -w '%{http_code}' -X POST -H "$(auth_header "$customer_token")" "${API_BASE}/api/v1/orders/${second_order_id}/cancel")"
+test "$cancel_completed_status" = "409"
+curl -fsS "${API_BASE}/api/v1/catalog/products/smoke-product-v1" | jq -e '.stockQuantity == 4' >/dev/null
+
 printf 'FULL-STACK API SMOKE: PASS\n'
-printf 'Validated health, v1.0.1 metadata, role privileges, seeded seller profile, policies, product publication, cart, Dominican ITBIS, checkout, orders, cancellation and stock restoration.\n'
+printf 'Validated health, v1.0.1 metadata, role privileges, seeded seller profile, policies, product publication, cart, Dominican ITBIS, checkout, cancellation, purchase completion, accessible invoice data and inventory invariants.\n'
