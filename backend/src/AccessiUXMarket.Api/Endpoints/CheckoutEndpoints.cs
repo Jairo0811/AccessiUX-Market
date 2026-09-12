@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using AccessiUXMarket.Api.Infrastructure;
 using AccessiUXMarket.Application.Checkout;
+using AccessiUXMarket.Domain.Identity;
 
 namespace AccessiUXMarket.Api.Endpoints;
 
@@ -11,7 +12,7 @@ public static class CheckoutEndpoints
     {
         var group = endpoints.MapGroup("/api/v1/checkout")
             .WithTags("Checkout")
-            .RequireAuthorization();
+            .RequireAuthorization(policy => policy.RequireRole(RoleNames.Customer));
 
         group.MapPost("/review", ReviewAsync)
             .AddEndpointFilter<ValidationFilter<CheckoutRequest>>();
