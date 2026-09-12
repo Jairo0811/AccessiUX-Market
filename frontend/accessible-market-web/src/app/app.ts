@@ -17,7 +17,7 @@ import { AuthService } from './core/auth/auth.service';
         <a class="brand brand--official" routerLink="/" aria-label="AccessiUX Market, inicio">
           <img
             class="brand__mark"
-            src="/branding/accessiux-mark.svg"
+            src="/branding/accessiux-market-isotype.png"
             alt=""
             aria-hidden="true"
           />
@@ -64,7 +64,7 @@ import { AuthService } from './core/auth/auth.service';
           <a class="footer-brand footer-brand--official" routerLink="/" aria-label="AccessiUX Market, inicio">
             <img
               class="footer-brand__mark"
-              src="/branding/accessiux-mark.svg"
+              src="/branding/accessiux-market-isotype.png"
               alt=""
               aria-hidden="true"
             />
