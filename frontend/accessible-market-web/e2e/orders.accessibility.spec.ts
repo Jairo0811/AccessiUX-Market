@@ -156,7 +156,7 @@ test('order cancellation requires explicit confirmation and announces the new st
   expect(results.violations).toEqual([]);
 });
 
-test('accessible invoice exposes persisted reading preferences and a non-color status', async ({ page }) => {
+test('accessible invoice exposes official branding, persisted reading preferences and a non-color status', async ({ page }) => {
   const invoicePath = `/api/v1/orders/${orderId}/invoice`;
   const invoiceNumber = 'FAC-20260906-TEST0001';
 
@@ -195,6 +195,11 @@ test('accessible invoice exposes persisted reading preferences and a non-color s
   await expect(page.getByText('DOP 3,540.00', { exact: true })).toBeVisible();
   await expect(page.getByRole('group', { name: 'Opciones de lectura de esta factura' })).toBeVisible();
 
+  const invoiceLogo = page.locator('.invoice-brand__logo');
+  await expect(invoiceLogo).toBeVisible();
+  await expect(invoiceLogo).toHaveAttribute('src', '/branding/accessiux-market-logo.png');
+  expect(await invoiceLogo.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
+
   const largeText = page.getByRole('checkbox', { name: /Texto grande/ });
   const highContrast = page.getByRole('checkbox', { name: /Alto contraste/ });
   const simpleReading = page.getByRole('checkbox', { name: /Lectura simple/ });
@@ -205,6 +210,8 @@ test('accessible invoice exposes persisted reading preferences and a non-color s
   await expect(page.locator('html')).toHaveAttribute('data-high-contrast', '');
   await simpleReading.check();
   await expect(page.locator('html')).toHaveAttribute('data-simple-reading', '');
+  await expect(invoiceLogo).toBeHidden();
+  await expect(page.locator('.invoice-brand__fallback')).toBeVisible();
 
   await expect(page.getByText('Lectura simple activada para AccessiUX Market.')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Ver todas las preferencias de accesibilidad' })).toBeVisible();
