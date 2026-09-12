@@ -103,7 +103,7 @@ test('home exposes quick accessibility controls using the global persisted prefe
   await trigger.click();
   await expect(trigger).toHaveAttribute('aria-expanded', 'true');
 
-  const panel = page.getByRole('region', { name: 'Accesibilidad' });
+  const panel = page.getByRole('region', { name: 'Accesibilidad', exact: true });
   await expect(panel).toBeVisible();
 
   const largeText = panel.getByRole('button', { name: /^Texto grande/ });
@@ -132,7 +132,7 @@ test('home exposes quick accessibility controls using the global persisted prefe
 
   await page.reload();
   await page.getByRole('button', { name: 'Accesibilidad', exact: true }).click();
-  const restoredPanel = page.getByRole('region', { name: 'Accesibilidad' });
+  const restoredPanel = page.getByRole('region', { name: 'Accesibilidad', exact: true });
   await expect(restoredPanel.getByRole('button', { name: /^Texto grande/ })).toHaveAttribute('aria-pressed', 'true');
   await expect(restoredPanel.getByRole('button', { name: /^Alto contraste/ })).toHaveAttribute('aria-pressed', 'true');
   await expect(restoredPanel.getByRole('button', { name: /^Lectura simple/ })).toHaveAttribute('aria-pressed', 'true');
@@ -146,7 +146,7 @@ test('home exposes quick accessibility controls using the global persisted prefe
 
   await restoredPanel.getByRole('button', { name: 'Cerrar opciones de accesibilidad' }).focus();
   await page.keyboard.press('Escape');
-  await expect(page.getByRole('region', { name: 'Accesibilidad' })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'Accesibilidad', exact: true })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Accesibilidad', exact: true })).toHaveAttribute('aria-expanded', 'false');
 });
 
