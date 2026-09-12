@@ -5,21 +5,17 @@ test('official AccessiUX branding renders in the header and footer', async ({ pa
 
   const headerBrand = page.locator('.site-header .brand--official');
   await expect(headerBrand).toBeVisible();
-  await expect(headerBrand).toContainText('AccessiUX');
-  await expect(headerBrand).toContainText('Market');
 
-  const headerMark = headerBrand.locator('img.brand__mark');
-  await expect(headerMark).toBeVisible();
-  await expect(headerMark).toHaveAttribute('src', '/branding/accessiux-market-isotype.png');
-  expect(await headerMark.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
+  const headerLogo = headerBrand.locator('img.brand__mark');
+  await expect(headerLogo).toBeVisible();
+  await expect(headerLogo).toHaveAttribute('src', '/branding/accessiux-market-logo.png');
+  expect(await headerLogo.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
 
   const footerBrand = page.locator('.site-footer .footer-brand--official');
   await expect(footerBrand).toBeVisible();
-  await expect(footerBrand).toContainText('AccessiUX');
-  await expect(footerBrand).toContainText('Market');
 
-  const footerMark = footerBrand.locator('img.footer-brand__mark');
-  await expect(footerMark).toBeVisible();
-  await expect(footerMark).toHaveAttribute('src', '/branding/accessiux-market-isotype.png');
-  expect(await footerMark.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
+  const footerLogo = footerBrand.locator('img.footer-brand__mark');
+  await expect(footerLogo).toBeVisible();
+  await expect(footerLogo).toHaveAttribute('src', '/branding/accessiux-market-logo.png');
+  expect(await footerLogo.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
 });
