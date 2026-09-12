@@ -17,8 +17,11 @@ public sealed record OrderSummaryDto(
     DateTime CreatedAtUtc,
     DateTime UpdatedAtUtc,
     bool CanCancel,
+    bool CanComplete,
+    bool InvoiceAvailable,
     DateTime CancelUntilUtc,
-    string CancellationMessage);
+    string CancellationMessage,
+    DateTime? CompletedAtUtc);
 
 public sealed record OrderItemDto(
     Guid ProductId,
@@ -53,7 +56,10 @@ public sealed record OrderDetailDto(
     DateTime CreatedAtUtc,
     DateTime UpdatedAtUtc,
     DateTime? CancelledAtUtc,
+    DateTime? CompletedAtUtc,
     bool CanCancel,
+    bool CanComplete,
+    bool InvoiceAvailable,
     DateTime CancelUntilUtc,
     string CancellationMessage);
 
@@ -64,9 +70,33 @@ public sealed record OrderCancellationDto(
     DateTime CancelledAtUtc,
     string Message);
 
+public sealed record OrderCompletionDto(
+    Guid Id,
+    string OrderNumber,
+    string Status,
+    DateTime CompletedAtUtc,
+    string Message);
+
+public sealed record OrderInvoiceDto(
+    string InvoiceNumber,
+    Guid OrderId,
+    string OrderNumber,
+    string Status,
+    DateTime IssuedAtUtc,
+    string Currency,
+    decimal Subtotal,
+    decimal ShippingAmount,
+    decimal TaxAmount,
+    decimal Total,
+    string PaymentMethod,
+    OrderAddressDto Address,
+    IReadOnlyList<OrderItemDto> Items);
+
 public interface IOrderService
 {
     Task<IReadOnlyList<OrderSummaryDto>> GetOrdersAsync(Guid userId, CancellationToken cancellationToken = default);
     Task<OrderDetailDto?> GetOrderAsync(Guid userId, Guid orderId, CancellationToken cancellationToken = default);
     Task<OrderCancellationDto?> CancelAsync(Guid userId, Guid orderId, CancellationToken cancellationToken = default);
+    Task<OrderCompletionDto?> CompleteAsync(Guid userId, Guid orderId, CancellationToken cancellationToken = default);
+    Task<OrderInvoiceDto?> GetInvoiceAsync(Guid userId, Guid orderId, CancellationToken cancellationToken = default);
 }

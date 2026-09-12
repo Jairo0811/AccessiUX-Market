@@ -14,7 +14,7 @@ import { OrderService } from '../../core/orders/order.service';
       <header class="page-header">
         <p class="eyebrow">Mi cuenta</p>
         <h1 id="orders-title">Mis pedidos</h1>
-        <p>Consulta el estado de tus compras y verifica claramente si todavía pueden cancelarse.</p>
+        <p>Consulta el estado de tus compras, las opciones disponibles y las facturas de compras realizadas.</p>
       </header>
 
       <p class="sr-status" aria-live="polite">{{ liveMessage }}</p>
@@ -41,7 +41,12 @@ import { OrderService } from '../../core/orders/order.service';
                   <p class="label">Pedido</p>
                   <h2>{{ order.orderNumber }}</h2>
                 </div>
-                <span class="status" [class.cancelled]="order.status === 'Cancelled'">{{ statusLabel(order.status) }}</span>
+                <span
+                  class="status"
+                  [class.cancelled]="order.status === 'Cancelled'"
+                  [class.completed]="order.status === 'Confirmed'">
+                  {{ statusLabel(order.status) }}
+                </span>
               </div>
 
               <dl class="summary-grid">
@@ -50,14 +55,21 @@ import { OrderService } from '../../core/orders/order.service';
                 <div><dt>Total</dt><dd>{{ order.total | currency:order.currency:'symbol':'1.2-2' }}</dd></div>
               </dl>
 
-              <p class="policy" [class.available]="order.canCancel">
-                <strong>{{ order.canCancel ? 'Cancelación disponible.' : 'Cancelación no disponible.' }}</strong>
+              <p class="policy" [class.available]="order.canCancel" [class.completed]="order.invoiceAvailable">
+                <strong>{{ policyHeading(order) }}</strong>
                 {{ friendlyCancellationMessage(order) }}
               </p>
 
-              <a class="secondary-link" [routerLink]="['/orders', order.id]" [attr.aria-label]="'Ver detalle del pedido ' + order.orderNumber">
-                Ver detalle
-              </a>
+              <div class="order-actions">
+                <a class="secondary-link" [routerLink]="['/orders', order.id]" [attr.aria-label]="'Ver detalle del pedido ' + order.orderNumber">
+                  Ver detalle
+                </a>
+                @if (order.invoiceAvailable) {
+                  <a class="primary-link" [routerLink]="['/orders', order.id, 'invoice']" [attr.aria-label]="'Ver factura accesible del pedido ' + order.orderNumber">
+                    Ver factura
+                  </a>
+                }
+              </div>
             </article>
           }
         </div>
@@ -73,16 +85,20 @@ import { OrderService } from '../../core/orders/order.service';
     h1 { margin: 0 0 .75rem; }
     h2 { margin: 0; font-size: 1.2rem; overflow-wrap: anywhere; }
     .order-list { display: grid; gap: 1rem; }
-    .order-card, .empty-state { border: 1px solid currentColor; border-radius: .9rem; padding: 1.25rem; }
+    .order-card, .empty-state { border: 1px solid var(--border-strong); border-radius: .9rem; padding: 1.25rem; background: #fff; }
     .order-card__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
     .status { border: 1px solid currentColor; border-radius: 999px; padding: .25rem .65rem; font-weight: 700; white-space: nowrap; }
-    .status.cancelled { text-decoration: line-through; }
+    .status.cancelled { color: var(--danger); text-decoration: line-through; }
+    .status.completed { color: var(--success); background: #edf9f4; }
     .summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; margin: 1rem 0; }
     dt { font-size: .85rem; font-weight: 700; }
     dd { margin: .2rem 0 0; }
     .policy { padding: .8rem; border-left: .3rem solid currentColor; background: rgba(127,127,127,.08); }
     .policy.available { font-weight: 500; }
+    .policy.completed { color: var(--success); background: #edf9f4; }
+    .order-actions { display: flex; flex-wrap: wrap; gap: .7rem; }
     .primary-link, .secondary-link { display: inline-block; min-height: 44px; padding: .7rem 1rem; border: 2px solid currentColor; border-radius: .55rem; font-weight: 700; text-decoration: none; }
+    .primary-link { color: #fff; border-color: var(--navy-900); background: var(--navy-900); }
     .notice { display: grid; gap: .35rem; padding: 1rem; border: 2px solid currentColor; border-radius: .65rem; }
     .sr-status:empty { display: none; }
     @media (max-width: 640px) {
@@ -119,13 +135,23 @@ export class OrdersComponent implements OnInit {
   statusLabel(status: string): string {
     switch (status) {
       case 'Pending': return 'Pendiente';
-      case 'Confirmed': return 'Confirmado';
+      case 'Confirmed': return 'Compra realizada';
       case 'Cancelled': return 'Cancelado';
       default: return status;
     }
   }
 
+  policyHeading(order: OrderSummary): string {
+    if (order.invoiceAvailable) return 'Compra realizada.';
+    if (order.canCancel) return 'Cancelación disponible.';
+    return 'Cancelación no disponible.';
+  }
+
   friendlyCancellationMessage(order: OrderSummary): string {
+    if (order.invoiceAvailable && order.completedAtUtc) {
+      return `Factura disponible desde ${new Intl.DateTimeFormat('es-DO', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(order.completedAtUtc))}.`;
+    }
+
     if (order.canCancel) {
       return `Disponible hasta ${new Intl.DateTimeFormat('es-DO', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(order.cancelUntilUtc))}.`;
     }
@@ -159,16 +185,45 @@ export class OrdersComponent implements OnInit {
           <p><strong>Estado:</strong> {{ statusLabel(order.status) }}</p>
         </header>
 
-        <section class="policy-card" aria-labelledby="cancellation-title">
-          <h2 id="cancellation-title">Control de cancelación</h2>
+        <section class="policy-card" aria-labelledby="order-actions-title">
+          <h2 id="order-actions-title">Estado y acciones</h2>
           <p id="cancellation-policy">{{ friendlyCancellationMessage(order) }}</p>
 
           @if (actionErrorMessage) {
             <p class="notice" role="alert">{{ actionErrorMessage }}</p>
           }
 
-          @if (order.canCancel && !confirmingCancellation) {
-            <button type="button" class="danger-button" (click)="confirmingCancellation = true" aria-describedby="cancellation-policy">
+          @if (order.invoiceAvailable && order.completedAtUtc) {
+            <div class="completed-panel" role="status">
+              <strong>Compra realizada</strong>
+              <span>Finalizada el {{ order.completedAtUtc | date:'medium' }}. La cancelación está cerrada y la factura está disponible.</span>
+              <a class="invoice-link" [routerLink]="['/orders', order.id, 'invoice']">Ver factura accesible</a>
+            </div>
+          }
+
+          @if (order.canComplete && !confirmingCompletion) {
+            <button type="button" class="primary-button" (click)="startCompletion()">
+              Marcar compra realizada
+            </button>
+          }
+
+          @if (order.canComplete && confirmingCompletion) {
+            <div class="confirmation" role="group" aria-labelledby="confirm-complete-title">
+              <h3 id="confirm-complete-title">¿Marcar esta compra como realizada?</h3>
+              <p>Confirma esta opción cuando la entrega o el pago hayan finalizado. Después no podrás cancelar el pedido y se habilitará la factura.</p>
+              <div class="button-row">
+                <button type="button" class="primary-button" (click)="completeOrder()" [disabled]="completing">
+                  {{ completing ? 'Finalizando…' : 'Sí, compra realizada' }}
+                </button>
+                <button type="button" class="secondary-button" (click)="confirmingCompletion = false" [disabled]="completing">
+                  Volver
+                </button>
+              </div>
+            </div>
+          }
+
+          @if (order.canCancel && !confirmingCancellation && !confirmingCompletion) {
+            <button type="button" class="danger-button" (click)="startCancellation()" aria-describedby="cancellation-policy">
               Cancelar pedido
             </button>
           }
@@ -210,7 +265,7 @@ export class OrdersComponent implements OnInit {
             <dl class="totals">
               <div><dt>Subtotal</dt><dd>{{ order.subtotal | currency:order.currency:'symbol':'1.2-2' }}</dd></div>
               <div><dt>Envío</dt><dd>{{ order.shippingAmount | currency:order.currency:'symbol':'1.2-2' }}</dd></div>
-              <div><dt>Impuestos</dt><dd>{{ order.taxAmount | currency:order.currency:'symbol':'1.2-2' }}</dd></div>
+              <div><dt>{{ taxLabel(order) }}</dt><dd>{{ order.taxAmount | currency:order.currency:'symbol':'1.2-2' }}</dd></div>
               <div class="total"><dt>Total</dt><dd>{{ order.total | currency:order.currency:'symbol':'1.2-2' }}</dd></div>
             </dl>
           </section>
@@ -229,7 +284,7 @@ export class OrdersComponent implements OnInit {
 
           <section class="card" aria-labelledby="payment-title">
             <h2 id="payment-title">Método de pago</h2>
-            <p>{{ order.paymentMethod }}</p>
+            <p>{{ paymentLabel(order.paymentMethod) }}</p>
             <p class="muted">AccessiUX Market conserva únicamente la selección del método; no almacena datos de tarjeta.</p>
           </section>
         </div>
@@ -242,11 +297,12 @@ export class OrdersComponent implements OnInit {
     .back-link { display: inline-block; margin-bottom: 1.25rem; min-height: 44px; padding: .6rem 0; font-weight: 700; }
     .eyebrow { margin: 0 0 .35rem; font-size: .82rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
     h1 { margin: 0 0 .5rem; overflow-wrap: anywhere; }
-    .policy-card, .card, .notice { border: 1px solid currentColor; border-radius: .85rem; padding: 1.2rem; }
+    .policy-card, .card, .notice { border: 1px solid var(--border-strong); border-radius: .85rem; padding: 1.2rem; background: #fff; }
     .policy-card { margin: 1.25rem 0; border-width: 2px; }
+    .policy-card > button + button { margin-left: .7rem; }
     .detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
     .item-list { list-style: none; padding: 0; margin: 0; }
-    .item-list li { display: flex; justify-content: space-between; gap: 1rem; padding: .8rem 0; border-bottom: 1px solid currentColor; }
+    .item-list li { display: flex; justify-content: space-between; gap: 1rem; padding: .8rem 0; border-bottom: 1px solid var(--border); }
     .item-list li:last-child { border-bottom: 0; }
     .item-list span { display: block; margin-top: .25rem; }
     .totals { margin: 0; }
@@ -255,13 +311,17 @@ export class OrdersComponent implements OnInit {
     .totals .total { margin-top: .4rem; padding-top: .75rem; border-top: 2px solid currentColor; font-weight: 800; }
     address { font-style: normal; line-height: 1.6; }
     .button-row { display: flex; flex-wrap: wrap; gap: .75rem; }
-    button { min-height: 44px; padding: .7rem 1rem; border: 2px solid currentColor; border-radius: .55rem; font: inherit; font-weight: 700; cursor: pointer; }
+    button, .invoice-link { min-height: 44px; padding: .7rem 1rem; border: 2px solid currentColor; border-radius: .55rem; font: inherit; font-weight: 700; cursor: pointer; }
+    .invoice-link { display: inline-flex; align-items: center; justify-content: center; width: fit-content; color: #fff; background: var(--navy-900); text-decoration: none; }
     button:disabled { cursor: wait; opacity: .65; }
-    .danger-button { font-weight: 800; }
-    .confirmation { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid currentColor; }
+    .primary-button { color: #fff; border-color: var(--navy-900); background: linear-gradient(135deg,var(--blue),var(--violet)); }
+    .danger-button { color: var(--danger); font-weight: 800; background: #fff; }
+    .secondary-button { background: #fff; }
+    .confirmation { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .completed-panel { margin-bottom: 1rem; padding: 1rem; display: grid; gap: .45rem; border: 1px solid #9dd8c1; border-radius: .75rem; color: #0b6245; background: #edf9f4; }
     .muted { opacity: .78; }
     .sr-status:empty { display: none; }
-    @media (max-width: 720px) { .detail-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 720px) { .detail-grid { grid-template-columns: 1fr; } .policy-card > button + button { margin: .7rem 0 0; } }
   `]
 })
 export class OrderDetailComponent implements OnInit {
@@ -272,7 +332,9 @@ export class OrderDetailComponent implements OnInit {
   order: OrderDetail | null = null;
   loading = true;
   cancelling = false;
+  completing = false;
   confirmingCancellation = false;
+  confirmingCompletion = false;
   errorMessage = '';
   actionErrorMessage = '';
   liveMessage = '';
@@ -286,6 +348,16 @@ export class OrderDetailComponent implements OnInit {
     }
 
     this.loadOrder(id);
+  }
+
+  startCancellation(): void {
+    this.confirmingCompletion = false;
+    this.confirmingCancellation = true;
+  }
+
+  startCompletion(): void {
+    this.confirmingCancellation = false;
+    this.confirmingCompletion = true;
   }
 
   cancelOrder(): void {
@@ -314,16 +386,46 @@ export class OrderDetailComponent implements OnInit {
     });
   }
 
+  completeOrder(): void {
+    if (!this.order || !this.order.canComplete || this.completing) return;
+
+    const id = this.order.id;
+    this.completing = true;
+    this.actionErrorMessage = '';
+
+    this.ordersService.complete(id).subscribe({
+      next: result => {
+        this.liveMessage = `Compra ${result.orderNumber} marcada como realizada. La factura ya está disponible.`;
+        this.confirmingCompletion = false;
+        this.completing = false;
+        this.loadOrder(id, false);
+        this.changeDetector.markForCheck();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.completing = false;
+        this.confirmingCompletion = false;
+        this.actionErrorMessage = this.readError(error, 'No fue posible finalizar la compra. Actualizamos su estado para que puedas revisarlo.');
+        this.liveMessage = this.actionErrorMessage;
+        this.loadOrder(id, false);
+        this.changeDetector.markForCheck();
+      }
+    });
+  }
+
   statusLabel(status: string): string {
     switch (status) {
       case 'Pending': return 'Pendiente';
-      case 'Confirmed': return 'Confirmado';
+      case 'Confirmed': return 'Compra realizada';
       case 'Cancelled': return 'Cancelado';
       default: return status;
     }
   }
 
   friendlyCancellationMessage(order: OrderDetail): string {
+    if (order.invoiceAvailable && order.completedAtUtc) {
+      return `Compra realizada el ${new Intl.DateTimeFormat('es-DO', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(order.completedAtUtc))}. Ya no puede cancelarse.`;
+    }
+
     if (order.canCancel) {
       return `Puedes cancelar este pedido hasta ${new Intl.DateTimeFormat('es-DO', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(order.cancelUntilUtc))}. Después de ese momento la opción se bloqueará.`;
     }
@@ -333,6 +435,18 @@ export class OrderDetailComponent implements OnInit {
     }
 
     return order.cancellationMessage;
+  }
+
+  paymentLabel(paymentMethod: string): string {
+    switch (paymentMethod) {
+      case 'CashOnDelivery': return 'Pago contra entrega';
+      case 'Card': return 'Tarjeta';
+      default: return paymentMethod;
+    }
+  }
+
+  taxLabel(order: OrderDetail): string {
+    return order.address.countryCode === 'DO' ? 'ITBIS (18%)' : 'Impuestos';
   }
 
   private loadOrder(id: string, showLoading = true): void {

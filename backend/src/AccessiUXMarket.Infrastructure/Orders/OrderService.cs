@@ -94,10 +94,83 @@ public sealed class OrderService(
         });
     }
 
+    public async Task<OrderCompletionDto?> CompleteAsync(
+        Guid userId,
+        Guid orderId,
+        CancellationToken cancellationToken = default)
+    {
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+
+        return await strategy.ExecuteAsync(async () =>
+        {
+            await using var transaction = await dbContext.Database.BeginTransactionAsync(
+                IsolationLevel.Serializable,
+                cancellationToken);
+
+            var order = await dbContext.Orders
+                .SingleOrDefaultAsync(candidate => candidate.Id == orderId && candidate.UserId == userId, cancellationToken);
+
+            if (order is null)
+            {
+                return null;
+            }
+
+            var now = timeProvider.GetUtcNow().UtcDateTime;
+            order.Complete(now);
+
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+
+            return new OrderCompletionDto(
+                order.Id,
+                order.OrderNumber,
+                order.Status.ToString(),
+                order.UpdatedAtUtc,
+                "Purchase marked as completed. Cancellation is now disabled and the invoice is available.");
+        });
+    }
+
+    public async Task<OrderInvoiceDto?> GetInvoiceAsync(
+        Guid userId,
+        Guid orderId,
+        CancellationToken cancellationToken = default)
+    {
+        var order = await dbContext.Orders
+            .AsNoTracking()
+            .Include(candidate => candidate.Items)
+            .SingleOrDefaultAsync(candidate => candidate.Id == orderId && candidate.UserId == userId, cancellationToken);
+
+        if (order is null)
+        {
+            return null;
+        }
+
+        if (order.Status != OrderStatus.Confirmed)
+        {
+            throw new InvalidOperationException("The invoice is available only after the purchase has been marked as completed.");
+        }
+
+        return new OrderInvoiceDto(
+            CreateInvoiceNumber(order.OrderNumber),
+            order.Id,
+            order.OrderNumber,
+            order.Status.ToString(),
+            order.UpdatedAtUtc,
+            order.Currency,
+            order.Subtotal,
+            order.ShippingAmount,
+            order.TaxAmount,
+            order.Total,
+            order.PaymentMethod,
+            ToAddress(order),
+            ToItems(order));
+    }
+
     private OrderSummaryDto ToSummary(Order order, DateTime now)
     {
         var deadline = order.GetCancellationDeadlineUtc(cancellationWindow);
         var canCancel = order.CanCancel(now, cancellationWindow);
+        var completed = order.Status == OrderStatus.Confirmed;
 
         return new OrderSummaryDto(
             order.Id,
@@ -109,14 +182,18 @@ public sealed class OrderService(
             order.CreatedAtUtc,
             order.UpdatedAtUtc,
             canCancel,
+            order.Status == OrderStatus.Pending,
+            completed,
             deadline,
-            GetCancellationMessage(order, now, deadline, canCancel));
+            GetCancellationMessage(order, now, deadline, canCancel),
+            completed ? order.UpdatedAtUtc : null);
     }
 
     private OrderDetailDto ToDetail(Order order, DateTime now)
     {
         var deadline = order.GetCancellationDeadlineUtc(cancellationWindow);
         var canCancel = order.CanCancel(now, cancellationWindow);
+        var completed = order.Status == OrderStatus.Confirmed;
 
         return new OrderDetailDto(
             order.Id,
@@ -128,31 +205,38 @@ public sealed class OrderService(
             order.TaxAmount,
             order.Total,
             order.PaymentMethod,
-            new OrderAddressDto(
-                order.RecipientName,
-                order.AddressLine1,
-                order.AddressLine2,
-                order.City,
-                order.Region,
-                order.PostalCode,
-                order.CountryCode,
-                order.Phone),
-            order.Items
-                .Select(item => new OrderItemDto(
-                    item.ProductId,
-                    item.ProductName,
-                    item.ProductSlug,
-                    item.UnitPrice,
-                    item.Quantity,
-                    item.LineTotal))
-                .ToArray(),
+            ToAddress(order),
+            ToItems(order),
             order.CreatedAtUtc,
             order.UpdatedAtUtc,
             order.Status == OrderStatus.Cancelled ? order.UpdatedAtUtc : null,
+            completed ? order.UpdatedAtUtc : null,
             canCancel,
+            order.Status == OrderStatus.Pending,
+            completed,
             deadline,
             GetCancellationMessage(order, now, deadline, canCancel));
     }
+
+    private static OrderAddressDto ToAddress(Order order) => new(
+        order.RecipientName,
+        order.AddressLine1,
+        order.AddressLine2,
+        order.City,
+        order.Region,
+        order.PostalCode,
+        order.CountryCode,
+        order.Phone);
+
+    private static IReadOnlyList<OrderItemDto> ToItems(Order order) => order.Items
+        .Select(item => new OrderItemDto(
+            item.ProductId,
+            item.ProductName,
+            item.ProductSlug,
+            item.UnitPrice,
+            item.Quantity,
+            item.LineTotal))
+        .ToArray();
 
     private static string GetCancellationMessage(Order order, DateTime now, DateTime deadline, bool canCancel)
     {
@@ -161,9 +245,9 @@ public sealed class OrderService(
             return "This order has been cancelled.";
         }
 
-        if (order.Status != OrderStatus.Pending)
+        if (order.Status == OrderStatus.Confirmed)
         {
-            return "Cancellation is unavailable because fulfillment has already started.";
+            return "Purchase completed. Cancellation is no longer available.";
         }
 
         if (!canCancel || now > deadline)
@@ -172,5 +256,13 @@ public sealed class OrderService(
         }
 
         return $"This order can be cancelled until {deadline:O}.";
+    }
+
+    private static string CreateInvoiceNumber(string orderNumber)
+    {
+        const string orderPrefix = "AUX-";
+        return orderNumber.StartsWith(orderPrefix, StringComparison.OrdinalIgnoreCase)
+            ? $"FAC-{orderNumber[orderPrefix.Length..]}"
+            : $"FAC-{orderNumber}";
     }
 }

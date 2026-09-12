@@ -8,8 +8,11 @@ export interface OrderSummary {
   createdAtUtc: string;
   updatedAtUtc: string;
   canCancel: boolean;
+  canComplete: boolean;
+  invoiceAvailable: boolean;
   cancelUntilUtc: string;
   cancellationMessage: string;
+  completedAtUtc: string | null;
 }
 
 export interface OrderItem {
@@ -47,7 +50,10 @@ export interface OrderDetail {
   createdAtUtc: string;
   updatedAtUtc: string;
   cancelledAtUtc: string | null;
+  completedAtUtc: string | null;
   canCancel: boolean;
+  canComplete: boolean;
+  invoiceAvailable: boolean;
   cancelUntilUtc: string;
   cancellationMessage: string;
 }
@@ -58,4 +64,28 @@ export interface OrderCancellation {
   status: string;
   cancelledAtUtc: string;
   message: string;
+}
+
+export interface OrderCompletion {
+  id: string;
+  orderNumber: string;
+  status: string;
+  completedAtUtc: string;
+  message: string;
+}
+
+export interface OrderInvoice {
+  invoiceNumber: string;
+  orderId: string;
+  orderNumber: string;
+  status: string;
+  issuedAtUtc: string;
+  currency: string;
+  subtotal: number;
+  shippingAmount: number;
+  taxAmount: number;
+  total: number;
+  paymentMethod: string;
+  address: OrderAddress;
+  items: OrderItem[];
 }
