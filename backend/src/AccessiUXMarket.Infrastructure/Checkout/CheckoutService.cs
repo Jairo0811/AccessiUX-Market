@@ -10,7 +10,7 @@ namespace AccessiUXMarket.Infrastructure.Checkout;
 public sealed class CheckoutService(ApplicationDbContext dbContext, TimeProvider timeProvider) : ICheckoutService
 {
     private const decimal ShippingAmount = 0m;
-    private const decimal TaxAmount = 0m;
+    private const decimal DominicanRepublicItbisRate = 0.18m;
 
     public async Task<CheckoutReviewDto> ReviewAsync(
         Guid userId,
@@ -61,6 +61,11 @@ public sealed class CheckoutService(ApplicationDbContext dbContext, TimeProvider
         CheckoutRequest request,
         CancellationToken cancellationToken)
     {
+        if (!HasConfiguredTaxRule(request.Address.CountryCode))
+        {
+            throw new InvalidOperationException("Tax calculation is not configured for the selected country.");
+        }
+
         var cartItems = await dbContext.CartItems
             .Where(item => item.UserId == userId)
             .OrderBy(item => item.CreatedAtUtc)
@@ -111,6 +116,8 @@ public sealed class CheckoutService(ApplicationDbContext dbContext, TimeProvider
             subtotal += product.Price * cartItem.Quantity;
         }
 
+        var taxAmount = CalculateTax(subtotal, ShippingAmount, request.Address.CountryCode);
+
         var order = new Order(
             Guid.NewGuid(),
             userId,
@@ -118,7 +125,7 @@ public sealed class CheckoutService(ApplicationDbContext dbContext, TimeProvider
             currencies[0],
             subtotal,
             ShippingAmount,
-            TaxAmount,
+            taxAmount,
             request.PaymentMethod,
             request.Address.RecipientName,
             request.Address.AddressLine1,
@@ -167,7 +174,7 @@ public sealed class CheckoutService(ApplicationDbContext dbContext, TimeProvider
                 request.PaymentMethod,
                 0m,
                 ShippingAmount,
-                TaxAmount,
+                0m,
                 0m,
                 "DOP",
                 false,
@@ -183,6 +190,11 @@ public sealed class CheckoutService(ApplicationDbContext dbContext, TimeProvider
         if (currencies.Length != 1)
         {
             warnings.Add("Todos los productos deben usar la misma moneda antes de confirmar la compra.");
+        }
+
+        if (!HasConfiguredTaxRule(request.Address.CountryCode))
+        {
+            warnings.Add(BuildTaxRuleWarning(request.Address.CountryCode));
         }
 
         foreach (var line in lines)
@@ -207,6 +219,9 @@ public sealed class CheckoutService(ApplicationDbContext dbContext, TimeProvider
             line.UnitPrice * line.Quantity)).ToArray();
 
         var subtotal = items.Sum(item => item.LineTotal);
+        var taxAmount = HasConfiguredTaxRule(request.Address.CountryCode)
+            ? CalculateTax(subtotal, ShippingAmount, request.Address.CountryCode)
+            : 0m;
         var currency = currencies.Length == 1 ? currencies[0] : lines[0].Currency;
 
         return new CheckoutReviewDto(
@@ -215,11 +230,35 @@ public sealed class CheckoutService(ApplicationDbContext dbContext, TimeProvider
             request.PaymentMethod,
             subtotal,
             ShippingAmount,
-            TaxAmount,
-            subtotal + ShippingAmount + TaxAmount,
+            taxAmount,
+            subtotal + ShippingAmount + taxAmount,
             currency,
             warnings.Count == 0,
             warnings);
+    }
+
+    private static bool HasConfiguredTaxRule(string countryCode) =>
+        string.Equals(countryCode.Trim(), "DO", StringComparison.OrdinalIgnoreCase);
+
+    private static decimal CalculateTax(decimal subtotal, decimal shippingAmount, string countryCode)
+    {
+        if (!HasConfiguredTaxRule(countryCode))
+        {
+            return 0m;
+        }
+
+        var taxableBase = subtotal + shippingAmount;
+        return Math.Round(taxableBase * DominicanRepublicItbisRate, 2, MidpointRounding.AwayFromZero);
+    }
+
+    private static string BuildTaxRuleWarning(string countryCode)
+    {
+        if (string.Equals(countryCode.Trim(), "US", StringComparison.OrdinalIgnoreCase))
+        {
+            return "El sales tax de Estados Unidos varía por estado y localidad. AccessiUX Market todavía no tiene una regla fiscal configurada para esta dirección.";
+        }
+
+        return "AccessiUX Market todavía no tiene una regla fiscal configurada para el país seleccionado.";
     }
 
     private static string CreateOrderNumber(DateTime now)
