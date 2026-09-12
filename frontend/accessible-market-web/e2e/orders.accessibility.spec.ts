@@ -156,6 +156,63 @@ test('order cancellation requires explicit confirmation and announces the new st
   expect(results.violations).toEqual([]);
 });
 
+test('accessible invoice exposes persisted reading preferences and a non-color status', async ({ page }) => {
+  const invoicePath = `/api/v1/orders/${orderId}/invoice`;
+  const invoiceNumber = 'FAC-20260906-TEST0001';
+
+  await installApiRouter(page, async (route, method, pathname) => {
+    if (method === 'GET' && pathname === invoicePath) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          invoiceNumber,
+          orderId,
+          orderNumber: baseOrder.orderNumber,
+          status: 'Confirmed',
+          issuedAtUtc: '2026-09-06T21:20:00Z',
+          currency: 'DOP',
+          subtotal: 3000,
+          shippingAmount: 0,
+          taxAmount: 540,
+          total: 3540,
+          paymentMethod: 'CashOnDelivery',
+          address: baseOrder.address,
+          items: baseOrder.items,
+        }),
+      });
+      return true;
+    }
+
+    return false;
+  });
+
+  await page.goto(`/orders/${orderId}/invoice`);
+
+  await expect(page.getByRole('heading', { name: invoiceNumber })).toBeVisible();
+  await expect(page.getByText('Estado: Compra realizada', { exact: true })).toBeVisible();
+  await expect(page.getByText('ITBIS (18%)', { exact: true })).toBeVisible();
+  await expect(page.getByText('DOP 3,540.00', { exact: true })).toBeVisible();
+  await expect(page.getByRole('group', { name: 'Opciones de lectura de esta factura' })).toBeVisible();
+
+  const largeText = page.getByRole('checkbox', { name: /Texto grande/ });
+  const highContrast = page.getByRole('checkbox', { name: /Alto contraste/ });
+  const simpleReading = page.getByRole('checkbox', { name: /Lectura simple/ });
+
+  await largeText.check();
+  await expect(page.locator('html')).toHaveAttribute('data-large-text', '');
+  await highContrast.check();
+  await expect(page.locator('html')).toHaveAttribute('data-high-contrast', '');
+  await simpleReading.check();
+  await expect(page.locator('html')).toHaveAttribute('data-simple-reading', '');
+
+  await expect(page.getByText('Lectura simple activada para AccessiUX Market.')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Ver todas las preferencias de accesibilidad' })).toBeVisible();
+
+  const results = await new AxeBuilder({ page }).analyze();
+  expect(results.violations).toEqual([]);
+});
+
 async function installApiRouter(
   page: Page,
   handleOrders: (route: Route, method: string, pathname: string) => Promise<boolean>,
