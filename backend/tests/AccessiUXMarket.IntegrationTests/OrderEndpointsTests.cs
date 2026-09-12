@@ -172,6 +172,7 @@ public sealed class OrderEndpointsTests(IdentityApiFixture fixture) : IClassFixt
             $"{CatalogRoot}/seller",
             new CreateSellerRequest("Orders test seller", $"{prefix}-seller-{Guid.NewGuid():N}", null));
         Assert.Equal(HttpStatusCode.Created, sellerResponse.StatusCode);
+        await RefreshSellerSessionAsync(client);
 
         var categories = await client.GetFromJsonAsync<List<CategoryDto>>($"{CatalogRoot}/categories");
         Assert.NotNull(categories);
@@ -194,5 +195,15 @@ public sealed class OrderEndpointsTests(IdentityApiFixture fixture) : IClassFixt
         var publish = await client.PostAsJsonAsync($"{CatalogRoot}/seller/products/{product.Id}/publish", new { });
         Assert.Equal(HttpStatusCode.NoContent, publish.StatusCode);
         return product;
+    }
+
+    private static async Task RefreshSellerSessionAsync(HttpClient client)
+    {
+        var response = await client.PostAsJsonAsync($"{AuthRoot}/refresh", new { });
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var session = await response.Content.ReadFromJsonAsync<AuthResponse>();
+        Assert.NotNull(session);
+        Assert.Contains("Seller", session.User.Roles);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", session.AccessToken);
     }
 }
