@@ -5,9 +5,9 @@ const password = process.env.DEMO_PASSWORD;
 if (!password) throw new Error('DEMO_PASSWORD is required');
 
 const accounts = [
-  { email: 'customer@accessiux.local', roles: 'Customer' },
-  { email: 'seller@accessiux.local', roles: 'Customer, Seller' },
-  { email: 'admin@accessiux.local', roles: 'Customer, Administrator' },
+  { email: 'customer@accessiux.local', roles: 'Cliente' },
+  { email: 'seller@accessiux.local', roles: 'Cliente, Vendedor' },
+  { email: 'admin@accessiux.local', roles: 'Cliente, Administrador' },
 ];
 
 const browser = await chromium.launch();
@@ -25,11 +25,26 @@ try {
     await expect(page.getByText(account.email, { exact: true })).toBeVisible();
     await expect(page.getByText(account.roles, { exact: true })).toBeVisible();
 
+    if (account.email === 'customer@accessiux.local') {
+      await expect(page.getByRole('link', { name: 'Vender', exact: true })).toBeVisible();
+      await expect(page.getByRole('link', { name: 'Administración', exact: true })).toHaveCount(0);
+    }
+
     if (account.email === 'seller@accessiux.local') {
+      await expect(page.getByRole('link', { name: 'Panel de vendedor', exact: true }).first()).toBeVisible();
       await page.goto(`${baseURL}/seller`);
       await expect(page.getByRole('heading', { name: 'Panel de vendedor' })).toBeVisible();
       await expect(page.getByText('Perfil activo:')).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Crear producto' })).toBeVisible();
       await expect(page.getByRole('heading', { name: 'Políticas comerciales' })).toBeVisible();
+    }
+
+    if (account.email === 'admin@accessiux.local') {
+      await expect(page.getByRole('link', { name: 'Administración', exact: true }).first()).toBeVisible();
+      await expect(page.getByRole('link', { name: 'Vender', exact: true })).toHaveCount(0);
+      await page.goto(`${baseURL}/admin`);
+      await expect(page.getByRole('heading', { name: 'Panel de administración' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Estado de la plataforma' })).toBeVisible();
     }
 
     await context.close();
