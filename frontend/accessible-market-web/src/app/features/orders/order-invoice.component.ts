@@ -87,25 +87,14 @@ import { OrderService } from '../../core/orders/order.service';
           </p>
 
           <header class="invoice-header">
-            <div class="invoice-brand">
-              <svg class="invoice-brand__mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-                <defs>
-                  <linearGradient id="invoice-brand-bg" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
-                    <stop offset="0" stop-color="#12d4e2" />
-                    <stop offset="0.5" stop-color="#1684ff" />
-                    <stop offset="1" stop-color="#7c3aed" />
-                  </linearGradient>
-                </defs>
-                <rect x="2" y="2" width="60" height="60" rx="18" fill="#0b2147" />
-                <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#invoice-brand-bg)" opacity="0.22" />
-                <path d="M32 10 13 21v22l19 11 19-11V21L32 10Z" fill="none" stroke="#d9fbff" stroke-width="3.2" stroke-linejoin="round" />
-                <path d="M23 42 32 22l9 20M25.5 35h13" fill="none" stroke="#ffffff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" />
-                <circle cx="32" cy="29" r="2.7" fill="#ffffff" />
-              </svg>
-              <div>
-                <strong>AccessiUX Market</strong>
-                <span>Comercio electrónico accesible y usable</span>
-              </div>
+            <div class="invoice-brand" aria-label="AccessiUX Market">
+              <img
+                class="invoice-brand__logo"
+                src="/branding/accessiux-market-logo.png"
+                alt="AccessiUX Market"
+              />
+              <span class="invoice-brand__fallback" aria-hidden="true">AccessiUX Market</span>
+              <span class="invoice-brand__tagline">Comercio electrónico accesible y usable</span>
             </div>
 
             <div class="invoice-heading">
@@ -204,11 +193,10 @@ import { OrderService } from '../../core/orders/order.service';
     .invoice-accessibility-link { min-height: 48px; grid-column: 1 / -1; display: inline-flex; align-items: center; width: fit-content; font-weight: 800; }
     .invoice-document { padding: clamp(1.4rem,4vw,3rem); display: grid; gap: 1.5rem; border: 1px solid var(--border-strong); border-radius: 1.25rem; background: #fff; box-shadow: var(--shadow-md); }
     .invoice-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 2rem; padding-bottom: 1.4rem; border-bottom: 2px solid var(--navy-900); }
-    .invoice-brand { display: flex; align-items: center; gap: .8rem; }
-    .invoice-brand__mark { width: 3rem; height: 3rem; flex: 0 0 3rem; display: block; }
-    .invoice-brand > div { display: grid; }
-    .invoice-brand strong { color: var(--navy-900); font-size: 1.25rem; }
-    .invoice-brand span { color: var(--ink-600); font-size: .88rem; }
+    .invoice-brand { display: grid; align-content: start; gap: .2rem; min-width: 0; }
+    .invoice-brand__logo { display: block; width: auto; height: 3.2rem; max-width: min(20rem, 42vw); object-fit: contain; object-position: left center; }
+    .invoice-brand__fallback { display: none; color: var(--navy-900); font-size: 1.25rem; font-weight: 900; }
+    .invoice-brand__tagline { color: var(--ink-600); font-size: .88rem; }
     .invoice-heading { text-align: right; }
     .invoice-kicker { margin: 0; color: #2845ba; font-size: .78rem; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
     .invoice-heading h1 { margin: .25rem 0 .55rem; color: var(--navy-900); font-size: clamp(1.7rem,4vw,2.5rem); overflow-wrap: anywhere; }
@@ -248,7 +236,8 @@ import { OrderService } from '../../core/orders/order.service';
     :root[data-high-contrast] .invoice-status { color: #000; border-color: #000; background: #fff; }
     :root[data-high-contrast] .invoice-page a { color: #000; text-decoration-thickness: .15em; }
     :root[data-simple-reading] .invoice-document { box-shadow: none; border-width: 2px; border-radius: .45rem; }
-    :root[data-simple-reading] .invoice-brand__mark { display: none; }
+    :root[data-simple-reading] .invoice-brand__logo { display: none; }
+    :root[data-simple-reading] .invoice-brand__fallback { display: inline; }
     :root[data-simple-reading] .invoice-status, :root[data-simple-reading] .invoice-meta dl > div, :root[data-simple-reading] .invoice-table-wrap { border-radius: .2rem; }
     @media (max-width: 52rem) {
       .invoice-reading-tools__options { grid-template-columns: 1fr; }
@@ -257,6 +246,7 @@ import { OrderService } from '../../core/orders/order.service';
       .invoice-header { flex-direction: column; }
       .invoice-heading { text-align: left; }
       .invoice-meta dl { grid-template-columns: 1fr; }
+      .invoice-brand__logo { max-width: min(18rem, 76vw); }
     }
     @media (prefers-contrast: more) {
       .invoice-document, .invoice-reading-tools, .invoice-meta dl > div, .invoice-table-wrap { border-color: var(--navy-900); border-width: 2px; }
@@ -265,7 +255,9 @@ import { OrderService } from '../../core/orders/order.service';
     @media (forced-colors: active) {
       .invoice-document, .invoice-reading-tools, .invoice-preference, .invoice-meta dl > div, .invoice-table-wrap, .invoice-status { border: 2px solid CanvasText; }
       .invoice-items thead th { color: Canvas; background: CanvasText; forced-color-adjust: none; }
-      .invoice-brand__mark { forced-color-adjust: auto; }
+      .invoice-brand__logo { display: none; }
+      .invoice-brand__fallback { display: inline; color: CanvasText; }
+      .invoice-brand__tagline { color: CanvasText; }
     }
     @media print {
       @page { size: A4 portrait; margin: 8mm 10mm; }
@@ -275,9 +267,9 @@ import { OrderService } from '../../core/orders/order.service';
       .invoice-page { max-width: none !important; margin: 0 !important; padding: 0 !important; background: #fff !important; }
       .invoice-document { padding: 0 !important; gap: 5.5mm !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; font-size: 10.5pt; line-height: 1.38; }
       .invoice-header { gap: 10mm; padding-bottom: 4mm; break-inside: avoid; }
-      .invoice-brand__mark { width: 10mm; height: 10mm; flex-basis: 10mm; }
-      .invoice-brand strong { font-size: 13.5pt; }
-      .invoice-brand span { font-size: 9pt; }
+      .invoice-brand__logo { height: 11mm; width: auto; max-width: 58mm; object-fit: contain; object-position: left center; }
+      .invoice-brand__fallback { font-size: 13.5pt; }
+      .invoice-brand__tagline { font-size: 9pt; }
       .invoice-kicker { font-size: 8.5pt; }
       .invoice-heading h1 { margin: 1mm 0 2mm; font-size: 17pt; }
       .invoice-status { padding: 1.5mm 3mm; border: 1.5px solid currentColor; font-size: 9pt; }
