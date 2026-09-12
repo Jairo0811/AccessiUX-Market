@@ -25,7 +25,7 @@ public sealed class HealthEndpointsTests(IdentityApiFixture fixture) : IClassFix
 
         Assert.NotNull(metadata);
         Assert.Equal("AccessiUX Market API", metadata.Name);
-        Assert.Equal("1.0.0", metadata.Version);
+        Assert.Equal("1.0.1", metadata.Version);
     }
 
     private sealed record ApiMetadata(string Name, string Version);

@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using AccessiUXMarket.Api.Infrastructure;
 using AccessiUXMarket.Application.Cart;
+using AccessiUXMarket.Domain.Identity;
 
 namespace AccessiUXMarket.Api.Endpoints;
 
@@ -11,7 +12,7 @@ public static class CartEndpoints
     {
         var group = endpoints.MapGroup("/api/v1/cart")
             .WithTags("Cart")
-            .RequireAuthorization();
+            .RequireAuthorization(policy => policy.RequireRole(RoleNames.Customer));
 
         group.MapGet(string.Empty, async (HttpContext context, ICartService service, CancellationToken ct) =>
             Results.Ok(await service.GetAsync(GetUserId(context.User), ct)));

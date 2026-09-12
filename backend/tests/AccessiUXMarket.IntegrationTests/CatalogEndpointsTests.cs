@@ -33,6 +33,7 @@ public sealed class CatalogEndpointsTests(IdentityApiFixture fixture) : IClassFi
             $"{CatalogRoot}/seller",
             new CreateSellerRequest("Tienda Accesible", $"tienda-{Guid.NewGuid():N}", "Productos accesibles."));
         Assert.Equal(HttpStatusCode.Created, sellerResponse.StatusCode);
+        await RefreshAuthenticationAsync(client);
 
         var categories = await client.GetFromJsonAsync<List<CategoryDto>>($"{CatalogRoot}/categories");
         var category = Assert.Single(categories!, item => item.Slug == "tecnologia");
@@ -135,6 +136,17 @@ public sealed class CatalogEndpointsTests(IdentityApiFixture fixture) : IClassFi
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
+    [Fact]
+    public async Task Customer_MustActivateSellerRoleBeforeUsingSellerTools()
+    {
+        using var client = CreateClient();
+        await AuthenticateNewCustomerAsync(client);
+
+        var response = await client.GetAsync($"{CatalogRoot}/seller/products");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
     private HttpClient CreateClient() => fixture.Factory.CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = true });
 
     private static async Task AuthenticateNewCustomerAsync(HttpClient client)
@@ -151,6 +163,17 @@ public sealed class CatalogEndpointsTests(IdentityApiFixture fixture) : IClassFi
     {
         var response = await client.PostAsJsonAsync($"{CatalogRoot}/seller", new CreateSellerRequest($"{prefix} seller", $"{prefix}-{Guid.NewGuid():N}", null));
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        await RefreshAuthenticationAsync(client);
+    }
+
+    private static async Task RefreshAuthenticationAsync(HttpClient client)
+    {
+        var response = await client.PostAsJsonAsync($"{AuthRoot}/refresh", new { });
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var session = await response.Content.ReadFromJsonAsync<AuthResponse>();
+        Assert.NotNull(session);
+        Assert.Contains("Seller", session.User.Roles);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", session.AccessToken);
     }
 
     private static async Task<ProductDto> CreateAndPublishProductAsync(HttpClient client, Guid categoryId, string name, decimal price, int stock)

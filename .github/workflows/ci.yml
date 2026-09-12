@@ -37,7 +37,27 @@ jobs:
         run: dotnet build backend/AccessiUXMarket.sln --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test backend/AccessiUXMarket.sln --configuration Release --no-restore --no-build --logger "console;verbosity=normal"
+        env:
+          # GitHub-hosted runners are ephemeral; disabling Ryuk avoids a runner-level
+          # resource-reaper termination while the fixture still disposes SQL explicitly.
+          TESTCONTAINERS_RYUK_DISABLED: 'true'
+        run: >-
+          dotnet test backend/AccessiUXMarket.sln
+          --configuration Release
+          --no-restore
+          --no-build
+          --logger "console;verbosity=detailed"
+          --logger "trx;LogFileName=backend-regression.trx"
+          --results-directory "${{ github.workspace }}/TestResults/backend-ci"
+
+      - name: Publish backend test results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: backend-test-results-ci-${{ github.run_id }}-${{ github.run_attempt }}
+          path: TestResults/backend-ci
+          if-no-files-found: warn
+          retention-days: 7
 
   frontend:
     name: Frontend · build and accessibility

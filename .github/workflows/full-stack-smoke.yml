@@ -1,0 +1,216 @@
+name: Full-stack smoke
+
+on:
+  push:
+    branches:
+      - main
+      - 'test/full-stack-smoke-*'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: full-stack-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: Real stack smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      API_BASE: http://127.0.0.1:5080
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/accessible-market-web/package-lock.json
+
+      - name: Resolve runtime test credentials
+        shell: bash
+        run: |
+          demo_password="$(sed -n 's/.*DemoPassword = "\([^"]*\)".*/\1/p' backend/src/AccessiUXMarket.Infrastructure/Identity/IdentityDataSeeder.cs)"
+          test -n "$demo_password"
+          sql_password="Smoke_${GITHUB_RUN_ID}_$(openssl rand -hex 8)_Aa1!"
+          echo "::add-mask::$demo_password"
+          echo "::add-mask::$sql_password"
+          echo "DEMO_PASSWORD=$demo_password" >> "$GITHUB_ENV"
+          echo "MSSQL_SA_PASSWORD=$sql_password" >> "$GITHUB_ENV"
+
+      - name: Start SQL Server
+        run: docker compose up -d sqlserver
+
+      - name: Wait for SQL Server
+        shell: bash
+        run: |
+          for attempt in $(seq 1 60); do
+            status="$(docker inspect -f '{{.State.Health.Status}}' accessiuxmarket-sqlserver 2>/dev/null || true)"
+            if [[ "$status" == "healthy" ]]; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs accessiuxmarket-sqlserver || true
+          exit 1
+
+      - name: Restore backend
+        run: dotnet restore backend/AccessiUXMarket.sln --locked-mode
+
+      - name: Build backend
+        run: dotnet build backend/AccessiUXMarket.sln --configuration Release --no-restore
+
+      - name: Start API in Development with demo seed
+        shell: bash
+        run: |
+          nohup env \
+            ASPNETCORE_ENVIRONMENT=Development \
+            ASPNETCORE_URLS=http://127.0.0.1:5080 \
+            ConnectionStrings__DefaultConnection="Server=127.0.0.1,1433;Database=AccessiUXMarketSmoke;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=True" \
+            Jwt__SigningKey="AccessiUXMarket_Smoke_SigningKey_2026_Only_AtLeast32Bytes" \
+            Cors__AllowedOrigins__0=http://127.0.0.1:4200 \
+            Database__ApplyMigrations=true \
+            Database__SeedRoles=true \
+            Database__SeedCatalog=true \
+            Database__SeedDemoUsers=true \
+            dotnet run --project backend/src/AccessiUXMarket.Api --configuration Release --no-build --no-launch-profile \
+            > /tmp/accessiux-api.log 2>&1 &
+          echo $! > /tmp/accessiux-api.pid
+
+      - name: Run real API commerce smoke
+        run: bash scripts/full-stack-api-smoke.sh
+
+      - name: Install frontend dependencies
+        working-directory: frontend/accessible-market-web
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend/accessible-market-web
+        run: npm run build
+
+      - name: Install Playwright Chromium
+        working-directory: frontend/accessible-market-web
+        run: npx playwright install --with-deps chromium
+
+      - name: Start Angular against real API
+        working-directory: frontend/accessible-market-web
+        shell: bash
+        run: |
+          cat > /tmp/accessiux-smoke-proxy.json <<'JSON'
+          {
+            "/api": {
+              "target": "http://127.0.0.1:5080",
+              "secure": false,
+              "changeOrigin": true
+            },
+            "/health": {
+              "target": "http://127.0.0.1:5080",
+              "secure": false,
+              "changeOrigin": true
+            }
+          }
+          JSON
+          nohup npx ng serve --host 127.0.0.1 --port 4200 --proxy-config /tmp/accessiux-smoke-proxy.json \
+            > /tmp/accessiux-web.log 2>&1 &
+          echo $! > /tmp/accessiux-web.pid
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4200/login >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/accessiux-web.log || true
+          exit 1
+
+      - name: Run browser smoke against real backend
+        working-directory: frontend/accessible-market-web
+        run: node e2e/full-stack.smoke.mjs
+
+      - name: Stop smoke Angular before isolated regression
+        shell: bash
+        run: |
+          if [[ -f /tmp/accessiux-web.pid ]]; then
+            kill "$(cat /tmp/accessiux-web.pid)" 2>/dev/null || true
+            rm -f /tmp/accessiux-web.pid
+          fi
+          pkill -f '[n]g serve --host 127.0.0.1 --port 4200' 2>/dev/null || true
+          for attempt in $(seq 1 20); do
+            if ! curl -fsS http://127.0.0.1:4200 >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo 'Smoke Angular server still occupies port 4200.' >&2
+          exit 1
+
+      - name: Run existing frontend accessibility regression
+        working-directory: frontend/accessible-market-web
+        run: npm test
+
+      - name: Stop real stack before Testcontainers regression
+        shell: bash
+        run: |
+          if [[ -f /tmp/accessiux-api.pid ]]; then
+            kill "$(cat /tmp/accessiux-api.pid)" 2>/dev/null || true
+            rm -f /tmp/accessiux-api.pid
+          fi
+          pkill -f '[A]ccessiUXMarket.Api' 2>/dev/null || true
+          docker compose down -v
+          if docker ps -a --format '{{.Names}}' | grep -qx 'accessiuxmarket-sqlserver'; then
+            echo 'Real-stack SQL Server is still present before Testcontainers regression.' >&2
+            exit 1
+          fi
+
+      - name: Run backend regression suite
+        env:
+          # This job runs on an ephemeral GitHub-hosted runner. The test fixture
+          # disposes its SQL container explicitly, so Ryuk is unnecessary here.
+          TESTCONTAINERS_RYUK_DISABLED: 'true'
+        run: >-
+          dotnet test backend/AccessiUXMarket.sln
+          --configuration Release
+          --no-restore
+          --no-build
+          --logger "console;verbosity=detailed"
+          --logger "trx;LogFileName=backend-regression.trx"
+          --results-directory "${{ github.workspace }}/TestResults/backend-full-stack-smoke"
+
+      - name: Publish backend regression results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: backend-test-results-full-stack-${{ github.run_id }}-${{ github.run_attempt }}
+          path: TestResults/backend-full-stack-smoke
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Diagnostics on failure
+        if: failure()
+        shell: bash
+        run: |
+          echo '=== API LOG ==='
+          cat /tmp/accessiux-api.log || true
+          echo '=== WEB LOG ==='
+          cat /tmp/accessiux-web.log || true
+          echo '=== SQL LOG ==='
+          docker logs accessiuxmarket-sqlserver || true
+
+      - name: Cleanup
+        if: always()
+        shell: bash
+        run: |
+          [[ -f /tmp/accessiux-web.pid ]] && kill "$(cat /tmp/accessiux-web.pid)" 2>/dev/null || true
+          [[ -f /tmp/accessiux-api.pid ]] && kill "$(cat /tmp/accessiux-api.pid)" 2>/dev/null || true
+          docker compose down -v || true

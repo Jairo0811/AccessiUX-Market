@@ -32,9 +32,18 @@ import { AuthService } from './core/auth/auth.service';
           <a routerLink="/catalog" routerLinkActive="active" ariaCurrentWhenActive="page">Catálogo</a>
           <a routerLink="/accessibility" routerLinkActive="active" ariaCurrentWhenActive="page">Accesibilidad</a>
           @if (auth.isAuthenticated()) {
-            <a routerLink="/cart" routerLinkActive="active" ariaCurrentWhenActive="page">Carrito</a>
-            <a routerLink="/orders" routerLinkActive="active" ariaCurrentWhenActive="page">Mis pedidos</a>
-            <a routerLink="/seller" routerLinkActive="active" ariaCurrentWhenActive="page">Vender</a>
+            @if (auth.isCustomer()) {
+              <a routerLink="/cart" routerLinkActive="active" ariaCurrentWhenActive="page">Carrito</a>
+              <a routerLink="/orders" routerLinkActive="active" ariaCurrentWhenActive="page">Mis pedidos</a>
+            }
+            @if (auth.isSeller()) {
+              <a routerLink="/seller" routerLinkActive="active" ariaCurrentWhenActive="page">Panel de vendedor</a>
+            } @else if (!auth.isAdministrator()) {
+              <a routerLink="/seller" routerLinkActive="active" ariaCurrentWhenActive="page">Vender</a>
+            }
+            @if (auth.isAdministrator()) {
+              <a routerLink="/admin" routerLinkActive="active" ariaCurrentWhenActive="page">Administración</a>
+            }
             <a routerLink="/account" routerLinkActive="active" ariaCurrentWhenActive="page">Mi cuenta</a>
             <button class="link-button" type="button" (click)="logout()">Cerrar sesión</button>
           } @else {
@@ -80,16 +89,28 @@ import { AuthService } from './core/auth/auth.service';
           <section>
             <h2>Explorar</h2>
             <a routerLink="/catalog">Catálogo</a>
-            <a routerLink="/register">Crear cuenta</a>
-            <a routerLink="/login">Iniciar sesión</a>
+            @if (auth.isAuthenticated()) {
+              <a routerLink="/account">Mi cuenta</a>
+            } @else {
+              <a routerLink="/register">Crear cuenta</a>
+              <a routerLink="/login">Iniciar sesión</a>
+            }
           </section>
           <section>
             <h2>Tu experiencia</h2>
             @if (auth.isAuthenticated()) {
-              <a routerLink="/cart">Carrito</a>
-              <a routerLink="/orders">Mis pedidos</a>
-              <a routerLink="/account">Mi cuenta</a>
-              <a routerLink="/seller">Vender</a>
+              @if (auth.isCustomer()) {
+                <a routerLink="/cart">Carrito</a>
+                <a routerLink="/orders">Mis pedidos</a>
+              }
+              @if (auth.isSeller()) {
+                <a routerLink="/seller">Panel de vendedor</a>
+              } @else if (!auth.isAdministrator()) {
+                <a routerLink="/seller">Vender</a>
+              }
+              @if (auth.isAdministrator()) {
+                <a routerLink="/admin">Administración</a>
+              }
             } @else {
               <span>Compra con navegación clara</span>
               <span>Controles compatibles con teclado</span>

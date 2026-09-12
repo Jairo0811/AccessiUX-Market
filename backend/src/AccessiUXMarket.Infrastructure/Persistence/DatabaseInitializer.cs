@@ -33,14 +33,16 @@ public static class DatabaseInitializer
             await identitySeeder.SeedRolesAsync();
         }
 
+        var catalogSeeder = scope.ServiceProvider.GetRequiredService<CatalogDataSeeder>();
         if (seedCatalog)
         {
-            await scope.ServiceProvider.GetRequiredService<CatalogDataSeeder>().SeedAsync(cancellationToken);
+            await catalogSeeder.SeedAsync(cancellationToken);
         }
 
         if (seedDemoUsers)
         {
             await identitySeeder.SeedDemoUsersAsync(cancellationToken);
+            await catalogSeeder.SeedDemoSellerAsync(cancellationToken);
         }
     }
 }

@@ -24,6 +24,7 @@ public sealed class SellerPolicyEndpointsTests(IdentityApiFixture fixture) : ICl
         Assert.Equal(HttpStatusCode.Created, sellerResponse.StatusCode);
         var seller = await sellerResponse.Content.ReadFromJsonAsync<SellerDto>();
         Assert.NotNull(seller);
+        await RefreshSellerSessionAsync(client);
 
         var updateResponse = await client.PutAsJsonAsync(
             $"{CatalogRoot}/seller/policies",
@@ -57,6 +58,7 @@ public sealed class SellerPolicyEndpointsTests(IdentityApiFixture fixture) : ICl
             $"{CatalogRoot}/seller",
             new CreateSellerRequest("Tienda Validación", $"validation-{Guid.NewGuid():N}", null));
         Assert.Equal(HttpStatusCode.Created, sellerResponse.StatusCode);
+        await RefreshSellerSessionAsync(client);
 
         var response = await client.PutAsJsonAsync(
             $"{CatalogRoot}/seller/policies",
@@ -76,6 +78,16 @@ public sealed class SellerPolicyEndpointsTests(IdentityApiFixture fixture) : ICl
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var session = await response.Content.ReadFromJsonAsync<AuthResponse>();
         Assert.NotNull(session);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", session.AccessToken);
+    }
+
+    private static async Task RefreshSellerSessionAsync(HttpClient client)
+    {
+        var response = await client.PostAsJsonAsync($"{AuthRoot}/refresh", new { });
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var session = await response.Content.ReadFromJsonAsync<AuthResponse>();
+        Assert.NotNull(session);
+        Assert.Contains("Seller", session.User.Roles);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", session.AccessToken);
     }
 }

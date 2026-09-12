@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using AccessiUXMarket.Application.Orders;
+using AccessiUXMarket.Domain.Identity;
 
 namespace AccessiUXMarket.Api.Endpoints;
 
@@ -10,7 +11,7 @@ public static class OrderEndpoints
     {
         var group = endpoints.MapGroup("/api/v1/orders")
             .WithTags("Orders")
-            .RequireAuthorization();
+            .RequireAuthorization(policy => policy.RequireRole(RoleNames.Customer));
 
         group.MapGet("/", GetOrdersAsync);
         group.MapGet("/{orderId:guid}", GetOrderAsync);

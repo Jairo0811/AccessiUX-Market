@@ -1,9 +1,11 @@
 using System.Text;
+using AccessiUXMarket.Application.Admin;
 using AccessiUXMarket.Application.Cart;
 using AccessiUXMarket.Application.Catalog;
 using AccessiUXMarket.Application.Checkout;
 using AccessiUXMarket.Application.Identity;
 using AccessiUXMarket.Application.Orders;
+using AccessiUXMarket.Infrastructure.Admin;
 using AccessiUXMarket.Infrastructure.Cart;
 using AccessiUXMarket.Infrastructure.Catalog;
 using AccessiUXMarket.Infrastructure.Checkout;
@@ -82,6 +84,7 @@ public static class DependencyInjection
         services.AddScoped<IJwtTokenFactory, JwtTokenFactory>();
         services.AddScoped<IPasswordResetNotifier, SmtpPasswordResetNotifier>();
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IAdminService, AdminService>();
         services.AddScoped<ICatalogService, CatalogService>();
         services.AddScoped<ICartService, CartService>();
         services.AddScoped<ICheckoutService, CheckoutService>();
