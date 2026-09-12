@@ -111,6 +111,27 @@ public sealed class Order
         UpdatedAtUtc = utcNow;
     }
 
+    public void Complete(DateTime utcNow)
+    {
+        if (Status == OrderStatus.Cancelled)
+        {
+            throw new InvalidOperationException("A cancelled order cannot be marked as completed.");
+        }
+
+        if (Status == OrderStatus.Confirmed)
+        {
+            throw new InvalidOperationException("The purchase has already been marked as completed.");
+        }
+
+        if (Status != OrderStatus.Pending)
+        {
+            throw new InvalidOperationException("The order cannot be completed from its current status.");
+        }
+
+        Status = OrderStatus.Confirmed;
+        UpdatedAtUtc = utcNow;
+    }
+
     public void AddItem(Guid id, Guid productId, string productName, string productSlug, decimal unitPrice, int quantity)
     {
         if (quantity <= 0)
