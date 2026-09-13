@@ -74,14 +74,16 @@ test('mobile navigation is compact, keyboard-friendly and closes predictably', a
   await mockCatalog(page);
   await page.goto('/');
 
-  const toggle = page.getByRole('button', { name: 'Abrir menú de navegación' });
+  const toggle = page.locator('.nav__toggle');
   const actions = page.locator('#primary-nav-actions');
 
   await expect(toggle).toBeVisible();
+  await expect(toggle).toHaveAccessibleName('Abrir menú de navegación');
   await expect(toggle).toHaveAttribute('aria-expanded', 'false');
   await expect(actions).toBeHidden();
 
   await toggle.click();
+  await expect(toggle).toHaveAccessibleName('Cerrar menú de navegación');
   await expect(toggle).toHaveAttribute('aria-expanded', 'true');
   await expect(actions).toBeVisible();
   await expect(actions.getByRole('link', { name: 'Catálogo' })).toBeVisible();
@@ -91,9 +93,10 @@ test('mobile navigation is compact, keyboard-friendly and closes predictably', a
 
   await page.keyboard.press('Escape');
   await expect(actions).toBeHidden();
-  await expect(page.getByRole('button', { name: 'Abrir menú de navegación' })).toHaveAttribute('aria-expanded', 'false');
+  await expect(toggle).toHaveAccessibleName('Abrir menú de navegación');
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
 
-  await page.getByRole('button', { name: 'Abrir menú de navegación' }).click();
+  await toggle.click();
   await actions.getByRole('link', { name: 'Catálogo' }).click();
   await expect(page).toHaveURL(/\/catalog$/);
   await expect(actions).toBeHidden();
