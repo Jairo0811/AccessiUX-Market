@@ -72,6 +72,18 @@ button {
   overflow-wrap: anywhere;
 }
 
+/* The invoice table is intentionally wider than a phone. Its wrapper owns
+   the horizontal scroll instead of expanding the whole page/grid column. */
+app-order-invoice .invoice-items,
+app-order-invoice .invoice-table-wrap {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+app-order-invoice .invoice-table-wrap {
+  width: 100% !important;
+}
+
 /* Keep the final approved invoice branding dimensions in source control. */
 app-order-invoice .invoice-brand__logo {
   height: 4.25rem !important;
