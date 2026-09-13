@@ -479,3 +479,35 @@ El repositorio todavía no declara una licencia de software explícita. No debe 
   <strong>AccessiUX Market · Accessibility + Usability + Market</strong><br>
   Universidad APEC (UNAPEC) · Ingeniería de la Usabilidad (ISO-505)
 </p>
+
+---
+
+## 🏁 Cierre funcional posterior a v1.0.1
+
+Después del release estable `v1.0.1`, el proyecto recibió una última etapa de **hardening funcional, accesible y responsive**. Esta sección documenta únicamente capacidades añadidas posteriormente; el contenido histórico anterior se conserva sin reescritura.
+
+### Compra realizada y factura accesible
+
+- Los pedidos `Pending` pueden pasar explícitamente a estado técnico `Confirmed`, presentado al usuario como **Compra realizada**.
+- Una compra realizada deja de ser cancelable y conserva su fecha de finalización mediante `CompletedAtUtc`.
+- La API incorpora `POST /api/v1/orders/{orderId}/complete` para completar la compra y `GET /api/v1/orders/{orderId}/invoice` para consultar su factura.
+- La factura está limitada al propietario autenticado del pedido y solo se habilita para compras realizadas.
+- La ruta protegida `/orders/:id/invoice` presenta una factura HTML semántica, navegable con teclado, compatible con lectores de pantalla y preparada para impresión o guardado como PDF desde el navegador.
+- La factura usa tablas semánticas, `caption`, encabezados con `scope`, dirección de entrega, método de pago, artículos, subtotal, envío, ITBIS y total de la compra.
+- El número comercial usa el prefijo `FAC-` derivado del número del pedido.
+- El documento se identifica expresamente como **documento comercial** y no se presenta como comprobante fiscal NCF/e-CF emitido ante la DGII.
+- El smoke full-stack valida también el ciclo `Pending → Compra realizada → factura disponible` y confirma que una compra completada no restaura inventario mediante cancelación.
+
+### Responsive final
+
+- Se añadió una capa de hardening responsive para el shell global, Home, catálogo, carrito, checkout, pedidos, panel de vendedor y factura.
+- La navegación móvil utiliza un menú colapsable accesible con `aria-expanded`, objetivos táctiles mínimos de 44 px y cierre predecible al navegar o presionar `Escape`.
+- Se evita el overflow horizontal global provocado por contenido largo, identificadores, tarjetas y tablas.
+- La factura mantiene el documento dentro del viewport en teléfonos pequeños; cuando la tabla necesita más ancho, el desplazamiento horizontal queda contenido dentro de su propio wrapper.
+- El panel rápido de accesibilidad permanece dentro del viewport y respeta áreas seguras en pantallas estrechas.
+- El logo oficial de la factura conserva una escala legible tanto en pantalla como en impresión A4/PDF.
+- El footer muestra el año actual automáticamente.
+
+### Regresión y cierre
+
+La regresión responsive automatizada cubre **320 px, 390 px y 768 px**, verifica ausencia de overflow horizontal global, comportamiento del menú móvil, contención del panel de accesibilidad y renderizado de la factura con branding oficial. El cierre fue validado tanto antes como después de fusionarse a `main` mediante los workflows de **CI** y **Full-stack smoke**, incluyendo build Angular, Playwright/axe, smoke del navegador contra la API real y la suite backend completa.
