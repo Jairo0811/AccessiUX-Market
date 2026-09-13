@@ -72,10 +72,16 @@ button {
   overflow-wrap: anywhere;
 }
 
+/* Keep the final approved invoice branding dimensions in source control. */
+app-order-invoice .invoice-brand__logo {
+  height: 4.25rem !important;
+  max-width: min(24rem, 48vw) !important;
+}
+
 @media (max-width: 68rem) {
   app-seller-dashboard .seller-workspace,
   app-seller-dashboard .seller-onboarding {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) !important;
   }
 }
 
@@ -157,35 +163,30 @@ button {
   }
 
   app-catalog .catalog-hero__badge {
-    width: 100%;
-    min-width: 0;
+    width: 100% !important;
+    min-width: 0 !important;
   }
 
   app-catalog .filter-panel,
   app-catalog .catalog-hero {
-    border-radius: 1rem;
+    border-radius: 1rem !important;
   }
 
   app-catalog .product-card__footer {
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: flex-start !important;
+    flex-direction: column !important;
   }
 
   app-checkout .summary-items li,
   app-checkout .summary-total,
   app-checkout .review-totals div {
-    flex-wrap: wrap;
+    flex-wrap: wrap !important;
   }
 
   app-checkout .summary-items li strong,
   app-checkout .summary-total strong,
   app-checkout .review-totals dd {
-    margin-left: auto;
-  }
-
-  app-order-invoice .invoice-brand__logo {
-    height: 4.25rem;
-    max-width: min(24rem, 48vw);
+    margin-left: auto !important;
   }
 }
 
@@ -196,64 +197,64 @@ button {
   app-orders .order-card,
   app-order-detail .policy-card,
   app-order-detail .card {
-    border-radius: .85rem;
+    border-radius: .85rem !important;
   }
 
   app-cart .quantity-input {
-    width: min(100%, 10rem);
+    width: min(100%, 10rem) !important;
   }
 
   app-orders .order-actions,
   app-order-detail .button-row {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
   }
 
   app-orders .primary-link,
   app-orders .secondary-link,
   app-order-detail button,
   app-order-detail .invoice-link {
-    width: 100%;
-    justify-content: center;
-    text-align: center;
+    width: 100% !important;
+    justify-content: center !important;
+    text-align: center !important;
   }
 
   app-order-detail .item-list li {
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: flex-start !important;
+    flex-direction: column !important;
   }
 
   app-seller-dashboard .seller-profile-card dl div,
   app-seller-dashboard .seller-product-card dl div {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: .2rem;
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: .2rem !important;
   }
 
   app-seller-dashboard .seller-profile-card dd,
   app-seller-dashboard .seller-product-card dd {
-    text-align: left;
+    text-align: left !important;
   }
 
   app-order-invoice .invoice-document {
-    padding: 1rem;
-    gap: 1rem;
-    border-radius: .85rem;
+    padding: 1rem !important;
+    gap: 1rem !important;
+    border-radius: .85rem !important;
   }
 
   app-order-invoice .invoice-header {
-    gap: 1rem;
+    gap: 1rem !important;
   }
 
   app-order-invoice .invoice-brand__logo {
-    width: auto;
-    height: auto;
-    max-width: min(19rem, 82vw);
+    width: auto !important;
+    height: auto !important;
+    max-width: min(19rem, 82vw) !important;
   }
 
   app-order-invoice .invoice-totals {
-    width: 100%;
-    min-width: 0;
+    width: 100% !important;
+    min-width: 0 !important;
   }
 }
 
@@ -301,71 +302,71 @@ button {
   }
 
   app-home .home-a11y {
-    left: .7rem;
-    right: .7rem;
-    bottom: max(.7rem, env(safe-area-inset-bottom));
-    justify-items: stretch;
+    left: .7rem !important;
+    right: .7rem !important;
+    bottom: max(.7rem, env(safe-area-inset-bottom)) !important;
+    justify-items: end !important;
   }
 
   app-home .home-a11y__trigger {
-    width: 100%;
-    justify-content: center;
+    width: auto !important;
+    max-width: 100%;
   }
 
   app-home .home-a11y__panel {
-    width: 100%;
-    max-height: min(72dvh, 38rem);
+    width: 100% !important;
+    max-height: min(72dvh, 38rem) !important;
   }
 
   app-catalog .filter-panel,
   app-catalog .catalog-hero {
-    padding: 1rem;
+    padding: 1rem !important;
   }
 
   app-catalog .product-card__description {
-    min-height: 0;
+    min-height: 0 !important;
   }
 
   app-catalog .pagination button {
-    width: 100%;
+    width: 100% !important;
   }
 
   app-cart .cart-item,
   app-cart .cart-summary,
   app-checkout .checkout-card {
-    padding: 1rem;
+    padding: 1rem !important;
   }
 
   app-checkout .payment-option {
-    padding: .8rem;
+    padding: .8rem !important;
   }
 
   app-checkout .review-confirmation {
-    gap: .5rem;
+    gap: .5rem !important;
   }
 
   app-orders .orders-shell,
   app-order-detail .detail-shell {
-    padding-inline: 0;
+    padding-inline: 0 !important;
   }
 
   app-orders .order-card,
   app-orders .empty-state,
   app-order-detail .policy-card,
   app-order-detail .card {
-    padding: 1rem;
+    padding: 1rem !important;
   }
 
   app-seller-dashboard .seller-hero,
   app-seller-dashboard .seller-panel,
   app-seller-dashboard .seller-products,
   app-seller-dashboard .seller-onboarding {
-    padding: 1rem;
+    padding: 1rem !important;
   }
 
   app-seller-dashboard .seller-empty-state {
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: flex-start !important;
+    flex-direction: column !important;
   }
 }
 
