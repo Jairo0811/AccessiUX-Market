@@ -13,7 +13,7 @@ import { AuthService } from './core/auth/auth.service';
     <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
 
     <header class="site-header">
-      <nav class="nav" aria-label="Navegación principal">
+      <nav class="nav" aria-label="Navegación principal" (keydown.escape)="closeNavigation()">
         <a class="brand brand--official" routerLink="/" aria-label="AccessiUX Market, inicio">
           <img
             class="brand__mark"
@@ -27,7 +27,23 @@ import { AuthService } from './core/auth/auth.service';
           </span>
         </a>
 
-        <div class="nav__actions">
+        <button
+          class="nav__toggle"
+          type="button"
+          aria-controls="primary-nav-actions"
+          [attr.aria-expanded]="navigationOpen"
+          [attr.aria-label]="navigationOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación'"
+          (click)="toggleNavigation()"
+        >
+          <span class="nav__toggle-icon" aria-hidden="true">{{ navigationOpen ? '×' : '☰' }}</span>
+          <span>Menú</span>
+        </button>
+
+        <div
+          id="primary-nav-actions"
+          class="nav__actions"
+          [class.nav__actions--open]="navigationOpen"
+        >
           <a routerLink="/catalog" routerLinkActive="active" ariaCurrentWhenActive="page">Catálogo</a>
           <a routerLink="/accessibility" routerLinkActive="active" ariaCurrentWhenActive="page">Accesibilidad</a>
           @if (auth.isAuthenticated()) {
@@ -126,7 +142,7 @@ import { AuthService } from './core/auth/auth.service';
       </div>
 
       <div class="site-footer__bottom">
-        <p>© 2026 AccessiUX Market. Comercio electrónico accesible y usable.</p>
+        <p>© {{ currentYear }} AccessiUX Market. Comercio electrónico accesible y usable.</p>
         <p>Diseñado para incluir desde el primer clic.</p>
       </div>
     </footer>
@@ -302,6 +318,10 @@ import { AuthService } from './core/auth/auth.service';
 export class AppComponent {
   readonly auth = inject(AuthService);
   readonly accessibilityPreferences = inject(AccessibilityPreferencesService);
+  readonly currentYear = new Date().getFullYear();
+
+  navigationOpen = false;
+
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly document = inject(DOCUMENT);
@@ -314,6 +334,8 @@ export class AppComponent {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe(() => {
+        this.closeNavigation();
+
         if (!this.hasCompletedInitialNavigation) {
           this.hasCompletedInitialNavigation = true;
           return;
@@ -323,7 +345,16 @@ export class AppComponent {
       });
   }
 
+  toggleNavigation(): void {
+    this.navigationOpen = !this.navigationOpen;
+  }
+
+  closeNavigation(): void {
+    this.navigationOpen = false;
+  }
+
   logout(): void {
+    this.closeNavigation();
     this.auth.logout().subscribe({
       next: () => void this.router.navigate(['/']),
       error: () => void this.router.navigate(['/']),
