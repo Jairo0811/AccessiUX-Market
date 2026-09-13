@@ -1,0 +1,389 @@
+/* Final responsive hardening for AccessiUX Market.
+   Loaded after the base and accessibility styles so it can normalize
+   layout behavior across feature components without duplicating them. */
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+input,
+select,
+textarea,
+button {
+  max-width: 100%;
+}
+
+/* Mobile primary navigation */
+.nav__toggle {
+  display: none;
+  min-width: 44px;
+  min-height: 44px;
+  padding: .55rem .8rem;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  border: 2px solid rgb(255 255 255 / 62%);
+  border-radius: .7rem;
+  color: #fff;
+  background: rgb(255 255 255 / 8%);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.nav__toggle:hover {
+  background: rgb(255 255 255 / 15%);
+}
+
+.nav__toggle-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+/* Keep long identifiers and user-generated content inside their containers. */
+:is(
+  .page-header,
+  .content-card,
+  .card,
+  .order-card,
+  .seller-product-card,
+  .seller-profile-card,
+  .checkout-card,
+  .cart-item,
+  .product-card,
+  .invoice-document
+) {
+  min-width: 0;
+}
+
+:is(
+  .page-header,
+  .order-card,
+  .seller-product-card,
+  .seller-profile-card,
+  .checkout-card,
+  .cart-item,
+  .product-card,
+  .invoice-document
+) :is(h1, h2, h3, p, a, dd, strong, span) {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 68rem) {
+  app-seller-dashboard .seller-workspace,
+  app-seller-dashboard .seller-onboarding {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 52rem) {
+  .site-header {
+    padding: .5rem .5rem 0;
+  }
+
+  .nav {
+    min-height: auto;
+    padding: .6rem .7rem;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .65rem;
+  }
+
+  .nav__toggle {
+    display: inline-flex;
+    margin-left: auto;
+  }
+
+  .nav__actions {
+    display: none;
+    width: 100%;
+    padding-top: .65rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .45rem;
+    border-top: 1px solid rgb(255 255 255 / 14%);
+  }
+
+  .nav__actions.nav__actions--open {
+    display: grid;
+  }
+
+  .nav__actions a,
+  .nav__actions button {
+    width: 100%;
+    min-height: 44px;
+    padding: .65rem .75rem !important;
+    display: flex;
+    align-items: center;
+    border-radius: .6rem !important;
+    text-align: left;
+  }
+
+  .nav__actions .button {
+    justify-content: center;
+  }
+
+  .app-shell {
+    width: min(100% - 1rem, 86rem);
+    padding-top: 1rem;
+  }
+
+  .site-footer {
+    margin-top: 1rem;
+    padding: 2.4rem .75rem 1rem;
+  }
+
+  .site-footer__content,
+  .site-footer__bottom {
+    width: min(100%, 86rem);
+  }
+
+  .hero--market {
+    min-height: 0;
+    padding: 2.4rem 1rem 1.5rem;
+    gap: 1.25rem;
+  }
+
+  .hero-visual {
+    min-height: 22rem;
+  }
+
+  .section-heading,
+  .section-heading--compact {
+    align-items: flex-start;
+  }
+
+  app-catalog .catalog-hero__badge {
+    width: 100%;
+    min-width: 0;
+  }
+
+  app-catalog .filter-panel,
+  app-catalog .catalog-hero {
+    border-radius: 1rem;
+  }
+
+  app-catalog .product-card__footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  app-checkout .summary-items li,
+  app-checkout .summary-total,
+  app-checkout .review-totals div {
+    flex-wrap: wrap;
+  }
+
+  app-checkout .summary-items li strong,
+  app-checkout .summary-total strong,
+  app-checkout .review-totals dd {
+    margin-left: auto;
+  }
+
+  app-order-invoice .invoice-brand__logo {
+    height: 4.25rem;
+    max-width: min(24rem, 48vw);
+  }
+}
+
+@media (max-width: 42rem) {
+  app-cart .cart-item,
+  app-cart .cart-summary,
+  app-checkout .checkout-card,
+  app-orders .order-card,
+  app-order-detail .policy-card,
+  app-order-detail .card {
+    border-radius: .85rem;
+  }
+
+  app-cart .quantity-input {
+    width: min(100%, 10rem);
+  }
+
+  app-orders .order-actions,
+  app-order-detail .button-row {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  app-orders .primary-link,
+  app-orders .secondary-link,
+  app-order-detail button,
+  app-order-detail .invoice-link {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  app-order-detail .item-list li {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  app-seller-dashboard .seller-profile-card dl div,
+  app-seller-dashboard .seller-product-card dl div {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: .2rem;
+  }
+
+  app-seller-dashboard .seller-profile-card dd,
+  app-seller-dashboard .seller-product-card dd {
+    text-align: left;
+  }
+
+  app-order-invoice .invoice-document {
+    padding: 1rem;
+    gap: 1rem;
+    border-radius: .85rem;
+  }
+
+  app-order-invoice .invoice-header {
+    gap: 1rem;
+  }
+
+  app-order-invoice .invoice-brand__logo {
+    width: auto;
+    height: auto;
+    max-width: min(19rem, 82vw);
+  }
+
+  app-order-invoice .invoice-totals {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 36rem) {
+  .brand__mark {
+    height: 2.15rem !important;
+    max-width: min(11.5rem, 57vw) !important;
+  }
+
+  .nav__actions {
+    grid-template-columns: 1fr;
+  }
+
+  .site-footer__nav {
+    gap: 1.35rem;
+  }
+
+  .footer-brand__mark {
+    max-width: min(18rem, 82vw) !important;
+  }
+
+  .button-row:not(.home-a11y__footer) {
+    align-items: stretch;
+  }
+
+  .button-row:not(.home-a11y__footer) > .button {
+    width: 100%;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.25rem, 13vw, 3.4rem);
+  }
+
+  .hero-visual {
+    min-height: 18.5rem;
+  }
+
+  .hero-visual__core {
+    width: min(13.5rem, 66vw);
+    border-radius: 2rem;
+  }
+
+  .floating-chip {
+    transform: scale(.9);
+  }
+
+  app-home .home-a11y {
+    left: .7rem;
+    right: .7rem;
+    bottom: max(.7rem, env(safe-area-inset-bottom));
+    justify-items: stretch;
+  }
+
+  app-home .home-a11y__trigger {
+    width: 100%;
+    justify-content: center;
+  }
+
+  app-home .home-a11y__panel {
+    width: 100%;
+    max-height: min(72dvh, 38rem);
+  }
+
+  app-catalog .filter-panel,
+  app-catalog .catalog-hero {
+    padding: 1rem;
+  }
+
+  app-catalog .product-card__description {
+    min-height: 0;
+  }
+
+  app-catalog .pagination button {
+    width: 100%;
+  }
+
+  app-cart .cart-item,
+  app-cart .cart-summary,
+  app-checkout .checkout-card {
+    padding: 1rem;
+  }
+
+  app-checkout .payment-option {
+    padding: .8rem;
+  }
+
+  app-checkout .review-confirmation {
+    gap: .5rem;
+  }
+
+  app-orders .orders-shell,
+  app-order-detail .detail-shell {
+    padding-inline: 0;
+  }
+
+  app-orders .order-card,
+  app-orders .empty-state,
+  app-order-detail .policy-card,
+  app-order-detail .card {
+    padding: 1rem;
+  }
+
+  app-seller-dashboard .seller-hero,
+  app-seller-dashboard .seller-panel,
+  app-seller-dashboard .seller-products,
+  app-seller-dashboard .seller-onboarding {
+    padding: 1rem;
+  }
+
+  app-seller-dashboard .seller-empty-state {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media print {
+  app-order-invoice .invoice-brand__logo {
+    width: auto !important;
+    height: 16mm !important;
+    max-width: 72mm !important;
+    object-fit: contain;
+    object-position: left center;
+  }
+}
+
+@media (forced-colors: active) {
+  .nav__toggle {
+    border: 2px solid ButtonText;
+    color: ButtonText;
+    background: Canvas;
+    forced-color-adjust: auto;
+  }
+}
