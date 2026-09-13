@@ -21,7 +21,11 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.scss", "src/accessibility.scss"]
+            "styles": [
+              "src/styles.scss",
+              "src/accessibility.scss",
+              "src/responsive.scss"
+            ]
           }
         },
         "serve": {
